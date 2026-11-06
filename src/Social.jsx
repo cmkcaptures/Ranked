@@ -74,7 +74,7 @@ export function Squad({ me, friends, openProfile }) {
             <span className="muted">›</span>
           </div>)}
         </div>
-        <div className="muted small center">Invite friends: send them sparkingzero-builds.github.io/Ranked</div>
+        <div className="muted small center">Invite friends: send them cmkcaptures.github.io/Ranked</div>
       </aside>
     </div>
   )
