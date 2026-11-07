@@ -95,7 +95,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const charPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
   // who's on the bench right now: on a 6-character team, whoever has the fewest points this week (decided for real at week's end)
   const weekPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id && e.week === S.week) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
-  const benchOf = t => !t || t.chars.length < 6 ? null : [...t.chars].sort((a, b) => (weekPts[a] || 0) - (weekPts[b] || 0))[0]
+  const benchOf = t => !t || t.chars.length < 6 ? null : [...t.chars].sort((a, b) => (weekPts[a] || 0) - (weekPts[b] || 0) || (charPts[a] || 0) - (charPts[b] || 0))[0]
   const dead = useMemo(() => {
     const m = {}
     for (const e of [...cur].reverse()) if (e.kind === 'death') m[e.char_id] = true; else if (e.kind === 'revive') delete m[e.char_id]
@@ -211,8 +211,14 @@ function Standings({ capOf, benchOf, teams, byId, who, me, charPts, dead, openPr
           {p?.avatar ? <img src={p.avatar} alt="" /> : <div className="blank">{(p?.username || '?')[0]}</div>}
           <div><b>{p?.username || '?'}</b><span className={t.week < 0 ? 'down' : 'up'}>{pts(t.week)} this week</span></div>
         </div>
-        <div className="fline">{t.chars.map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${benchOf(t) === id ? 'benched' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
-          <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}{benchOf(t) === id && <i className="fbench-badge" title="On the bench this week (lowest so far)">🪑</i>}</div> })}</div>
+        <div className="fline">
+          {t.chars.filter(id => id !== benchOf(t)).map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
+            <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}</div> })}
+          {benchOf(t) && byId[benchOf(t)] && <div className="fbenchslot" title="On the bench this week: lowest scorer, doesn't count">
+            <span>Bench</span>
+            <div className="fcard" onClick={() => openChar(benchOf(t))}><img src={byId[benchOf(t)].image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[benchOf(t)] || 0}</em></div>
+          </div>}
+        </div>
         <div className="ftotal">{t.total}<small>pts</small></div>
       </div> })}
       {!teams.length && <div className="card pad muted">No teams yet.</div>}

@@ -1032,11 +1032,14 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .tchar { display: inline-flex; align-items: center; gap: 4px; color: #fff; font-weight: 700; } .tchar img { width: 22px; height: 28px; object-fit: cover; }
 @media (max-width: 760px) { .fgrid.six { grid-template-columns: repeat(3, 1fr); } }
 
-/* lineups fit 6 characters; benched one dimmed */
-.fteam { grid-template-columns: 54px minmax(120px, 190px) minmax(0, 1fr) auto; }
-.fline { flex-wrap: nowrap; overflow: hidden; }
-.fcard { flex: 1 1 0; min-width: 0; max-width: 58px; width: auto; height: auto; aspect-ratio: 58 / 74; }
-.fcard.benched { opacity: .45; filter: grayscale(.7); border-style: dashed; }
-.fbench-badge { position: absolute; top: 0; left: 0; font-style: normal; font-size: 12px; background: #000b; padding: 0 3px; }
-.ftotal { white-space: nowrap; position: relative; z-index: 1; }
-@media (max-width: 760px) { .fcard { max-width: 48px; } }
+/* lineups: 5 starters + bench slot, straight cards that never overlap */
+.fteam { grid-template-columns: 54px minmax(110px, 170px) minmax(0, 1fr) auto; }
+.fline { display: flex; align-items: flex-end; gap: 6px; flex-wrap: nowrap; min-width: 0; }
+.fcard { flex: 0 0 auto; width: 54px; height: 70px; transform: none; border-radius: 4px; border: 2px solid #ffffff1f; }
+.fcard.cap { border-color: var(--blue); box-shadow: 0 0 10px #ffd60a55; }
+.fbenchslot { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-left: 8px; padding-left: 10px; border-left: 2px dashed #ffffff26; }
+.fbenchslot span { font-family: var(--display); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #a49ccf; }
+.fbenchslot .fcard { opacity: .6; } .fbenchslot .fcard:hover { opacity: 1; }
+.ftotal { white-space: nowrap; }
+@media (max-width: 1100px) { .fcard { width: 46px; height: 60px; } }
+@media (max-width: 760px) { .fcard { width: 42px; height: 56px; } .fbenchslot { margin-left: 4px; padding-left: 6px; } }
