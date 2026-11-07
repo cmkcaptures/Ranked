@@ -1031,3 +1031,12 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .ttrade.in { border-left-color: var(--blue); }
 .tchar { display: inline-flex; align-items: center; gap: 4px; color: #fff; font-weight: 700; } .tchar img { width: 22px; height: 28px; object-fit: cover; }
 @media (max-width: 760px) { .fgrid.six { grid-template-columns: repeat(3, 1fr); } }
+
+/* lineups fit 6 characters; benched one dimmed */
+.fteam { grid-template-columns: 54px minmax(120px, 190px) minmax(0, 1fr) auto; }
+.fline { flex-wrap: nowrap; overflow: hidden; }
+.fcard { flex: 1 1 0; min-width: 0; max-width: 58px; width: auto; height: auto; aspect-ratio: 58 / 74; }
+.fcard.benched { opacity: .45; filter: grayscale(.7); border-style: dashed; }
+.fbench-badge { position: absolute; top: 0; left: 0; font-style: normal; font-size: 12px; background: #000b; padding: 0 3px; }
+.ftotal { white-space: nowrap; position: relative; z-index: 1; }
+@media (max-width: 760px) { .fcard { max-width: 48px; } }

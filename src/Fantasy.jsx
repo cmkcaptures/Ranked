@@ -93,6 +93,9 @@ export default function Fantasy({ me, friends, openProfile }) {
     return Object.values(t).sort((a, b) => b.total - a.total)
   }, [picks, events])
   const charPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
+  // who's on the bench right now: on a 6-character team, whoever has the fewest points this week (decided for real at week's end)
+  const weekPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id && e.week === S.week) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
+  const benchOf = t => !t || t.chars.length < 6 ? null : [...t.chars].sort((a, b) => (weekPts[a] || 0) - (weekPts[b] || 0))[0]
   const dead = useMemo(() => {
     const m = {}
     for (const e of [...cur].reverse()) if (e.kind === 'death') m[e.char_id] = true; else if (e.kind === 'revive') delete m[e.char_id]
@@ -134,8 +137,8 @@ export default function Fantasy({ me, friends, openProfile }) {
           {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['trades', `Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
-        {tab === 'table' && <Standings capOf={capOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
-        {tab === 'team' && <MyTeam team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
+        {tab === 'table' && <Standings capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
+        {tab === 'team' && <MyTeam benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })} />}
@@ -194,7 +197,7 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
-function Standings({ capOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
+function Standings({ capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
@@ -208,8 +211,8 @@ function Standings({ capOf, teams, byId, who, me, charPts, dead, openProfile, ev
           {p?.avatar ? <img src={p.avatar} alt="" /> : <div className="blank">{(p?.username || '?')[0]}</div>}
           <div><b>{p?.username || '?'}</b><span className={t.week < 0 ? 'down' : 'up'}>{pts(t.week)} this week</span></div>
         </div>
-        <div className="fline">{t.chars.map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
-          <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}</div> })}</div>
+        <div className="fline">{t.chars.map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${benchOf(t) === id ? 'benched' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
+          <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}{benchOf(t) === id && <i className="fbench-badge" title="On the bench this week (lowest so far)">🪑</i>}</div> })}</div>
         <div className="ftotal">{t.total}<small>pts</small></div>
       </div> })}
       {!teams.length && <div className="card pad muted">No teams yet.</div>}
@@ -228,7 +231,7 @@ function Standings({ capOf, teams, byId, who, me, charPts, dead, openProfile, ev
   </div>
 }
 
-function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -241,7 +244,7 @@ function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events,
       </div>
       <div className={`fgrid ${team.chars.length > 5 ? "six" : "five"}`}>
         {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} tag={info[id]} onClick={() => openChar(id)}
-          sub={dead[id] ? '💀 dead: scores 0 until they return' : `${charPts[id] || 0} pts`}>
+          sub={dead[id] ? '💀 dead: scores 0 until they return' : benched === id ? `🪑 on the bench this week · ${charPts[id] || 0} pts` : `${charPts[id] || 0} pts`}>
           <div className="ftilebtns" onClick={e => e.stopPropagation()}>
             {!capLocked && captain !== id && <button className="btn sm" onClick={() => onCaptain(id)}>👑 Captain</button>}
             {!swapped && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel' : 'Swap'}</button>}
