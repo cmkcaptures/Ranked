@@ -35,7 +35,7 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
       <div className="row gap">
         {inIt ? <button className="pill ghost" disabled={busy} onClick={() => call('draft_leave')}>Leave</button>
           : <button className="flock" disabled={busy} onClick={() => call('draft_join')}>Join draft</button>}
-        {inIt && <button className="flock" disabled={busy || d.joined.length < 2} onClick={() => call('draft_start')}>
+        {inIt && <button className="flock" disabled={busy || d.joined.length < 2} onClick={() => confirm(`Start the draft with ${d.joined.length} players (${d.joined.map(name).join(', ')})? Nobody can join once it starts.`) && call('draft_start')}>
           {d.joined.length < 2 ? 'Waiting for players…' : `Start draft (${d.joined.length} players)`}</button>}
       </div>
     </div>
