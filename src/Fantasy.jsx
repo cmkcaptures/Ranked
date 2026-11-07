@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
+import Draft from './Draft.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
@@ -36,6 +37,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const [chars, setChars] = useState([])
   const [info, setInfo] = useState({})
   const [picks, setPicks] = useState([])
+  const [draft, setDraft] = useState(null)
   const [events, setEvents] = useState([])
   const [votes, setVotes] = useState([])
   const [swaps, setSwaps] = useState([])
@@ -55,6 +57,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   useEffect(() => {
     if (!sb) return
     sb.from('fantasy_picks').select('*').eq('season', S.key).then(({ data }) => setPicks(data || []))
+    sb.from('fantasy_draft').select('*').eq('season', S.key).maybeSingle().then(({ data }) => setDraft(data || null))
     fetchAll(() => sb.from('fantasy_events').select('*').order('created_at', { ascending: false })).then(setEvents).catch(() => {})
     sb.from('fantasy_votes').select('*').eq('season', S.key).eq('week', S.week).then(({ data }) => setVotes(data || []))
     sb.from('fantasy_swaps').select('*').eq('season', S.key).then(({ data }) => setSwaps(data || []))
@@ -63,7 +66,8 @@ export default function Fantasy({ me, friends, openProfile }) {
   useEffect(() => {
     if (!sb) return
     const ch = sb.channel('fantasy').on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_events' }, reload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_picks' }, reload).subscribe()
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_picks' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_draft' }, reload).subscribe()
     return () => { sb.removeChannel(ch) }
   }, [])
 
@@ -118,7 +122,8 @@ export default function Fantasy({ me, friends, openProfile }) {
       </div>
       {err && <div className="card pad ferr">{err}</div>}
 
-      {!mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
+      {draft && draft.status !== 'done' ? <Draft d={draft} me={me} friends={friends} chars={chars} info={info} picks={picks} reload={reload} />
+      : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <div className="tabs squadtabs">
           {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>

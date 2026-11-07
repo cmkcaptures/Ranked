@@ -989,3 +989,26 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 
 .ftag { position: absolute; left: 0; bottom: 46px; z-index: 2; font-style: normal; font-family: var(--display); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 8px 1px 6px; clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%); }
 .ftag.live { background: #3ddc97; color: #0b1a12; } .ftag.legacy { background: #c9a84a; color: #1a1300; }
+
+/* ===== Live draft ===== */
+.draft { margin-top: 6px; }
+.dlhead h1 { font-family: var(--display); font-weight: 400; font-size: clamp(44px, 7vw, 84px); margin: 4px 0 6px; font-style: italic; color: #fff; text-shadow: 4px 4px 0 #ff2e88; }
+.dlhead p { color: #d9d4ff; max-width: 640px; }
+.dljoined { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.dljoined div { display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 8px; background: #1d1645; border-left: 4px solid var(--blue); animation: hpin .3s ease-out; }
+.dljoined img, .dljoined span { width: 36px; height: 36px; object-fit: cover; display: grid; place-items: center; background: #ff2e88; color: #fff; font-family: var(--display); text-transform: uppercase; }
+.dljoined b { color: #fff; }
+.dlturn { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 22px; margin-bottom: 14px; background: linear-gradient(90deg, #2a1a6e, #120d30); border-left: 6px solid #a49ccf; }
+.dlturn.me { background: linear-gradient(90deg, #6b4a00, #2a1a6e); border-left-color: var(--blue); animation: crashpulse 1.4s ease-in-out infinite; }
+.dlturn span { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #a49ccf; } .dlturn small { color: #d9d4ff; }
+.dlturn h2 { margin: 2px 0; font-family: var(--display); font-weight: 400; font-size: 34px; font-style: italic; color: #fff; } .dlturn.me h2 { color: var(--blue); }
+.dlclock { text-align: center; } .dlclock b { display: block; font-family: var(--display); font-weight: 400; font-size: 44px; color: #fff; } .dlclock.low b { color: #ff4d6d; }
+.dlboard { display: grid; gap: 8px; margin-bottom: 16px; }
+.dlcol { background: #140e35; padding: 8px; border-top: 3px solid #ffffff22; } .dlcol.on { border-top-color: var(--blue); box-shadow: 0 0 20px #ffd60a33; }
+.dlname { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; } .dlname img { width: 24px; height: 24px; object-fit: cover; } .dlname b { color: #fff; font-size: 14px; }
+.dlslot { position: relative; height: 54px; margin-bottom: 5px; background: #ffffff08; border: 1px dashed #ffffff22; display: flex; align-items: center; gap: 8px; overflow: hidden; }
+.dlslot.full { border: 1px solid #ffffff33; cursor: pointer; animation: hpin .35s ease-out; } .dlslot img { width: 40px; height: 54px; object-fit: cover; object-position: center 20%; }
+.dlslot span { font-size: 12px; color: #fff; font-weight: 700; line-height: 1.1; } .dlslot em { margin: auto; font-style: normal; color: #ffffff33; font-family: var(--display); }
+.dlgrid .fchar { cursor: pointer; } .dlpick { position: absolute; top: 8px; right: 8px; z-index: 2; font-style: normal; font-family: var(--display); font-size: 12px; background: var(--blue); color: #120c2c; padding: 2px 8px; opacity: 0; transition: opacity .15s; }
+.dlgrid .fchar:hover .dlpick { opacity: 1; }
+@media (max-width: 760px) { .dlboard { grid-template-columns: repeat(2, 1fr) !important; } .dlturn { flex-direction: column; align-items: flex-start; } .dlturn h2 { font-size: 24px; } }
