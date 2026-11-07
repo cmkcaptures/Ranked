@@ -1043,3 +1043,11 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .ftotal { white-space: nowrap; }
 @media (max-width: 1100px) { .fcard { width: 46px; height: 60px; } }
 @media (max-width: 760px) { .fcard { width: 42px; height: 56px; } .fbenchslot { margin-left: 4px; padding-left: 6px; } }
+/* cards shrink to the space available so the lineup never runs into the points total */
+.fline { overflow: hidden; }
+.fline > .fcard { flex: 1 1 0; width: auto; height: auto; min-width: 24px; max-width: 54px; aspect-ratio: 54 / 70; }
+.fbenchslot { flex: 1 1 0; min-width: 30px; max-width: 64px; }
+.fbenchslot .fcard { width: 100%; height: auto; aspect-ratio: 54 / 70; }
+.ftotal { padding-left: 6px; }
+@media (max-width: 1100px) { .fline > .fcard { width: auto; height: auto; } }
+@media (max-width: 760px) { .fline > .fcard { width: auto; height: auto; } }
