@@ -141,3 +141,10 @@ select p.username, string_agg(c.name, ' + ') as same_show, fantasy_show_key(c.me
 from fantasy_picks fp join characters c on c.id = fp.char_id join profiles p on p.id = fp.user_id
 where fp.season = fantasy_season()
 group by p.username, fantasy_show_key(c.media_title) having count(*) > 1;
+
+-- all Dragon Ball series count as one show (Z / Super / GT / Kai / Daima)
+create or replace function fantasy_show_key(t text) returns text language sql immutable as $$
+  select regexp_replace(trim(regexp_replace(lower(split_part(split_part(coalesce(t, ''), ':', 1), ' - ', 1)),
+    '(\s+(season|part|cour)\s*\d+.*|\s+\d+(st|nd|rd|th)\s+season.*|\s+shipp?uu?den.*|\s+final season.*|\s+the movie.*|\s+\(\d{4}\).*|\s+(ii|iii|iv|2|3|4)$|\s+brotherhood$)', '', 'g')),
+    '^dragon ball( z| super| gt| kai| daima)?$', 'dragon ball')
+$$;
