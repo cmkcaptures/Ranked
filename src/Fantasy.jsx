@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
-import Draft, { ResetDraft } from './Draft.jsx'
+import Draft, { ResetDraft, Commish } from './Draft.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
@@ -125,7 +125,7 @@ export default function Fantasy({ me, friends, openProfile }) {
       {draft && draft.status !== 'done' ? <Draft d={draft} me={me} friends={friends} chars={chars} info={info} picks={picks} reload={reload} />
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
-        {draft && <div className="dlresetrow"><ResetDraft me={me} friends={friends} reload={reload} /></div>}
+        <Commish me={me} friends={friends} reload={reload} />
         <div className="tabs squadtabs">
           {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}

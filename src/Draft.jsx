@@ -8,6 +8,23 @@ const turnOf = (order, n) => {
   return r % 2 === 0 ? order[i] : order[len - 1 - i]
 }
 
+// commissioner tools (AspextPro only; the server checks too)
+export function Commish({ me, friends, reload }) {
+  const [busy, setBusy] = useState(false)
+  if (friends.find(f => f.id === me.id)?.username !== 'AspextPro') return null
+  const go = async (fn, msg, done) => {
+    if (!confirm(msg)) return
+    setBusy(true); const { data, error } = await sb.rpc(fn); setBusy(false)
+    if (error) alert(error.message); else { alert(done(data)); reload() }
+  }
+  return <div className="commish">
+    <b>🛡️ Commissioner</b>
+    <ResetDraft me={me} friends={friends} reload={reload} />
+    <button className="pill ghost dlreset" disabled={busy} onClick={() => go('commish_reset_teams', 'Clear EVERY team (all picks, captains and swaps)? Points already scored stay.', n => `Cleared ${n} picks.`)}>🧹 Reset teams</button>
+    <button className="pill ghost dlreset" disabled={busy} onClick={() => go('commish_reset_points', 'Reset EVERYONE to 0 points for this season? (It can be undone.)', n => `Reset ${n} scoring entries. Everyone's on 0.`)}>0️⃣ Reset points</button>
+  </div>
+}
+
 export function ResetDraft({ me, friends, reload }) {
   const [busy, setBusy] = useState(false)
   if (friends.find(f => f.id === me.id)?.username !== 'AspextPro') return null
