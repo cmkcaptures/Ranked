@@ -38,6 +38,7 @@ export function ResetDraft({ me, friends, reload }) {
 
 export default function Draft({ d, me, friends, chars, info, picks, reload }) {
   const [q, setQ] = useState('')
+  const [order, setOrder] = useState(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [now, setNow] = useState(Date.now())
@@ -54,11 +55,22 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
 
   if (d.status === 'lobby') {
     const inIt = d.joined.includes(me.id)
+    const commish = friends.find(f => f.id === me.id)?.username === 'AspextPro'
+    // commissioner's chosen order (defaults to lobby order, keeps up as people join/leave)
+    const ord = [...(order || []).filter(u => d.joined.includes(u)), ...d.joined.filter(u => !(order || []).includes(u))]
+    const move = (i, k) => { const o = [...ord]; const j = i + k; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; setOrder(o) }
     return <div className="draft">
       <div className="dlhead"><div className="kicker">Fall draft</div><h1>DRAFT LOBBY</h1>
         <p>Everyone joining hits <b>Join</b>, then anyone starts it. Pick order is random, snake style (1→{Math.max(d.joined.length, 2)}, then back), 5 rounds, one character per show.</p></div>
       <div className="dljoined">{d.joined.map(u => <div key={u}>{ava(u) ? <img src={ava(u)} alt="" /> : <span>{name(u)[0]}</span>}<b>{name(u)}</b></div>)}
         {!d.joined.length && <div className="muted">Nobody's in yet.</div>}</div>
+      {commish && d.joined.length >= 2 && <div className="dlorder">
+        <b>🛡️ Set the pick order</b>
+        {ord.map((u, i) => <div key={u}><span>{i + 1}</span><b>{name(u)}</b>
+          <button className="pill ghost" onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
+          <button className="pill ghost" onClick={() => move(i, 1)} disabled={i === ord.length - 1}>↓</button></div>)}
+        <button className="flock" disabled={busy} onClick={() => confirm(`Start with this order: ${ord.map(name).join(' → ')}? Everyone will see it was set by the commissioner.`) && call('draft_start_ordered', { p_order: ord })}>Start with my order</button>
+      </div>}
       {err && <div className="ferr card pad">{err}</div>}
       <div className="row gap">
         <ResetDraft me={me} friends={friends} reload={reload} />
@@ -87,7 +99,7 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
 
   return <div className="draft">
     <div className={`dlturn ${mine ? 'me' : ''}`}>
-      <div><span>Round {round} of {d.rounds} · pick {d.pick_no + 1} of {total}</span>
+      <div><span>Round {round} of {d.rounds} · pick {d.pick_no + 1} of {total}{d.order_by_commish ? ' · 🛡️ Order set by the commissioner' : ' · 🎲 Random order'}</span>
         <h2>{mine ? "YOU'RE ON THE CLOCK" : `${name(turn).toUpperCase()} IS PICKING`}</h2>
         <small>Up next: {upNext.map(name).join(' → ') || 'last pick'}</small>
         <div><ResetDraft me={me} friends={friends} reload={reload} /></div></div>
