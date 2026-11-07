@@ -986,3 +986,6 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .navarrows button:hover:not(:disabled) { background: var(--blue); color: #120c2c; }
 .navarrows button:disabled { opacity: .25; cursor: default; }
 @media (max-width: 760px) { .nav .logo { margin-right: 0; } .navarrows { margin-right: auto; } .navarrows button { width: 32px; height: 32px; } }
+
+.ftag { position: absolute; left: 0; bottom: 46px; z-index: 2; font-style: normal; font-family: var(--display); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 1px 8px 1px 6px; clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%); }
+.ftag.live { background: #3ddc97; color: #0b1a12; } .ftag.legacy { background: #c9a84a; color: #1a1300; }

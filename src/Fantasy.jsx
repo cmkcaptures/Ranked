@@ -13,7 +13,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
-  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'],
+  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], news: ['📰', 'Big news'],
   transform: ['⚡', 'Transformation / power-up'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
@@ -34,6 +34,7 @@ function matchups(ids, week) {
 export default function Fantasy({ me, friends, openProfile }) {
   const S = fantasySeason()
   const [chars, setChars] = useState([])
+  const [info, setInfo] = useState({})
   const [picks, setPicks] = useState([])
   const [events, setEvents] = useState([])
   const [votes, setVotes] = useState([])
@@ -46,7 +47,10 @@ export default function Fantasy({ me, friends, openProfile }) {
 
   useEffect(() => {
     if (!sb) return
-    fetchAll(() => sb.from('characters').select('id, name, image, media_title, color, form').order('favourites', { ascending: false })).then(setChars).catch(() => {})
+    fetchAll(() => sb.from('characters').select('id, name, image, media_title, color, form').order('favourites', { ascending: false })).then(cs => {
+      setChars(cs)
+      fetchAll(() => sb.rpc('fantasy_char_info', { p_ids: cs.map(c => c.id) })).then(rows => setInfo(Object.fromEntries(rows.map(r => [r.id, r])))).catch(() => {})
+    }).catch(() => {})
   }, [])
   useEffect(() => {
     if (!sb) return
@@ -114,14 +118,14 @@ export default function Fantasy({ me, friends, openProfile }) {
       </div>
       {err && <div className="card pad ferr">{err}</div>}
 
-      {!mine ? <Picker chars={chars} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
+      {!mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <div className="tabs squadtabs">
           {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
         {tab === 'table' && <Standings capOf={capOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
-        {tab === 'team' && <MyTeam team={mine} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
+        {tab === 'team' && <MyTeam team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} />}
@@ -133,37 +137,41 @@ export default function Fantasy({ me, friends, openProfile }) {
   )
 }
 
-function CharTile({ c, sub, on, off, onClick, children, big, capt }) {
+function CharTile({ c, sub, on, off, onClick, children, big, capt, tag }) {
   if (!c) return null
   return <div className={`fchar ${on ? 'on' : ''} ${off ? 'off' : ''} ${big ? 'big' : ''}`} onClick={off ? undefined : onClick} style={{ '--c': c.color || '#7b5cff' }}>
     <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" />
     {c.form && <i className="fform">{c.form}</i>}
     {on && <i className="fcheck">✓</i>}
     {capt && <i className="fcapt">👑 ×2</i>}
+    {tag && <i className={`ftag ${tag.active ? 'live' : 'legacy'}`}>{tag.active ? '📺 Active' : '🏛️ Legacy ×1.5'}</i>}
     <div className="fcap"><b>{c.name}</b><span>{sub ?? c.media_title}</span></div>
     {children}
   </div>
 }
 
-function Picker({ chars, takenBy, name, onLock }) {
+function Picker({ chars, info, takenBy, name, onLock }) {
   const [q, setQ] = useState('')
   const [sel, setSel] = useState([])
   const shown = chars.filter(c => !q || (c.name + ' ' + (c.media_title || '')).toLowerCase().includes(q.toLowerCase())).slice(0, 120)
-  const toggle = id => setSel(s => s.includes(id) ? s.filter(x => x !== id) : s.length < 5 ? [...s, id] : s)
+  const showOf = id => info[id]?.show_key
+  // already have someone from this show (and it isn't this character)
+  const clash = id => sel.some(x => x !== id && showOf(x) && showOf(x) === showOf(id))
+  const toggle = id => setSel(s => s.includes(id) ? s.filter(x => x !== id) : s.length < 5 && !clash(id) ? [...s, id] : s)
   const byId = Object.fromEntries(chars.map(c => [c.id, c]))
   const forms = chars.filter(c => c.form).length
   return <div className="fpick">
     <div className="fintro">
       <h2>Draft your 5</h2>
-      <p>Any 5 characters from any anime. Each one can only be on one team, so first come first served. They score all season from new episodes, chapters, hype and big moments. One swap a week.</p>
+      <p>Any 5 characters, <b>one per show</b>. Each one can only be on one team, so first come first served. <b>📺 Active</b> characters (anime airing or manga releasing) score from episodes, chapters and fights. <b>🏛️ Legacy</b> characters score from hype and news at <b>×1.5</b>. One swap a week.</p>
     </div>
     <div className="fbar">
       <input className="search" placeholder="Search characters or anime…" value={q} onChange={e => setQ(e.target.value)} />
       <span className="muted small">{chars.length} characters · {forms} in their strongest form</span>
     </div>
     <div className="fgrid">
-      {shown.map(c => <CharTile key={c.id} c={c} on={sel.includes(c.id)} off={!!takenBy[c.id]}
-        sub={takenBy[c.id] ? `taken by ${name(takenBy[c.id])}` : c.media_title} onClick={() => toggle(c.id)} />)}
+      {shown.map(c => <CharTile key={c.id} c={c} on={sel.includes(c.id)} off={!!takenBy[c.id] || (!sel.includes(c.id) && clash(c.id))} tag={info[c.id]}
+        sub={takenBy[c.id] ? `taken by ${name(takenBy[c.id])}` : !sel.includes(c.id) && clash(c.id) ? 'you have someone from this show' : c.media_title} onClick={() => toggle(c.id)} />)}
     </div>
     <div className="fdraft">
       <div className="fslots">
@@ -209,7 +217,7 @@ function Standings({ capOf, teams, byId, who, me, charPts, dead, openProfile, ev
   </div>
 }
 
-function MyTeam({ team, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, captain, capLocked, onCaptain }) {
+function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [q, setQ] = useState('')
   return <div className="rank">
@@ -220,7 +228,7 @@ function MyTeam({ team, byId, chars, takenBy, name, charPts, dead, events, swapp
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
       <div className="fgrid five">
-        {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} onClick={() => openChar(id)}
+        {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} tag={info[id]} onClick={() => openChar(id)}
           sub={dead[id] ? '💀 dead: scores 0 until they return' : `${charPts[id] || 0} pts`}>
           <div className="ftilebtns" onClick={e => e.stopPropagation()}>
             {!capLocked && captain !== id && <button className="btn sm" onClick={() => onCaptain(id)}>👑 Captain</button>}
@@ -232,7 +240,7 @@ function MyTeam({ team, byId, chars, takenBy, name, charPts, dead, events, swapp
       {out && <div className="card pad">
         <h3>Swap out {byId[out]?.name} for…</h3>
         <input className="search" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
-        <div className="fgrid">{chars.filter(c => !takenBy[c.id] && (!q || (c.name + c.media_title).toLowerCase().includes(q.toLowerCase()))).slice(0, 40).map(c =>
+        <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => x !== out && info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || (c.name + c.media_title).toLowerCase().includes(q.toLowerCase()))).slice(0, 40).map(c =>
           <CharTile key={c.id} c={c} onClick={() => { onSwap(out, c.id); setOut(null) }} />)}</div>
       </div>}
     </section>
@@ -289,15 +297,15 @@ function Vote({ S, teams, byId, name, me, votes, reload, setErr }) {
 }
 
 function Rules() {
-  const auto = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['📈', 'Wikipedia hype spike (weekly)', 'up to +15'],
-    ['💜', 'New AniList fans vs their usual (weekly)', 'up to +10'], ['🔥', 'Their show is trending (weekly)', '+5'], ['💤', 'No episode or chapter for 2+ weeks (weekly)', '−5']]
-  const squad = [['⚡', 'Transformation or power-up', '+20'], ['🏆', 'Wins a fight', '+15'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
-  const T = (title, rows) => <div className="card pad"><h3>{title}</h3>{rows.map(([i, l, p]) => <div key={l} className="lrow"><span>{i}</span><div className="grow">{l}</div><b>{p}</b></div>)}</div>
+  const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'],
+    ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
+  const hype = [['📊', 'Weekly hype ranking: every drafted character ranked by how much their hype grew vs their own usual week', '+30 (1st) → +5 (last)'],
+    ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15']]
+  const T = (title, rows, note) => <div className="card pad"><h3>{title}</h3>{note && <p className="muted small">{note}</p>}{rows.map(([i, l, p]) => <div key={l} className="lrow"><span>{i}</span><div className="grow">{l}</div><b>{p}</b></div>)}</div>
   return <div className="frules">
-    {T('Automatic', auto)}
-    {T('Big moments (found automatically from recaps)', squad)}
-    {T('Squad vote', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5']])}
-    {T('Captain', [['👑', 'Your captain scores double all week (pick once a week, carries over)', '×2']])}
-    <p className="muted small">Seasons follow the anime seasons. Teams lock for the season with one swap a week. Most points when the season ends takes the crown and a spot in the hall of fame.</p>
+    {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
+    {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
+    {T('Squad', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5'], ['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
+    <p className="muted small">One character per show (no stacking two from the same anime). Seasons follow the anime seasons, one swap a week, plus a free swap while your team has two from the same show. Most points when the season ends takes the crown.</p>
   </div>
 }
