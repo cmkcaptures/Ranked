@@ -38,7 +38,7 @@ export function ResetDraft({ me, friends, reload }) {
 
 export default function Draft({ d, me, friends, chars, info, picks, reload }) {
   const [q, setQ] = useState('')
-  const [order, setOrder] = useState(null)
+  const [myOrder, setMyOrder] = useState(null)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const [now, setNow] = useState(Date.now())
@@ -57,8 +57,8 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
     const inIt = d.joined.includes(me.id)
     const commish = friends.find(f => f.id === me.id)?.username === 'AspextPro'
     // commissioner's chosen order (defaults to lobby order, keeps up as people join/leave)
-    const ord = [...(order || []).filter(u => d.joined.includes(u)), ...d.joined.filter(u => !(order || []).includes(u))]
-    const move = (i, k) => { const o = [...ord]; const j = i + k; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; setOrder(o) }
+    const ord = [...(myOrder || []).filter(u => d.joined.includes(u)), ...d.joined.filter(u => !(myOrder || []).includes(u))]
+    const move = (i, k) => { const o = [...ord]; const j = i + k; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; setMyOrder(o) }
     return <div className="draft">
       <div className="dlhead"><div className="kicker">Fall draft</div><h1>DRAFT LOBBY</h1>
         <p>Everyone joining hits <b>Join</b>, then anyone starts it. Pick order is random, snake style (1→{Math.max(d.joined.length, 2)}, then back), 5 rounds, one character per show.</p></div>
