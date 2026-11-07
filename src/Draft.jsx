@@ -8,6 +8,17 @@ const turnOf = (order, n) => {
   return r % 2 === 0 ? order[i] : order[len - 1 - i]
 }
 
+export function ResetDraft({ me, friends, reload }) {
+  const [busy, setBusy] = useState(false)
+  if (friends.find(f => f.id === me.id)?.username !== 'AspextPro') return null
+  const go = async () => {
+    if (!confirm('Reset the draft? Every pick so far is wiped and everyone goes back to the lobby.')) return
+    setBusy(true); const { error } = await sb.rpc('draft_reset'); setBusy(false)
+    if (error) alert(error.message); else reload()
+  }
+  return <button className="pill ghost dlreset" disabled={busy} onClick={go}>↺ Reset draft</button>
+}
+
 export default function Draft({ d, me, friends, chars, info, picks, reload }) {
   const [q, setQ] = useState('')
   const [err, setErr] = useState('')
@@ -33,6 +44,7 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
         {!d.joined.length && <div className="muted">Nobody's in yet.</div>}</div>
       {err && <div className="ferr card pad">{err}</div>}
       <div className="row gap">
+        <ResetDraft me={me} friends={friends} reload={reload} />
         {inIt ? <button className="pill ghost" disabled={busy} onClick={() => call('draft_leave')}>Leave</button>
           : <button className="flock" disabled={busy} onClick={() => call('draft_join')}>Join draft</button>}
         {inIt && <button className="flock" disabled={busy || d.joined.length < 2} onClick={() => confirm(`Start the draft with ${d.joined.length} players (${d.joined.map(name).join(', ')})? Nobody can join once it starts.`) && call('draft_start')}>
@@ -60,7 +72,8 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
     <div className={`dlturn ${mine ? 'me' : ''}`}>
       <div><span>Round {round} of {d.rounds} · pick {d.pick_no + 1} of {total}</span>
         <h2>{mine ? "YOU'RE ON THE CLOCK" : `${name(turn).toUpperCase()} IS PICKING`}</h2>
-        <small>Up next: {upNext.map(name).join(' → ') || 'last pick'}</small></div>
+        <small>Up next: {upNext.map(name).join(' → ') || 'last pick'}</small>
+        <div><ResetDraft me={me} friends={friends} reload={reload} /></div></div>
       <div className={`dlclock ${left < 20 ? 'low' : ''}`}><b>{Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</b>
         {!mine && left === 0 && order.includes(me.id) && <button className="pill" disabled={busy} onClick={() => call('draft_skip')}>Skip them</button>}</div>
     </div>

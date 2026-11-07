@@ -1012,3 +1012,6 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .dlgrid .fchar { cursor: pointer; } .dlpick { position: absolute; top: 8px; right: 8px; z-index: 2; font-style: normal; font-family: var(--display); font-size: 12px; background: var(--blue); color: #120c2c; padding: 2px 8px; opacity: 0; transition: opacity .15s; }
 .dlgrid .fchar:hover .dlpick { opacity: 1; }
 @media (max-width: 760px) { .dlboard { grid-template-columns: repeat(2, 1fr) !important; } .dlturn { flex-direction: column; align-items: flex-start; } .dlturn h2 { font-size: 24px; } }
+
+.dlreset { border: 1px solid #ff4d6d88 !important; color: #ffb3c1 !important; } .dlturn .dlreset { margin-top: 8px; font-size: 12px; }
+.dlresetrow { display: flex; justify-content: flex-end; margin: -6px 0 8px; }
