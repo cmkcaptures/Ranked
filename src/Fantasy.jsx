@@ -5,6 +5,7 @@ import Draft, { ResetDraft, Commish } from './Draft.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
+export const norm = t => (t || '').toLowerCase().replace(/[^a-z0-9]/g, '')
 export function fantasySeason(d = new Date()) {
   const q = Math.floor(d.getUTCMonth() / 3), y = d.getUTCFullYear()
   const start = Date.UTC(y, q * 3, 1), end = Date.UTC(q === 3 ? y + 1 : y, (q * 3 + 3) % 12, 1)
@@ -14,7 +15,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
-  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], news: ['📰', 'Big news'],
+  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'],
   transform: ['⚡', 'Transformation / power-up'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
@@ -42,6 +43,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const [votes, setVotes] = useState([])
   const [swaps, setSwaps] = useState([])
   const [caps, setCaps] = useState([])
+  const [trades, setTrades] = useState([])
   const [tab, setTab] = useState('table')
   const [err, setErr] = useState('')
   const [tick, setTick] = useState(0)
@@ -62,12 +64,14 @@ export default function Fantasy({ me, friends, openProfile }) {
     sb.from('fantasy_votes').select('*').eq('season', S.key).eq('week', S.week).then(({ data }) => setVotes(data || []))
     sb.from('fantasy_swaps').select('*').eq('season', S.key).then(({ data }) => setSwaps(data || []))
     sb.from('fantasy_captains').select('*').eq('season', S.key).then(({ data }) => setCaps(data || []))
+    sb.from('fantasy_trades').select('*').eq('season', S.key).order('created_at', { ascending: false }).then(({ data }) => setTrades(data || []))
   }, [tick])
   useEffect(() => {
     if (!sb) return
     const ch = sb.channel('fantasy').on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_events' }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_picks' }, reload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_draft' }, reload).subscribe()
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_draft' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_trades' }, reload).subscribe()
     return () => { sb.removeChannel(ch) }
   }, [])
 
@@ -127,14 +131,15 @@ export default function Fantasy({ me, friends, openProfile }) {
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
         <div className="tabs squadtabs">
-          {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
+          {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['trades', `Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
         {tab === 'table' && <Standings capOf={capOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
         {tab === 'team' && <MyTeam team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
-          onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} />}
+          onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })} />}
+        {tab === 'trades' && <Trades me={me} picks={picks} byId={byId} name={name} trades={trades} run={run} />}
         {tab === 'moments' && <Moments events={cur.filter(e => e.source === 'bot')} byId={byId} name={name} />}
         {tab === 'vote' && <Vote S={S} teams={teams} byId={byId} name={name} me={me} votes={votes} reload={reload} setErr={setErr} />}
         {tab === 'rules' && <Rules />}
@@ -159,7 +164,7 @@ function CharTile({ c, sub, on, off, onClick, children, big, capt, tag }) {
 function Picker({ chars, info, takenBy, name, onLock }) {
   const [q, setQ] = useState('')
   const [sel, setSel] = useState([])
-  const shown = chars.filter(c => !q || (c.name + ' ' + (c.media_title || '')).toLowerCase().includes(q.toLowerCase())).slice(0, 120)
+  const shown = chars.filter(c => !q || norm(c.name + c.media_title).includes(norm(q))).slice(0, 120)
   const showOf = id => info[id]?.show_key
   // already have someone from this show (and it isn't this character)
   const clash = id => sel.some(x => x !== id && showOf(x) && showOf(x) === showOf(id))
@@ -223,8 +228,9 @@ function Standings({ capOf, teams, byId, who, me, charPts, dead, openProfile, ev
   </div>
 }
 
-function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, captain, capLocked, onCaptain }) {
+function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
+  const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
   return <div className="rank">
     <section>
@@ -233,7 +239,7 @@ function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events,
         <span>{captain ? <>{byId[captain]?.name} scores <b>double</b> this week</> : 'Pick a captain: their points count double'}</span>
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
-      <div className="fgrid five">
+      <div className={`fgrid ${team.chars.length > 5 ? "six" : "five"}`}>
         {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} tag={info[id]} onClick={() => openChar(id)}
           sub={dead[id] ? '💀 dead: scores 0 until they return' : `${charPts[id] || 0} pts`}>
           <div className="ftilebtns" onClick={e => e.stopPropagation()}>
@@ -242,11 +248,20 @@ function MyTeam({ team, info, byId, chars, takenBy, name, charPts, dead, events,
           </div>
         </CharTile>)}
       </div>
+      {team.chars.length < 6 ? <div className="fbench" onClick={() => setBenchOpen(o => !o)}>
+        <b>🪑 Add your bench player</b><span>A free 6th character. Each week only your best 5 count: your lowest scorer is benched automatically, so the bench covers anyone who goes quiet or dies.</span>
+      </div> : <p className="muted small">🪑 6 characters: each week your lowest scorer is benched automatically, and your best 5 count.</p>}
+      {benchOpen && team.chars.length < 6 && <div className="card pad">
+        <h3>Pick your bench player</h3>
+        <input className="search" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
+        <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
+          <CharTile key={c.id} c={c} tag={info[c.id]} onClick={() => confirm(`Add ${c.name} as your bench player?`) && (onBench(c.id), setBenchOpen(false))} />)}</div>
+      </div>}
       {swapped && <p className="muted small">You've used this week's swap.</p>}
       {out && <div className="card pad">
         <h3>Swap out {byId[out]?.name} for…</h3>
         <input className="search" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
-        <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => x !== out && info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || (c.name + c.media_title).toLowerCase().includes(q.toLowerCase()))).slice(0, 40).map(c =>
+        <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => x !== out && info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
           <CharTile key={c.id} c={c} onClick={() => { onSwap(out, c.id); setOut(null) }} />)}</div>
       </div>}
     </section>
@@ -312,6 +327,53 @@ function Rules() {
     {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
     {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
     {T('Squad', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5'], ['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
+    {T('Bench & trades', [['🪑', 'Bench: a free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5'], ['🔄', 'Trade one of yours for one of a mate\'s (they accept or decline). Points already scored stay where they are', '1 for 1']])}
     <p className="muted small">One character per show (no stacking two from the same anime). Seasons follow the anime seasons, one swap a week, plus a free swap while your team has two from the same show. Most points when the season ends takes the crown.</p>
+  </div>
+}
+
+// one-for-one trades: offer one of yours for one of theirs; they accept or decline
+function Trades({ me, picks, byId, name, trades, run }) {
+  const [give, setGive] = useState('')
+  const [get, setGet] = useState('')
+  const mine = picks.filter(p => p.user_id === me.id)
+  const theirs = picks.filter(p => p.user_id !== me.id).sort((a, b) => name(a.user_id).localeCompare(name(b.user_id)))
+  const incoming = trades.filter(t => t.status === 'pending' && t.to_user === me.id)
+  const outgoing = trades.filter(t => t.status === 'pending' && t.from_user === me.id)
+  const done = trades.filter(t => t.status !== 'pending').slice(0, 20)
+  const C = id => byId[id] ? <span className="tchar"><img src={byId[id].image} alt="" referrerPolicy="origin" />{byId[id].name}</span> : '?'
+  return <div className="rank">
+    <section>
+      <div className="card pad">
+        <h3>Make an offer</h3>
+        <label className="lbl">You give</label>
+        <select value={give} onChange={e => setGive(e.target.value)}><option value="">Pick one of yours…</option>
+          {mine.map(p => byId[p.char_id] && <option key={p.char_id} value={p.char_id}>{byId[p.char_id].name}</option>)}</select>
+        <label className="lbl">You get</label>
+        <select value={get} onChange={e => setGet(e.target.value)}><option value="">Pick someone else's…</option>
+          {theirs.map(p => byId[p.char_id] && <option key={p.char_id} value={p.char_id}>{name(p.user_id)}: {byId[p.char_id].name}</option>)}</select>
+        <button className="flock" disabled={!give || !get} onClick={() => run('trade_offer', { p_give: +give, p_get: +get }, () => { setGive(''); setGet('') })}>Send offer</button>
+      </div>
+      <h3>Offers for you</h3>
+      {incoming.map(t => <div key={t.id} className="ttrade in">
+        <div><b>{name(t.from_user)}</b> offers {C(t.give_char)} for your {C(t.get_char)}</div>
+        <div className="row gap"><button className="pill" onClick={() => confirm('Accept this trade?') && run('trade_respond', { p_id: t.id, p_accept: true })}>✅ Accept</button>
+          <button className="pill ghost" onClick={() => run('trade_respond', { p_id: t.id, p_accept: false })}>❌ Decline</button></div>
+      </div>)}
+      {!incoming.length && <div className="muted small">No offers right now.</div>}
+      <h3>Your offers</h3>
+      {outgoing.map(t => <div key={t.id} className="ttrade">
+        <div>Your {C(t.give_char)} for <b>{name(t.to_user)}</b>'s {C(t.get_char)}</div>
+        <button className="pill ghost" onClick={() => run('trade_cancel', { p_id: t.id })}>Cancel</button>
+      </div>)}
+      {!outgoing.length && <div className="muted small">You haven't offered anything.</div>}
+    </section>
+    <aside>
+      <h3>Trade log</h3>
+      <div className="card">{done.map(t => <div key={t.id} className="lrow small">
+        <span>{t.status === 'accepted' ? '✅' : t.status === 'declined' ? '❌' : '➖'}</span>
+        <div className="grow"><b>{name(t.from_user)}</b> {byId[t.give_char]?.name} ↔ <b>{name(t.to_user)}</b> {byId[t.get_char]?.name}<div className="muted">{t.status}</div></div>
+      </div>)}{!done.length && <div className="pad muted small">No trades yet.</div>}</div>
+    </aside>
   </div>
 }

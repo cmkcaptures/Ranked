@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { sb } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
+import { norm } from './Fantasy.jsx'
 
 // Live snake draft: lobby → randomised order → 5 rounds (1..n then n..1). Everyone sees picks land in real time.
 const turnOf = (order, n) => {
@@ -92,7 +93,7 @@ export default function Draft({ d, me, friends, chars, info, picks, reload }) {
   const myPicks = picks.filter(p => p.user_id === me.id).map(p => p.char_id)
   const myShows = new Set(myPicks.map(id => info[id]?.show_key).filter(Boolean))
   const taken = new Set(picks.map(p => p.char_id))
-  const shown = chars.filter(c => !taken.has(c.id) && (!q || (c.name + ' ' + (c.media_title || '')).toLowerCase().includes(q.toLowerCase()))).slice(0, 90)
+  const shown = chars.filter(c => !taken.has(c.id) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 90)
   // board: one column per player, in draft order, picks in the order they were made
   const col = u => picks.filter(p => p.user_id === u).sort((a, b) => new Date(a.picked_at) - new Date(b.picked_at))
   const upNext = [1, 2, 3].map(k => d.pick_no + k < total ? turnOf(order, d.pick_no + k) : null).filter(Boolean)
