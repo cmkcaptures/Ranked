@@ -276,12 +276,18 @@ const NEWS: Record<string, [string, string]> = {
 }
 
 // Runs every 10 minutes; each run handles a sixth of the market so every character is scanned hourly.
-const CHUNKS = 6
+// 24 batches, one every 5 minutes: every character refreshed every 2 hours, each run small enough to finish in time
+const CHUNKS = 24
 async function collect(chunkArg?: number) {
-  const { data: all } = await db.from('characters').select('*').order('id')
-  if (!all?.length) return { error: 'no characters, run seed first' }
+  // page through every listing (one select stops at 1,000 rows, which left most of the market un-collected)
+  const all: any[] = []
+  for (let from = 0; ; from += 1000) {
+    const { data } = await db.from('characters').select('*').order('id').range(from, from + 999)
+    all.push(...(data || [])); if (!data || data.length < 1000) break
+  }
+  if (!all.length) return { error: 'no characters, run seed first' }
   const now = new Date(), hour = now.getUTCHours()
-  const chunk = chunkArg ?? Math.floor(now.getUTCMinutes() / 10) % CHUNKS
+  const chunk = chunkArg ?? Math.floor((hour * 60 + now.getUTCMinutes()) / 5) % CHUNKS
   const chars = all.map((c, i) => ({ ...c, i })).filter(c => c.i % CHUNKS === chunk)
 
   // AniList: favourites + show trending/airing, one batched call
