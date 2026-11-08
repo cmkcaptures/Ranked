@@ -4,6 +4,7 @@ import App from './App.jsx'
 import { captureToken } from './anilistAuth.js'
 import './styles.css'
 import './theme.css'
+import './manga.css'
 captureToken() // AniList login redirect lands back here with #access_token
 createRoot(document.getElementById('root')).render(<App />)
 // installable app: offline shell (production only, so dev hot-reload isn't cached)

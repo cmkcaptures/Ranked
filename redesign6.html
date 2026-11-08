@@ -1,0 +1,199 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranked redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;600;700;800;900&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f6f3ec;--ink:#111;--red:#e8202f;--mute:#6b665c;--up:#108a4b;--dn:#e8202f}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif;overflow-x:hidden}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.panel{position:relative;background:#fff;border:3px solid var(--ink)}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;padding:22px 16px;background:var(--ink);color:#fff;display:flex;flex-direction:column;overflow:hidden}
+.side::after{content:'ランクド';position:absolute;right:-6px;bottom:90px;writing-mode:vertical-rl;font:900 64px 'Noto Sans JP';color:#ffffff0c;letter-spacing:6px;pointer-events:none}
+.logo{display:flex;align-items:center;gap:10px;padding:0 6px 24px}
+.logo .mk{width:40px;height:40px;display:grid;place-items:center;background:var(--red);font:400 26px Bangers;border:2px solid #fff;transform:rotate(-6deg)}
+.logo b{font:400 30px Bangers;letter-spacing:2px}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav a{display:flex;align-items:center;gap:14px;padding:10px 12px;color:#bdbdbd;font:400 19px Bangers;letter-spacing:1.4px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.nav a:hover{color:#fff;border-color:#ffffff30}
+.nav a.on{background:#fff;color:var(--ink);transform:rotate(-1.5deg);box-shadow:4px 4px 0 var(--red)}.nav a.on svg{color:var(--red)}
+.nav .badge{margin-left:auto;font:400 13px Bangers;letter-spacing:1px;padding:1px 7px;background:var(--red);color:#fff;transform:rotate(6deg)}
+.sec{margin:24px 8px 10px;font:400 15px Bangers;letter-spacing:2px;color:#777}
+.wid{margin:0 2px;padding:12px;background:#fff;color:var(--ink);position:relative}
+.wid .t{display:flex;justify-content:space-between;font-weight:800;font-size:11px;margin-bottom:8px;text-transform:uppercase}
+.wid .bar{height:10px;border:2px solid var(--ink);margin-bottom:10px}.wid .bar i{display:block;height:100%;width:57%;background:var(--red)}
+.wid .ln{display:flex;gap:8px;padding:4px 0;font-weight:700;font-size:13px;border-top:1px dashed #0003}.wid .ln span{width:14px}.wid .ln b{margin-left:auto;font:400 18px Bangers;letter-spacing:1px}.wid .ln.me{color:var(--red)}
+.me{margin-top:auto;display:flex;align-items:center;gap:12px;padding:10px;border:2px solid #ffffff30}
+.me .av{width:40px;height:40px;background:var(--red);border:2px solid #fff;display:grid;place-items:center;font:400 22px Bangers}.me small{display:block;color:#999;font-size:11px}
+main{padding:22px 32px 70px;min-width:0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.search{display:flex;align-items:center;gap:10px;flex:1;max-width:460px;padding:10px 16px;background:#fff;border:3px solid var(--ink);color:var(--mute);font-weight:600;border-radius:40px}
+.coins{margin-left:auto;display:flex;align-items:center;gap:8px;padding:8px 14px;background:#fff;border:3px solid var(--ink);font:400 20px Bangers;letter-spacing:1px}.coins i{width:18px;height:18px;border-radius:50%;background:var(--red);border:2px solid var(--ink)}
+.ib{width:46px;height:46px;display:grid;place-items:center;background:#fff;border:3px solid var(--ink);position:relative}.ib i{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--red);border:2px solid var(--ink)}
+.page{display:grid;grid-template-columns:1.15fr .85fr;gap:10px;margin-bottom:22px}
+.p1{grid-row:span 2;clip-path:polygon(0 0,100% 0,94% 100%,0 100%);min-height:400px;padding:30px 70px 28px 30px;overflow:hidden}
+.p1::before{content:'';position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 92% 60%,#111 0 .7deg,transparent .7deg 4deg);opacity:.16}
+.p1::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 92% 60%,#fff 0 18%,transparent 52%)}
+.p1>*{position:relative;z-index:1}
+.chap{display:inline-flex;align-items:center;gap:10px;font:400 16px Bangers;letter-spacing:2px}.chap b{background:var(--ink);color:#fff;padding:3px 10px;font-weight:400}.chap em{font-style:normal;color:var(--red)}
+.p1 h1{margin:16px 0 0;font:400 86px/.88 Bangers;letter-spacing:2px;text-shadow:4px 4px 0 #fff,6px 6px 0 var(--ink)}
+.p1 h1 em{font-style:normal;color:var(--red);display:block}
+.bub{position:relative;display:inline-block;margin:26px 0 0;max-width:380px;padding:16px 24px;background:#fff;border:3px solid var(--ink);border-radius:50%/42%;font:700 15px/1.35 Inter;text-align:center}
+.bub::after{content:'';position:absolute;left:54px;bottom:-19px;width:22px;height:22px;background:#fff;border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:rotate(35deg) skewX(15deg)}
+.btns{display:flex;gap:12px;margin-top:34px}
+.b{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;font:400 20px Bangers;letter-spacing:1.5px;border:3px solid var(--ink);cursor:pointer;transition:transform .12s,box-shadow .12s;background:#fff;color:var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.b:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}.b:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}.b.p{background:var(--red);color:#fff}
+.sfx{position:absolute;z-index:2;font:900 72px/1 'Noto Sans JP';transform:rotate(-10deg);letter-spacing:-6px;pointer-events:none}
+.sfx.a{right:40px;top:24px}.sfx.b{right:60px;bottom:110px;font-size:34px;color:var(--red);transform:rotate(6deg)}
+.p2{overflow:hidden;min-height:260px;clip-path:polygon(4% 0,100% 0,100% 100%,0 100%);background:#111}
+.p2 img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%}
+.p2 .cap{position:absolute;left:24px;bottom:14px;z-index:2;background:#fff;border:3px solid var(--ink);padding:5px 12px;font:400 22px Bangers;letter-spacing:1.5px}.p2 .cap small{display:block;font:800 10px Inter;color:var(--red);letter-spacing:1px}
+.p3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{position:relative;padding:12px 14px;background:#fff;border:3px solid var(--ink);text-align:center;overflow:hidden}
+.stat:nth-child(2){background:var(--red);color:#fff}
+.stat:nth-child(odd)::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#1112 .9px,transparent 1.2px);background-size:5px 5px}
+.stat small{position:relative;display:block;font:800 10px Inter;letter-spacing:1.5px;text-transform:uppercase}.stat b{position:relative;display:block;font:400 44px/1 Bangers;letter-spacing:1px;font-weight:400}
+.strip{display:flex;gap:6px;margin-bottom:26px}
+.strip div{flex:1;height:30px;border:3px solid var(--ink);background:#fff;display:grid;place-items:center;font:400 15px Bangers;letter-spacing:1px}.strip div.d{background:var(--ink);color:#fff}.strip div.n{background:var(--red);color:#fff}
+.st{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+.st .n{font:400 18px Bangers;color:#fff;background:var(--ink);padding:2px 10px;letter-spacing:1px}
+.st h2{margin:0;font:400 38px/1 Bangers;letter-spacing:2px}.st h2 small{font:900 13px 'Noto Sans JP';color:var(--red);margin-left:8px;letter-spacing:2px}
+.st .ln{flex:1;height:3px;background:var(--ink)}
+.seg{display:flex;border:3px solid var(--ink);background:#fff}.seg button{border:0;background:none;font:400 16px Bangers;letter-spacing:1px;padding:4px 12px;cursor:pointer}.seg button.on{background:var(--ink);color:#fff}
+.movers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:30px}
+.mv{display:flex;gap:10px;align-items:center;padding:8px;background:#fff;border:3px solid var(--ink);cursor:pointer;transition:transform .15s}
+.mv:hover{transform:translateY(-3px) rotate(-1deg)}
+.mv img{width:52px;height:52px;object-fit:cover;object-position:center 20%;border:2px solid var(--ink);filter:grayscale(1) contrast(1.15);transition:filter .2s}.mv:hover img{filter:none}
+.mv b{display:block;font:400 18px/1 Bangers;letter-spacing:1px}.mv small{color:var(--mute);font-size:11px;font-weight:600}.mv .ch{margin-left:auto;font:400 26px Bangers;letter-spacing:1px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.cols{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;margin-bottom:34px}
+.row{display:grid;grid-template-columns:60px 1fr 80px 70px 80px;align-items:center;gap:10px;margin-bottom:8px;background:#fff;border:3px solid var(--ink);min-height:70px;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.row:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.row.hd{border:0;background:none;min-height:0;margin:0 0 4px;font:800 10px Inter;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);cursor:default}.row.hd:hover{transform:none;box-shadow:none}
+.pos{align-self:stretch;display:grid;place-items:center;border-right:3px solid var(--ink);font:400 40px Bangers;position:relative}
+.pos i{position:absolute;bottom:2px;font:800 10px Inter;font-style:normal}
+.row.r1 .pos{background:var(--red);color:#fff}.row.r1 .pos i{color:#fff}
+.row.r2 .pos,.row.r3 .pos{background-image:radial-gradient(circle,#1113 .9px,transparent 1.2px);background-size:5px 5px}
+.row.me{outline:3px solid var(--red);outline-offset:3px}
+.who{display:flex;align-items:center;gap:12px;min-width:0}
+.who .av{width:38px;height:38px;border:2px solid var(--ink);display:grid;place-items:center;font:400 20px Bangers;background:#fff;flex:none}.row.me .who .av{background:var(--red);color:#fff}
+.who b{display:block;font:400 21px/1 Bangers;letter-spacing:1px}
+.faces{display:flex;margin-top:4px}.faces img{width:22px;height:22px;border-radius:50%;object-fit:cover;object-position:center 20%;border:2px solid var(--ink);margin-right:-6px;filter:grayscale(1) contrast(1.2);transition:.2s}
+.row:hover .faces img{filter:none;margin-right:1px}
+.raceline{height:8px;margin-top:6px;border:2px solid var(--ink);background:#fff;max-width:240px}.raceline i{display:block;height:100%;background:var(--ink)}.row.r1 .raceline i,.row.me .raceline i{background:var(--red)}
+.form{display:flex;gap:3px;align-items:flex-end;height:24px;justify-content:center}.form i{width:8px;border:1.5px solid var(--ink);background:#fff}.form i.w{background:var(--ink)}.form i.l{background:var(--red)}
+.wk{text-align:right;font:400 22px Bangers;letter-spacing:1px}
+.tot{text-align:right;padding-right:16px;font:400 40px/1 Bangers;letter-spacing:1px}.row.r1 .tot{color:var(--red)}
+.feed{display:flex;flex-direction:column;gap:8px}
+.it{display:grid;grid-template-columns:70px 1fr auto;background:#fff;border:3px solid var(--ink);min-height:70px;transition:transform .12s;overflow:hidden}
+.it:hover{transform:rotate(-.6deg)}
+.it img{width:70px;height:100%;object-fit:cover;object-position:center 20%;border-right:3px solid var(--ink)}
+.it .t{padding:8px 12px}.it b{display:block;font:400 20px/1 Bangers;letter-spacing:1px}.it small{font-size:12px;color:var(--mute);font-weight:600}
+.tag{display:inline-block;font:400 13px Bangers;letter-spacing:1px;padding:0 6px;border:2px solid var(--ink);margin:4px 6px 0 0}
+.it.hot .tag{background:var(--ink);color:#fff}
+.it.hot{background-image:repeating-conic-gradient(from 0deg at 100% 50%,#1111 0 1deg,transparent 1deg 5deg)}
+.pts{align-self:center;margin-right:12px;font:400 28px Bangers;letter-spacing:1px;padding:2px 12px;border:3px solid var(--ink);border-radius:50%/40%;background:#fff;transform:rotate(-5deg)}.pts.n{background:var(--red);color:#fff}
+.shelf{display:grid;grid-template-columns:1.6fr repeat(5,minmax(0,1fr));gap:10px}
+.sc{position:relative;aspect-ratio:3/4.3;border:3px solid var(--ink);background:#fff;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.sc:first-child{aspect-ratio:auto;border-width:4px}
+.sc:hover{transform:translate(-3px,-3px) rotate(-1deg);box-shadow:7px 7px 0 var(--ink)}
+.sc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%}
+.sc .vol{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;padding:4px 8px;background:#fff;border-bottom:3px solid var(--ink);font:400 14px Bangers;letter-spacing:1px}.sc .vol em{font-style:normal;color:var(--red)}
+.sc .ft{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:8px 10px;background:#fff;border-top:3px solid var(--ink)}
+.sc b{display:block;font:400 20px/1 Bangers;letter-spacing:1px}.sc:first-child b{font-size:34px}
+.sc .pr{display:flex;align-items:baseline;gap:6px}.sc .pr strong{font:400 26px Bangers;color:var(--red)}.sc:first-child .pr strong{font-size:40px}.sc .pr span{font-size:12px;font-weight:800}
+.sc .stk{position:absolute;z-index:3;top:42px;right:-4px;padding:2px 10px;background:var(--red);color:#fff;border:2px solid var(--ink);font:400 16px Bangers;letter-spacing:1px;transform:rotate(8deg)}
+.sc.bench img{filter:grayscale(1) contrast(1.1)}.sc.bench .stk{background:#fff;color:var(--ink)}
+.sc:first-child::after{content:'ドドド';position:absolute;left:14px;top:46px;z-index:2;font:900 40px 'Noto Sans JP';color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;transform:rotate(-8deg);letter-spacing:-4px}
+.mobnav{display:none}
+@media(max-width:1100px){.movers{grid-template-columns:repeat(2,1fr)}.shelf{grid-template-columns:repeat(3,1fr)}.sc:first-child{grid-column:span 3;aspect-ratio:16/9}.page{grid-template-columns:1fr}.p1{grid-row:auto;clip-path:none}.p2{clip-path:none}}
+@media(max-width:860px){.app{grid-template-columns:1fr}.side{display:none}main{padding:14px 14px 100px}.cols{grid-template-columns:1fr}.p1{padding:22px 18px}.p1 h1{font-size:60px}.search{display:none}
+ .row{grid-template-columns:48px 1fr 54px 64px}.row .form{display:none}
+ .mobnav{display:flex;position:fixed;left:10px;right:10px;bottom:10px;z-index:9;justify-content:space-around;padding:8px;background:#fff;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+ .mobnav a{display:flex;flex-direction:column;align-items:center;font:400 13px Bangers;letter-spacing:1px}.mobnav a.on{color:var(--red)}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-4 3 3 6-7"/></symbol>
+<symbol id="cards" viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></symbol>
+<symbol id="swords" viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></symbol>
+<symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+</defs></svg>
+<div class="app">
+<aside class="side">
+  <div class="logo"><div class="mk">R</div><b>RANKED</b></div>
+  <nav class="nav">
+    <a><svg class="i"><use href="#home"/></svg>Home</a>
+    <a class="on"><svg class="i"><use href="#trophy"/></svg>League<span class="badge">LIVE!</span></a>
+    <a><svg class="i"><use href="#chart"/></svg>Market</a>
+    <a><svg class="i"><use href="#cards"/></svg>Collection</a>
+    <a><svg class="i"><use href="#swords"/></svg>Hype Bracket</a>
+    <a><svg class="i"><use href="#music"/></svg>Song Battles</a>
+    <a><svg class="i"><use href="#globe"/></svg>Passport</a>
+  </nav>
+  <div class="sec">League · Week 6</div>
+  <div class="wid"><div class="t"><span>Week progress</span><span>Day 4/7</span></div><div class="bar"><i></i></div>
+    <div class="ln"><span>1</span>Wanderer<b>502</b></div><div class="ln me"><span>2</span>You<b>414</b></div><div class="ln"><span>3</span>ROla<b>399</b></div></div>
+  <div class="me"><div class="av">A</div><div><b>AspextPro</b><small>Lv 24 · 72% to next</small></div></div>
+</aside>
+<main>
+  <div class="top"><div class="search"><svg class="i"><use href="#search"/></svg>Search characters, shows, players…</div><div class="coins"><i></i>12,480</div><div class="ib"><svg class="i"><use href="#bell"/></svg><i></i></div></div>
+  <section class="page">
+    <div class="panel p1">
+      <div class="chap"><b>CH. 06</b>FALL 2026 <em>● LIVE</em></div>
+      <h1>88 POINTS<em>OFF THE TOP!</em></h1>
+      <div class="bub">Johnny's captaining at ×2 and SBR ep 8 drops Thursday… a Triple Captain could swing it!</div>
+      <div class="btns"><button class="b p"><svg class="i"><use href="#bolt"/></svg>Triple Captain!</button><button class="b">Manage squad</button></div>
+      <div class="sfx a">ゴゴゴ</div><div class="sfx b">ドン!</div>
+    </div>
+    <div class="panel p2"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><div class="cap"><small>YOUR CAPTAIN · ×2</small>JOHNNY JOESTAR</div></div>
+    <div class="p3"><div class="stat"><small>Your pts</small><b>414</b></div><div class="stat"><small>This week</small><b>+188</b></div><div class="stat"><small>Rank</small><b>#2</b></div></div>
+  </section>
+  <div class="strip"><div class="d">MON</div><div class="d">TUE</div><div class="d">WED</div><div class="n">THU</div><div>FRI</div><div>SAT</div><div>SUN</div></div>
+  <div class="movers">
+    <div class="mv"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div><b>Gokuu Son</b><small>Your squad</small></div><div class="ch up">+55</div></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>Satoru Gojou</b><small>Wanderer</small></div><div class="ch up">+48</div></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><div><b>Ken Takakura</b><small>ROla · captain</small></div><div class="ch up">+44</div></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png"><div><b>Zoro Roronoa</b><small>October10</small></div><div class="ch dn">−12</div></div>
+  </div>
+  <div class="cols">
+    <div>
+      <div class="st"><span class="n">01</span><h2>THE TABLE<small>順位表</small></h2><span class="ln"></span><div class="seg"><button class="on">Season</button><button>Week</button></div></div>
+      <div class="row hd"><span style="text-align:center">#</span><span>Manager</span><span style="text-align:center">Form</span><span style="text-align:right">Week</span><span style="text-align:right;padding-right:16px">Pts</span></div>
+      <div class="row r1"><div class="pos">1<i>▲1</i></div><div class="who"><div class="av">W</div><div style="flex:1"><b>Wanderer</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b27-Z5O02kQUydpT.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b81239-n1aMD2Jig1WP.png"></div><div class="raceline"><i style="width:100%"></i></div></div></div><div class="form"><i class="w" style="height:12px"></i><i class="w" style="height:16px"></i><i class="l" style="height:7px"></i><i class="w" style="height:20px"></i><i class="w" style="height:24px"></i></div><div class="wk up">+216</div><div class="tot">502</div></div>
+      <div class="row r2 me"><div class="pos">2<i class="dn">▼1</i></div><div class="who"><div class="av">A</div><div style="flex:1"><b>AspextPro</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"></div><div class="raceline"><i style="width:82%"></i></div></div></div><div class="form"><i class="w" style="height:14px"></i><i class="w" style="height:10px"></i><i class="w" style="height:18px"></i><i class="l" style="height:6px"></i><i class="w" style="height:20px"></i></div><div class="wk up">+188</div><div class="tot">414</div></div>
+      <div class="row r3"><div class="pos">3<i class="up">▲1</i></div><div class="who"><div class="av">R</div><div style="flex:1"><b>ROla</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b76348-pGWrznfxgPIV.png"></div><div class="raceline"><i style="width:79%"></i></div></div></div><div class="form"><i class="l" style="height:7px"></i><i class="w" style="height:15px"></i><i class="w" style="height:12px"></i><i class="w" style="height:21px"></i><i class="w" style="height:24px"></i></div><div class="wk up">+232</div><div class="tot">399</div></div>
+      <div class="row"><div class="pos">4</div><div class="who"><div class="av">D</div><div style="flex:1"><b>Dayn</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b40-MNypXsxSRb1R.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b266433-8JWks5k2OPJn.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b89198-qKmRTw4Y3PRC.png"></div><div class="raceline"><i style="width:67%"></i></div></div></div><div class="form"><i class="w" style="height:9px"></i><i class="l" style="height:6px"></i><i class="w" style="height:11px"></i><i class="w" style="height:13px"></i><i class="w" style="height:15px"></i></div><div class="wk up">+158</div><div class="tot">337</div></div>
+      <div class="row"><div class="pos">5</div><div class="who"><div class="av">M</div><div style="flex:1"><b>MeliQw</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b145341-CuPldCLZMvvf.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png"></div><div class="raceline"><i style="width:63%"></i></div></div></div><div class="form"><i class="w" style="height:13px"></i><i class="w" style="height:9px"></i><i class="l" style="height:5px"></i><i class="w" style="height:14px"></i><i class="w" style="height:16px"></i></div><div class="wk up">+160</div><div class="tot">319</div></div>
+      <div class="row"><div class="pos">6</div><div class="who"><div class="av">O</div><div style="flex:1"><b>October10</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png"><img src="https://cmkcaptures.github.io/Ranked/forms/133701.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b45627-CR68RyZmddGG.png"></div><div class="raceline"><i style="width:52%"></i></div></div></div><div class="form"><i class="l" style="height:6px"></i><i class="w" style="height:10px"></i><i class="l" style="height:4px"></i><i class="w" style="height:12px"></i><i class="l" style="height:5px"></i></div><div class="wk dn">−4</div><div class="tot">264</div></div>
+    </div>
+    <div>
+      <div class="st"><span class="n">02</span><h2>LIVE<small>ライブ</small></h2><span class="ln"></span></div>
+      <div class="feed">
+        <div class="it hot"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div class="t"><b>Gokuu Son</b><span class="tag">⚡ Power-up!</span><small>Ultra Instinct · ep 6</small></div><span class="pts">+20</span></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><div class="t"><b>Johnny Joestar</b><span class="tag">Episode</span><small>SBR ep 7 · ×2</small></div><span class="pts">+20</span></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><div class="t"><b>Ken Takakura</b><span class="tag">Win</span><small>Dandadan ch 210</small></div><span class="pts">+8</span></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div class="t"><b>Satoru Gojou</b><span class="tag">News</span><small>JJK film announced</small></div><span class="pts">+15</span></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div class="t"><b>Rem</b><span class="tag">Loss</span><small>Re:Zero ep 5</small></div><span class="pts n">−5</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="st"><span class="n">03</span><h2>YOUR SQUAD<small>チーム</small></h2><span class="ln"></span></div>
+  <div class="shelf">
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><div class="vol"><span>VOL. 1</span><em>CAPTAIN ×2</em></div><span class="stk">ACTIVE!</span><div class="ft"><b>Johnny Joestar</b><div class="pr"><strong>59</strong><span class="up">+18 wk</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div class="vol"><span>VOL. 2</span></div><div class="ft"><b>Loki</b><div class="pr"><strong>86</strong><span class="up">+33</span></div></div></div>
+    <div class="sc"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div class="vol"><span>VOL. 3</span></div><span class="stk">U.I.!</span><div class="ft"><b>Gokuu Son</b><div class="pr"><strong>81</strong><span class="up">+55</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><div class="vol"><span>VOL. 4</span></div><div class="ft"><b>Momo Ayase</b><div class="pr"><strong>69</strong><span class="up">+36</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div class="vol"><span>VOL. 5</span></div><div class="ft"><b>Rem</b><div class="pr"><strong>51</strong><span class="up">+33</span></div></div></div>
+    <div class="sc bench"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b126824-MqsCncTO1qpv.png"><div class="vol"><span>VOL. 6</span></div><span class="stk">BENCH</span><div class="ft"><b>Maomao</b><div class="pr"><strong>68</strong><span class="up">+13</span></div></div></div>
+  </div>
+</main>
+</div>
+<nav class="mobnav"><a><svg class="i"><use href="#home"/></svg>Home</a><a class="on"><svg class="i"><use href="#trophy"/></svg>League</a><a><svg class="i"><use href="#chart"/></svg>Market</a><a><svg class="i"><use href="#cards"/></svg>Cards</a><a><svg class="i"><use href="#user"/></svg>Me</a></nav>
+</body></html>

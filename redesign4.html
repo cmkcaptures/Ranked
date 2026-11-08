@@ -1,0 +1,373 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranked redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,800;1,900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08090d;--panel:#101219;--panel2:#171a24;--line:#ffffff0f;--line2:#ffffff1c;--text:#eceef4;--mute:#868b9f;--acc:#ff3352;--acc-d:#a3102a;--gold:#ffb627;--up:#29e39b;--dn:#ff5470;--r:16px}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+ background:radial-gradient(900px 500px at 85% -10%,#ff335222,transparent 60%),radial-gradient(700px 500px at 10% 110%,#5b2cff18,transparent 60%),
+ radial-gradient(circle at 1px 1px,#ffffff08 1px,transparent 1.4px) 0 0/18px 18px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+
+/* ---------- sidebar ---------- */
+.side{position:sticky;top:0;height:100vh;padding:24px 16px;background:linear-gradient(180deg,#0b0c12,#07080b);border-right:1px solid var(--line);display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px 26px}
+.logo .mk{width:36px;height:36px;display:grid;place-items:center;background:var(--acc);clip-path:polygon(18% 0,100% 0,82% 100%,0 100%);font:400 22px Anton;color:#fff}
+.logo b{font:400 26px Anton;letter-spacing:2px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{position:relative;display:flex;align-items:center;gap:14px;padding:11px 14px;border-radius:12px;color:var(--mute);font-weight:600;cursor:pointer;transition:color .15s,background .15s}
+.nav a:hover{color:#fff;background:#ffffff08}
+.nav a.on{color:#fff;background:linear-gradient(90deg,#ff335226,#ff335205)}
+.nav a.on::before{content:'';position:absolute;left:-16px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--acc);box-shadow:0 0 14px var(--acc)}
+.nav a.on svg{color:var(--acc)}
+.nav .badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--acc);color:#fff}
+.sec{margin:26px 14px 10px;font-size:10px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:#4f5466}
+.wid{margin:0 4px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.wid .t{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);font-weight:700;margin-bottom:10px}
+.wid .t b{color:#fff}
+.wid .bar{height:6px;border-radius:9px;background:#ffffff0d;overflow:hidden;margin-bottom:12px}.wid .bar i{display:block;height:100%;width:57%;background:linear-gradient(90deg,var(--acc-d),var(--acc));border-radius:9px}
+.wid .ln{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;color:#b7bbc9}
+.wid .ln span{width:16px;color:var(--mute);font-weight:800}.wid .ln b{margin-left:auto;font:400 15px Anton;color:#fff}
+.wid .ln.me{color:#fff}.wid .ln.me span{color:var(--acc)}
+.me{margin-top:auto;display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.ring{width:40px;height:40px;border-radius:50%;padding:2px;background:conic-gradient(var(--acc) 0 72%,#ffffff14 0)}
+.ring div{width:100%;height:100%;border-radius:50%;background:#1b1e2a;display:grid;place-items:center;font-weight:900}
+.me small{display:block;color:var(--mute);font-size:11px}.me svg{margin-left:auto;color:var(--mute)}
+
+/* ---------- main ---------- */
+main{padding:22px 34px 70px;min-width:0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.search{display:flex;align-items:center;gap:10px;flex:1;max-width:460px;padding:11px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--mute)}
+.search kbd{margin-left:auto;font:700 10px Inter;padding:2px 6px;border-radius:5px;background:#ffffff10}
+.ib{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--mute);position:relative}
+.ib i{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 3px var(--panel)}
+.coins{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:800;margin-left:auto}
+.coins .c{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe08a,var(--gold) 60%,#b9740a)}
+
+/* hero */
+.hero{position:relative;min-height:360px;border-radius:24px;overflow:hidden;margin-bottom:22px;background:linear-gradient(110deg,#140a10,#1d0b14 40%,#2a0b16);border:1px solid var(--line2);isolation:isolate}
+.hero .big{position:absolute;right:-10px;bottom:-40px;font:400 300px/1 Anton;color:transparent;-webkit-text-stroke:2px #ffffff10;z-index:0;letter-spacing:-6px}
+.hero .slash{position:absolute;top:-20%;bottom:-20%;left:44%;width:180px;background:linear-gradient(180deg,var(--acc),#ff335200);transform:skewX(-18deg);opacity:.35;z-index:0;filter:blur(1px)}
+.hero .art{position:absolute;bottom:0;height:100%;object-fit:cover;object-position:center 18%;z-index:1;clip-path:polygon(22% 0,100% 0,78% 100%,0 100%)}
+.hero .a1{right:300px;width:240px;opacity:.55;filter:saturate(.8)}
+.hero .a2{right:150px;width:260px;opacity:.75}
+.hero .a3{right:-30px;width:340px;filter:drop-shadow(-20px 0 40px #000)}
+.hero::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,#120910 34%,#12091000 62%),linear-gradient(0deg,#08090dd0,transparent 45%)}
+.hc{position:relative;z-index:3;padding:34px 38px 30px;max-width:600px}
+.kick{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:99px;background:#ff33521f;border:1px solid #ff335244;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#ff8a9c}
+.kick i{width:7px;height:7px;border-radius:50%;background:var(--acc);box-shadow:0 0 10px var(--acc);animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.2}}
+.hc h1{margin:16px 0 10px;font:italic 900 60px/.95 'Playfair Display',serif;letter-spacing:-1.5px}
+.hc h1 em{font-style:italic;color:var(--acc);text-shadow:0 0 40px #ff335266}
+.hc p{margin:0 0 22px;color:#c9ccd8;font-size:15px;max-width:440px}
+.btns{display:flex;gap:10px}
+.b{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:0;border-radius:12px;font:700 14px Inter;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.b.p{background:linear-gradient(180deg,#ff4a66,var(--acc));color:#fff;box-shadow:0 8px 24px #ff335255,inset 0 1px 0 #ffffff40}.b.p:hover{transform:translateY(-2px)}
+.b.g{background:#ffffff10;color:#fff;border:1px solid var(--line2)}
+.weekbar{position:relative;z-index:3;display:flex;align-items:center;gap:0;margin:0 38px 26px;max-width:560px}
+.weekbar div{flex:1;height:5px;margin-right:4px;border-radius:3px;background:#ffffff14}.weekbar div.d{background:var(--acc)}.weekbar div.n{background:linear-gradient(90deg,var(--acc) 60%,#ffffff14 60%)}
+.weekbar span{margin-left:10px;font-size:11px;font-weight:700;color:var(--mute);white-space:nowrap}
+.hstats{position:absolute;right:30px;top:28px;z-index:3;display:flex;gap:10px}
+.hs{min-width:96px;padding:12px 16px;border-radius:14px;background:#08090dbb;backdrop-filter:blur(12px);border:1px solid var(--line2)}
+.hs small{display:block;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute)}
+.hs b{display:block;font:400 30px/1.1 Anton}.hs.up b{color:var(--up)}
+
+/* movers */
+.movers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:30px}
+.mv{position:relative;display:flex;gap:12px;align-items:center;padding:12px;border-radius:var(--r);background:var(--panel);border:1px solid var(--line);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s}
+.mv:hover{border-color:var(--line2);transform:translateY(-3px)}
+.mv img{width:46px;height:46px;border-radius:12px;object-fit:cover;object-position:center 20%}
+.mv b{display:block;font-size:13px}.mv small{color:var(--mute);font-size:11px}
+.mv .ch{margin-left:auto;text-align:right;font-weight:800;font-size:13px}
+.mv svg.sp{position:absolute;left:0;right:0;bottom:0;width:100%;height:28px;opacity:.5}
+
+/* section titles (editorial) */
+.st{display:flex;align-items:flex-end;gap:14px;margin:0 0 14px}
+.st .n{font:400 13px Anton;color:var(--acc);letter-spacing:1px;padding-bottom:6px}
+.st h2{margin:0;font:italic 900 30px/1 'Playfair Display',serif;letter-spacing:-.5px}
+.st .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent);margin-bottom:9px}
+.seg{display:flex;padding:3px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
+.seg button{border:0;background:none;color:var(--mute);font:700 12px Inter;padding:6px 12px;border-radius:8px;cursor:pointer}.seg button.on{background:#fff;color:#08090d}
+
+.cols{display:grid;grid-template-columns:1.35fr 1fr;gap:24px;margin-bottom:34px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+
+/* table (fotmob) */
+.row{display:grid;grid-template-columns:44px 1fr 74px 64px 66px;align-items:center;gap:10px;padding:11px 16px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s}
+.row:hover{background:#ffffff05}
+.row.hd{border:0;padding-top:12px;padding-bottom:8px;color:#4f5466;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;cursor:default}.row.hd:hover{background:none}
+.pos{display:flex;flex-direction:column;align-items:center;line-height:1}
+.pos b{font:400 20px Anton;color:#c3c6d3}.pos i{font-style:normal;font-size:9px;font-weight:900;margin-top:2px}
+.row.r1 .pos b{color:var(--gold);text-shadow:0 0 14px #ffb62777}.row.r2 .pos b{color:#d6dbe6}.row.r3 .pos b{color:#e0915a}
+.row.me{background:linear-gradient(90deg,#ff335214,transparent 70%);box-shadow:inset 3px 0 0 var(--acc)}
+.who{display:flex;align-items:center;gap:12px;min-width:0}
+.av{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-weight:900;font-size:13px;flex:none}
+.who b{display:block;font-size:14px}.faces{display:flex;margin-top:3px}
+.faces img{width:20px;height:20px;border-radius:50%;object-fit:cover;object-position:center 20%;border:2px solid var(--panel);margin-right:-5px;transition:margin .2s}
+.row:hover .faces img{margin-right:1px}
+.faces img.c{border-color:var(--gold)}
+.form{display:flex;gap:3px;align-items:flex-end;height:22px;justify-content:center}.form i{width:7px;border-radius:2px;background:#2a2e3d}.form i.w{background:var(--up)}.form i.l{background:var(--dn)}
+.wk{text-align:right;font-weight:800;font-size:13px}.up{color:var(--up)}.dn{color:var(--dn)}
+.tot{text-align:right;font:400 24px Anton}
+.row.r1 .tot{color:var(--gold)}
+
+/* live timeline */
+.feed{padding:6px 0}
+.it{position:relative;display:flex;gap:14px;align-items:center;padding:11px 16px 11px 34px}
+.it::before{content:'';position:absolute;left:18px;top:0;bottom:0;width:2px;background:var(--line2)}
+.it:first-child::before{top:50%}.it:last-child::before{bottom:50%}
+.it::after{content:'';position:absolute;left:13px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--panel);border:2px solid var(--up)}
+.it.n::after{border-color:var(--dn)}.it.hot::after{background:var(--acc);border-color:var(--acc);box-shadow:0 0 12px var(--acc)}
+.it img{width:44px;height:44px;border-radius:12px;object-fit:cover;object-position:center 20%}
+.it .t{flex:1;min-width:0}.it b{display:block;font-size:14px}.it small{color:var(--mute);font-size:12px}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;background:#ffffff0d;color:#c9ccd8;margin-right:6px;text-transform:uppercase;letter-spacing:.5px}
+.pts{font:400 18px Anton;padding:4px 10px;border-radius:10px;background:#29e39b14;color:var(--up)}.pts.n{background:#ff547014;color:var(--dn)}
+.it time{position:absolute;right:16px;top:8px;font-size:10px;color:#4f5466;font-weight:700}
+
+/* squad shelf (game art) */
+.shelf{display:grid;grid-template-columns:1.6fr repeat(5,minmax(0,1fr));gap:14px}
+.sc{position:relative;aspect-ratio:3/4.2;border-radius:18px;overflow:hidden;cursor:pointer;border:1px solid var(--line2);transition:transform .25s,box-shadow .25s;isolation:isolate}
+.sc:first-child{aspect-ratio:auto}
+.sc:hover{transform:translateY(-8px) rotate(-1deg);box-shadow:0 24px 50px #000c,0 0 0 1px #ffffff30}
+.sc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%;transition:transform .5s;z-index:-1}
+.sc:hover img{transform:scale(1.08)}
+.sc::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#08090df5);z-index:0}
+.sc::after{content:'';position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,#ffffff22 45%,transparent 60%);background-size:250% 100%;background-position:100% 0;transition:background-position .7s;pointer-events:none}
+.sc:hover::after{background-position:-50% 0}
+.sc .in{position:absolute;left:14px;right:14px;bottom:12px;z-index:1}
+.sc .sh{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--mute)}
+.sc b{display:block;font:400 20px/1 Anton;text-transform:uppercase;margin:3px 0 8px}
+.sc:first-child b{font-size:38px}
+.sc .pr{display:flex;align-items:baseline;gap:6px}.sc .pr strong{font:400 26px Anton}.sc:first-child .pr strong{font-size:44px}.sc .pr span{font-size:12px;font-weight:800}
+.sc .bad{position:absolute;top:12px;left:12px;z-index:1;display:flex;gap:5px}
+.sc .bad i{font-style:normal;font-size:10px;font-weight:800;padding:3px 8px;border-radius:7px;background:#08090dcc;backdrop-filter:blur(6px);text-transform:uppercase;letter-spacing:.5px}
+.sc .bad i.c{background:var(--gold);color:#140c00}.sc .bad i.l{color:var(--up)}.sc .bad i.f{background:linear-gradient(90deg,var(--acc),#7b3cff);color:#fff}
+.sc.bench img{filter:grayscale(.7) brightness(.7)}
+.sc:first-child{border-color:#ffb62766;box-shadow:0 0 40px #ffb62722}
+
+.mobnav{display:none}
+@media(max-width:1100px){.movers{grid-template-columns:repeat(2,1fr)}.hero .a1{display:none}.shelf{grid-template-columns:repeat(3,1fr)}.sc:first-child{grid-column:span 3;aspect-ratio:16/9}}
+@media(max-width:860px){.app{grid-template-columns:1fr}.side{display:none}main{padding:14px 14px 100px}.cols{grid-template-columns:1fr}
+ .hero{min-height:420px}.hero .a2{display:none}.hero .a3{width:70%;opacity:.6}.hc{padding:24px 20px}.hc h1{font-size:42px}.hstats{position:relative;top:auto;right:auto;padding:0 20px 18px}.weekbar{margin:0 20px 18px}
+ .search{display:none}.row{grid-template-columns:38px 1fr 54px 56px}.row .form{display:none}
+ .mobnav{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:9;justify-content:space-around;padding:10px 6px;background:#101219ee;backdrop-filter:blur(14px);border-radius:20px;border:1px solid var(--line2)}
+ .mobnav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--mute);font-weight:700}.mobnav a.on{color:var(--acc)}}
+</style>
+<style id="anime">
+:root{--bg:#0c0920;--panel:#17113d;--panel2:#211858;--line:#ffffff12;--line2:#ffffff22;--mute:#a49ccf;--acc:#ff2e88;--acc-d:#a3105a;--gold:#ffd60a;--up:#2bff88;--r:0px}
+body::before{background:radial-gradient(900px 520px at 85% -10%,#ff2e8833,transparent 60%),radial-gradient(800px 600px at 0% 0%,#5b1fd166,transparent 60%),radial-gradient(circle at 1px 1px,#ffffff0d 1px,transparent 1.5px) 0 0/14px 14px}
+.side{background:linear-gradient(180deg,#120c30,#0a0720)}
+.logo .mk{background:var(--gold);color:#120c2c;box-shadow:4px 4px 0 var(--acc)}
+.logo b{font-style:italic;letter-spacing:3px}
+.nav a{border-radius:0;transform:skewX(-10deg);font-family:Anton;font-weight:400;letter-spacing:1.2px;text-transform:uppercase;font-size:15px}
+.nav a>*{transform:skewX(10deg)}.nav a svg{transform:skewX(10deg)}
+.nav a.on{background:var(--gold);color:#120c2c;box-shadow:4px 4px 0 var(--acc)}.nav a.on svg{color:#120c2c}.nav a.on::before{display:none}
+.nav .badge{background:var(--acc);border-radius:0}
+.sec::after{content:' ・ リーグ';color:#3d356b}
+.wid,.me,.search,.coins,.ib,.card,.mv,.hs,.seg,.seg button,.b,.av,.it img,.mv img,.kick,.pts,.tag{border-radius:0}
+.wid{clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%)}
+.wid .bar{border-radius:0;transform:skewX(-20deg)}.wid .bar i{background:linear-gradient(90deg,var(--acc),var(--gold));border-radius:0}
+.wid .ln b,.tot,.hs b,.pos b{font-style:italic}
+.ring{background:conic-gradient(var(--gold) 0 72%,#ffffff14 0)}
+.search{transform:skewX(-10deg)}.search>*{transform:skewX(10deg)}
+.hero{border-radius:0;background:linear-gradient(115deg,#2a1b6e,#170f40 50%,#3a0f3a);clip-path:polygon(0 0,100% 0,100% calc(100% - 26px),calc(100% - 26px) 100%,0 100%);border:0}
+.hero::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-conic-gradient(from 0deg at 75% 50%,#ffffff07 0 2deg,transparent 2deg 9deg)}
+.hero::after{background:linear-gradient(90deg,#1c1250 30%,#1c125000 60%),linear-gradient(0deg,#0c0920d0,transparent 45%)}
+.hero .slash{background:linear-gradient(180deg,var(--gold),#ffd60a00);opacity:.5}
+.hero .big{-webkit-text-stroke:2px #ffffff14;font-style:italic}
+.hero .art{border-left:4px solid #0c0920}
+.kick{background:var(--acc);color:#fff;border:0;transform:skewX(-12deg)}.kick i{background:#fff;box-shadow:none}
+.hc h1{font:italic 400 66px/.92 Anton;letter-spacing:0;text-transform:uppercase;text-shadow:5px 5px 0 #00000055}
+.hc h1 em{color:var(--gold);text-shadow:5px 5px 0 var(--acc)}
+.hc h1::after{content:'トップまで88点';display:block;font:700 13px Inter;letter-spacing:6px;color:#ffffff40;margin-top:10px;text-shadow:none}
+.b{transform:skewX(-12deg);font-family:Anton;font-weight:400;letter-spacing:1.2px;text-transform:uppercase;font-size:15px}.b>*{transform:skewX(12deg)}
+.b.p{background:var(--gold);color:#120c2c;box-shadow:5px 5px 0 var(--acc)}
+.b.g{background:#0007}
+.weekbar div{border-radius:0;transform:skewX(-25deg)}.weekbar div.d{background:var(--gold)}.weekbar div.n{background:linear-gradient(90deg,var(--gold) 60%,#ffffff14 60%)}
+.hs{transform:skewX(-10deg);background:#0c0920cc}.hs>*{transform:skewX(10deg)}.hs b{color:var(--gold)}.hs.up b{color:var(--up)}
+.mv{clip-path:polygon(0 0,100% 0,calc(100% - 14px) 100%,0 100%)}.mv:hover{border-color:var(--gold)}
+.st .n{font-size:15px;color:var(--gold);background:var(--acc);padding:2px 8px;transform:skewX(-12deg);color:#fff}
+.st h2{font:italic 400 34px/1 Anton;text-transform:uppercase;letter-spacing:.5px}
+.st h2::after{font:700 11px Inter;letter-spacing:4px;color:#3d356b;margin-left:10px;vertical-align:middle}
+.cols>div:first-child .st h2::after{content:'順位表'}.cols>div:last-child .st h2::after{content:'ライブ'}
+.seg button.on{background:#fff;transform:skewX(-10deg)}
+/* table rows as anime race lanes */
+.card{background:transparent;border:0;overflow:visible}
+.row{background:var(--panel);border:1px solid var(--line);margin-bottom:6px;grid-template-columns:54px 1fr 74px 64px 76px;padding:0 16px 0 0;min-height:64px}
+.row.hd{background:none;border:0;min-height:0;margin:0}
+.pos{align-self:stretch;justify-content:center;background:#0005}.pos b{font-size:30px;color:#fff}
+.row.r1 .pos{background:var(--gold)}.row.r2 .pos{background:#c9d2e3}.row.r3 .pos{background:#d08a4c}
+.row.r1 .pos b,.row.r2 .pos b,.row.r3 .pos b{color:#120c2c;text-shadow:none}.row.r1 .pos i,.row.r3 .pos i{color:#0a7a3a}.row.r2 .pos i{color:#b0102e}
+.row.me{background:linear-gradient(90deg,#2c2166,#17104a);box-shadow:inset 0 0 0 1px #ffd60a66}
+.who{position:relative;padding-bottom:12px}
+.who::after{content:'';position:absolute;left:48px;bottom:4px;height:5px;border-radius:3px;background:linear-gradient(90deg,#ffffff10,#7b5cff);width:var(--w,60%)}
+.row.r1 .who::after{background:linear-gradient(90deg,#ffd60a10,var(--gold));box-shadow:0 0 10px #ffd60a66}.row.me .who::after{background:linear-gradient(90deg,#ff2e8810,var(--acc))}
+.who b{font-size:16px}.av{background:var(--acc)!important;clip-path:polygon(14% 0,100% 0,86% 100%,0 100%)}
+.tot{font-size:32px;color:var(--gold)}
+.it{background:none}.it::after{border-radius:0;transform:rotate(45deg)}
+.it img{clip-path:polygon(12% 0,100% 0,88% 100%,0 100%)}
+.pts{font-style:italic;transform:skewX(-10deg)}
+.feed{background:var(--panel);border:1px solid var(--line)}
+.tag{transform:skewX(-10deg)}
+.sc{border-radius:0;clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%)}
+.sc b{font-style:italic}.sc .pr strong{font-style:italic;color:var(--gold)}
+.sc:first-child{border:2px solid var(--gold);box-shadow:none}
+.sc .bad i{border-radius:0;transform:skewX(-10deg)}
+.sc:first-child::before{background:linear-gradient(180deg,transparent 35%,#0c0920f5),repeating-linear-gradient(-60deg,transparent 0 22px,#ffd60a10 22px 24px)}
+.coins .c{border-radius:50%}
+.mobnav{border-radius:0}
+</style>
+<style id="ink">
+:root{--bg:#0a0a0c;--panel:#131317;--panel2:#1b1b21;--line:#ffffff10;--line2:#ffffff20;--mute:#8d8d99;--acc:#ff2d3f;--acc-d:#8f0f1c;--gold:#ffffff;--up:#3ee08f;--dn:#ff4d5e}
+body::before{background:radial-gradient(1000px 520px at 90% -10%,#ff2d3f26,transparent 60%),radial-gradient(circle at 1px 1px,#ffffff09 1px,transparent 1.5px) 0 0/12px 12px}
+.side{background:#08080a}
+.logo .mk{background:var(--acc);color:#fff;box-shadow:none;clip-path:polygon(0 0,100% 0,100% 72%,72% 100%,0 100%)}
+/* nav: no skew blocks, clean ink tabs with red edge */
+.nav a{transform:none;font-size:14px}.nav a>*,.nav a svg{transform:none}
+.nav a.on{background:linear-gradient(90deg,#ff2d3f22,transparent);color:#fff;box-shadow:inset 3px 0 0 var(--acc)}.nav a.on svg{color:var(--acc)}
+.sec::after{color:#33333d}
+.wid .bar i{background:var(--acc)}.ring{background:conic-gradient(var(--acc) 0 72%,#ffffff14 0)}
+.search{transform:none}.search>*{transform:none}
+/* hero: ink + red, screentone */
+.hero{background:linear-gradient(115deg,#141418,#0e0e12 55%,#220a0e)}
+.hero::before{background:repeating-conic-gradient(from 0deg at 75% 50%,#ffffff06 0 2deg,transparent 2deg 9deg),radial-gradient(circle at 1px 1px,#ffffff10 1px,transparent 1.6px) 0 0/7px 7px;mask-image:linear-gradient(90deg,transparent 40%,#000)}
+.hero::after{background:linear-gradient(90deg,#0f0f13 32%,#0f0f1300 60%),linear-gradient(0deg,#0a0a0cd8,transparent 45%)}
+.hero .slash{background:linear-gradient(180deg,var(--acc),#ff2d3f00);opacity:.55}
+.hero .art{border-left:4px solid #0a0a0c}
+.kick{background:transparent;border:1px solid var(--acc);color:#ff8794;transform:none}.kick i{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.hc h1{text-shadow:none}.hc h1 em{color:var(--acc);text-shadow:none}
+.hc h1::after{color:#ffffff33}
+/* buttons: notched corner, no skew, no offset shadow */
+.b{transform:none;font:700 13px Inter;letter-spacing:1.5px;padding:13px 22px;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%);transition:background .15s,color .15s,transform .15s}
+.b>*{transform:none}
+.b.p{background:var(--acc);color:#fff;box-shadow:none}.b.p:hover{background:#ff4757;transform:translateY(-2px)}
+.b.g{background:transparent;color:#fff;border:0;box-shadow:inset 0 0 0 1.5px #ffffff55}.b.g:hover{box-shadow:inset 0 0 0 1.5px #fff}
+.weekbar div.d{background:var(--acc)}.weekbar div.n{background:linear-gradient(90deg,var(--acc) 60%,#ffffff14 60%)}
+.hs{transform:none;background:#0a0a0ccc;border-left:3px solid var(--acc)}.hs>*{transform:none}.hs b{color:#fff}
+.mv:hover{border-color:var(--acc)}
+.st .n{background:none;color:var(--acc);transform:none;padding:0;font-size:16px}
+.st h2::after{color:#33333d}
+.seg button.on{transform:none;background:var(--acc);color:#fff}
+/* table */
+.row{background:var(--panel)}
+.row.r1 .pos{background:var(--acc)}.row.r2 .pos{background:#e8e8ee}.row.r3 .pos{background:#5a5a66}
+.row.r1 .pos b{color:#fff}.row.r1 .pos i{color:#fff}.row.r3 .pos b{color:#fff}.row.r3 .pos i{color:var(--up)}.row.r2 .pos i{color:var(--acc)}
+.row.me{background:linear-gradient(90deg,#2a1216,var(--panel));box-shadow:inset 0 0 0 1px #ff2d3f66}
+.who::after{background:linear-gradient(90deg,#ffffff08,#ffffff55)}
+.row.r1 .who::after{background:linear-gradient(90deg,#ff2d3f10,var(--acc));box-shadow:0 0 10px #ff2d3f66}.row.me .who::after{background:linear-gradient(90deg,#ffffff10,#fff)}
+.av{background:#2a2a33!important}.row.me .av{background:var(--acc)!important}
+.tot{color:#fff}.row.r1 .tot{color:var(--acc)}
+.it.hot::after{background:var(--acc);border-color:var(--acc)}
+.sc:first-child{border-color:var(--acc)}.sc .pr strong{color:#fff}
+.sc .bad i.c{background:var(--acc);color:#fff}.sc .bad i.f{background:#fff;color:#0a0a0c}
+.sc:first-child::before{background:linear-gradient(180deg,transparent 35%,#0a0a0cf5),repeating-linear-gradient(-60deg,transparent 0 22px,#ff2d3f12 22px 24px)}
+.nav .badge{background:var(--acc)}
+.coins .c{background:radial-gradient(circle at 35% 35%,#ff8a95,var(--acc) 60%,#8f0f1c)}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></symbol>
+<symbol id="chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-4 3 3 6-7"/></symbol>
+<symbol id="cards" viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13"/></symbol>
+<symbol id="swords" viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4M5 21l-2-2"/></symbol>
+<symbol id="globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+<symbol id="music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+<symbol id="bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></symbol>
+<symbol id="cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+<symbol id="bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+<symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+</defs></svg>
+
+<div class="app">
+<aside class="side">
+  <div class="logo"><div class="mk">R</div><b>RANKED</b></div>
+  <nav class="nav">
+    <a><svg class="i"><use href="#home"/></svg>Home</a>
+    <a class="on"><svg class="i"><use href="#trophy"/></svg>League<span class="badge">LIVE</span></a>
+    <a><svg class="i"><use href="#chart"/></svg>Market</a>
+    <a><svg class="i"><use href="#cards"/></svg>Collection</a>
+    <a><svg class="i"><use href="#swords"/></svg>Hype Bracket</a>
+    <a><svg class="i"><use href="#music"/></svg>Song Battles</a>
+    <a><svg class="i"><use href="#globe"/></svg>Passport</a>
+  </nav>
+  <div class="sec">League · Week 6</div>
+  <div class="wid">
+    <div class="t"><span>Week progress</span><b>Day 4 / 7</b></div>
+    <div class="bar"><i></i></div>
+    <div class="ln"><span>1</span>Wanderer<b>502</b></div>
+    <div class="ln me"><span>2</span>You<b>414</b></div>
+    <div class="ln"><span>3</span>ROla<b>399</b></div>
+  </div>
+  <div class="me"><div class="ring"><div>A</div></div><div><b>AspextPro</b><small>Lv 24 · 72% to next</small></div><svg class="i"><use href="#cog"/></svg></div>
+</aside>
+
+<main>
+  <div class="top">
+    <div class="search"><svg class="i"><use href="#search"/></svg>Search characters, shows, players<kbd>/</kbd></div>
+    <div class="coins"><span class="c"></span>12,480</div>
+    <div class="ib"><svg class="i"><use href="#bell"/></svg><i></i></div>
+  </div>
+
+  <section class="hero">
+    <div class="big">06</div><div class="slash"></div>
+    <img class="art a1" src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png">
+    <img class="art a2" src="https://cmkcaptures.github.io/Ranked/forms/246.jpg">
+    <img class="art a3" src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg">
+    <div class="hstats"><div class="hs"><small>Your pts</small><b>414</b></div><div class="hs up"><small>This week</small><b>+188</b></div><div class="hs"><small>Rank</small><b>#2</b></div></div>
+    <div class="hc">
+      <div class="kick"><i></i>Fall 2026 · Week 6 · Live</div>
+      <h1>88 points <em>off the top.</em></h1>
+      <p>Johnny Joestar is captaining at ×2 and SBR ep 8 drops Thursday. A Triple Captain now could swing it.</p>
+      <div class="btns"><button class="b p"><svg class="i"><use href="#bolt"/></svg>Play Triple Captain</button><button class="b g">Manage squad</button></div>
+    </div>
+    <div class="weekbar"><div class="d"></div><div class="d"></div><div class="d"></div><div class="n"></div><div></div><div></div><div></div><span>3 days left</span></div>
+  </section>
+
+  <div class="movers">
+    <div class="mv"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div><b>Gokuu Son</b><small>Your squad</small></div><div class="ch up">+55</div><svg class="sp" viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 24 L20 20 L40 22 L60 12 L80 8 L100 2" stroke="#29e39b" stroke-width="2" fill="none"/></svg></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>Satoru Gojou</b><small>Wanderer</small></div><div class="ch up">+48</div><svg class="sp" viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 22 L20 24 L40 16 L60 14 L80 10 L100 6" stroke="#29e39b" stroke-width="2" fill="none"/></svg></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><div><b>Ken Takakura</b><small>ROla · captain</small></div><div class="ch up">+44</div><svg class="sp" viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 20 L20 18 L40 20 L60 10 L80 12 L100 4" stroke="#29e39b" stroke-width="2" fill="none"/></svg></div>
+    <div class="mv"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png"><div><b>Zoro Roronoa</b><small>October10</small></div><div class="ch dn">−12</div><svg class="sp" viewBox="0 0 100 28" preserveAspectRatio="none"><path d="M0 6 L20 8 L40 12 L60 10 L80 18 L100 24" stroke="#ff5470" stroke-width="2" fill="none"/></svg></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="st"><span class="n">01</span><h2>The Table</h2><span class="ln"></span><div class="seg"><button class="on">Season</button><button>Week</button></div></div>
+      <div class="card">
+        <div class="row hd"><span style="text-align:center">#</span><span>Manager</span><span style="text-align:center">Form</span><span style="text-align:right">Week</span><span style="text-align:right">Pts</span></div>
+        <div class="row r1"><div class="pos"><b>1</b><i class="up">▲1</i></div><div class="who" style="--w:100%"><div class="av" style="background:#2c3a5a">W</div><div><b>Wanderer</b><div class="faces"><img class="c" src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b137080-UHcynYNjb5ZU.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b27-Z5O02kQUydpT.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b81239-n1aMD2Jig1WP.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b124440-Lpdo6y8cljV6.png"></div></div></div><div class="form"><i class="w" style="height:12px"></i><i class="w" style="height:16px"></i><i class="l" style="height:6px"></i><i class="w" style="height:20px"></i><i class="w" style="height:22px"></i></div><div class="wk up">+216</div><div class="tot">502</div></div>
+        <div class="row r2 me"><div class="pos"><b>2</b><i class="dn">▼1</i></div><div class="who" style="--w:82%"><div class="av" style="background:var(--acc)">A</div><div><b>AspextPro</b><div class="faces"><img class="c" src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"></div></div></div><div class="form"><i class="w" style="height:14px"></i><i class="w" style="height:10px"></i><i class="w" style="height:18px"></i><i class="l" style="height:5px"></i><i class="w" style="height:19px"></i></div><div class="wk up">+188</div><div class="tot">414</div></div>
+        <div class="row r3"><div class="pos"><b>3</b><i class="up">▲1</i></div><div class="who" style="--w:79%"><div class="av" style="background:#4a2c5a">R</div><div><b>ROla</b><div class="faces"><img class="c" src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b76348-pGWrznfxgPIV.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b344548-sEYgqUM1ebqP.png"></div></div></div><div class="form"><i class="l" style="height:7px"></i><i class="w" style="height:15px"></i><i class="w" style="height:12px"></i><i class="w" style="height:21px"></i><i class="w" style="height:22px"></i></div><div class="wk up">+232</div><div class="tot">399</div></div>
+        <div class="row"><div class="pos"><b>4</b><i style="color:#4f5466">–</i></div><div class="who" style="--w:67%"><div class="av" style="background:#2c4a3a">D</div><div><b>Dayn</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b40-MNypXsxSRb1R.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b266433-8JWks5k2OPJn.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b89198-qKmRTw4Y3PRC.png"></div></div></div><div class="form"><i class="w" style="height:9px"></i><i class="l" style="height:6px"></i><i class="w" style="height:11px"></i><i class="w" style="height:13px"></i><i class="w" style="height:15px"></i></div><div class="wk up">+158</div><div class="tot">337</div></div>
+        <div class="row"><div class="pos"><b>5</b><i style="color:#4f5466">–</i></div><div class="who" style="--w:63%"><div class="av" style="background:#5a4a2c">M</div><div><b>MeliQw</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b145341-CuPldCLZMvvf.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127212-FVm2tD0erQ5B.png"></div></div></div><div class="form"><i class="w" style="height:13px"></i><i class="w" style="height:9px"></i><i class="l" style="height:5px"></i><i class="w" style="height:14px"></i><i class="w" style="height:16px"></i></div><div class="wk up">+160</div><div class="tot">319</div></div>
+        <div class="row"><div class="pos"><b>6</b><i style="color:#4f5466">–</i></div><div class="who" style="--w:52%"><div class="av" style="background:#3a2c2c">O</div><div><b>October10</b><div class="faces"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png"><img src="https://cmkcaptures.github.io/Ranked/forms/133701.jpg"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b45627-CR68RyZmddGG.png"></div></div></div><div class="form"><i class="l" style="height:6px"></i><i class="w" style="height:10px"></i><i class="l" style="height:4px"></i><i class="w" style="height:12px"></i><i class="l" style="height:5px"></i></div><div class="wk dn">−4</div><div class="tot">264</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="st"><span class="n">02</span><h2>Live</h2><span class="ln"></span></div>
+      <div class="card feed">
+        <div class="it hot"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div class="t"><b>Gokuu Son</b><small><span class="tag">⚡ Power-up</span>Ultra Instinct · ep 6</small></div><span class="pts">+20</span><time>2m</time></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><div class="t"><b>Johnny Joestar</b><small><span class="tag">📺 Episode</span>SBR ep 7 · ×2</small></div><span class="pts">+20</span><time>1h</time></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222593-qBqUvpodooAI.png"><div class="t"><b>Ken Takakura</b><small><span class="tag">🏆 Win</span>Dandadan ch 210</small></div><span class="pts">+8</span><time>3h</time></div>
+        <div class="it"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div class="t"><b>Satoru Gojou</b><small><span class="tag">📰 News</span>JJK film announced</small></div><span class="pts">+15</span><time>5h</time></div>
+        <div class="it n"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div class="t"><b>Rem</b><small><span class="tag">💥 Loss</span>Re:Zero ep 5</small></div><span class="pts n">−5</span><time>8h</time></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="st"><span class="n">03</span><h2>Your Squad</h2><span class="ln"></span></div>
+  <div class="shelf">
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b19492-gvMnKxhUhT9V.jpg"><div class="bad"><i class="c">Captain ×2</i><i class="l">● Active</i></div><div class="in"><span class="sh">JoJo Part 7</span><b>Johnny Joestar</b><div class="pr"><strong>59</strong><span class="up">+18 wk</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div class="bad"><i class="l">● Active</i></div><div class="in"><span class="sh">One Piece</span><b>Loki</b><div class="pr"><strong>86</strong><span class="up">+33</span></div></div></div>
+    <div class="sc"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div class="bad"><i class="f">Ultra Instinct</i></div><div class="in"><span class="sh">Dragon Ball</span><b>Gokuu Son</b><div class="pr"><strong>81</strong><span class="up">+55</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><div class="bad"><i class="l">● Active</i></div><div class="in"><span class="sh">Dandadan</span><b>Momo Ayase</b><div class="pr"><strong>69</strong><span class="up">+36</span></div></div></div>
+    <div class="sc"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div class="bad"><i class="l">● Active</i></div><div class="in"><span class="sh">Re:Zero</span><b>Rem</b><div class="pr"><strong>51</strong><span class="up">+33</span></div></div></div>
+    <div class="sc bench"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b126824-MqsCncTO1qpv.png"><div class="bad"><i>Bench</i></div><div class="in"><span class="sh">Apothecary</span><b>Maomao</b><div class="pr"><strong>68</strong><span class="up">+13</span></div></div></div>
+  </div>
+</main>
+</div>
+<nav class="mobnav"><a><svg class="i"><use href="#home"/></svg>Home</a><a class="on"><svg class="i"><use href="#trophy"/></svg>League</a><a><svg class="i"><use href="#chart"/></svg>Market</a><a><svg class="i"><use href="#cards"/></svg>Cards</a><a><svg class="i"><use href="#user"/></svg>Me</a></nav>
+</body></html>

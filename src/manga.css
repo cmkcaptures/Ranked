@@ -1,0 +1,162 @@
+/* ===================== Ranked: manga "black page" theme (loads last) ===================== */
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;600;700;800;900&family=Noto+Sans+JP:wght@900&display=swap');
+:root {
+  --bg: #1f1d22; --fg: #2b2830; --fg2: #38343e; --text: #d8d1c0; --bright: #f1ebdc;
+  --ink: #e9e2d0; --pan: #2b2830; --deep: #151418; --red: #e8202f;
+  --blue: #e8202f; --gold: #e8202f; --pink: #e8202f; --cyan: #e9e2d0; --up: #4fd88a; --dn: #ff4d5e;
+  --display: Bangers, Anton, Impact, sans-serif;
+}
+body { background: var(--bg) !important; color: var(--text); font-family: Inter, system-ui, sans-serif; }
+body::before { display: none !important; }
+
+/* ---------- sidebar nav ---------- */
+@media (min-width: 761px) {
+  .nav { position: fixed !important; inset: 0 auto 0 0; width: 232px; height: 100vh !important; z-index: 30; display: flex; flex-direction: column; align-items: stretch !important; gap: 0 !important;
+    padding: 20px 14px !important; background: var(--deep) !important; border: 0 !important; border-right: 3px solid var(--ink) !important; box-shadow: none !important; backdrop-filter: none !important; overflow-y: auto; }
+  .nav::after { content: 'ランクド'; position: fixed; left: 170px; bottom: 120px; writing-mode: vertical-rl; font: 900 60px 'Noto Sans JP'; color: #ffffff0a; letter-spacing: 6px; pointer-events: none; }
+  .wrap, .flash { margin-left: 232px !important; }
+  main.wrap { max-width: none !important; padding: 26px 32px 70px !important; }
+  .nav .links { display: flex; flex-direction: column; gap: 0; max-width: none !important; overflow: visible !important; margin: 0 0 14px; }
+  .navarrows { order: 2; display: flex; gap: 6px; margin: 0 0 12px; }
+  .navarrows button { flex: 1; border: 2px solid #ffffff30 !important; background: none !important; color: var(--ink) !important; font: 400 20px Bangers; }
+  .nav .navsearch { order: 3; }
+  .nav .links { order: 1; }
+  .nav > *:not(.logo):not(.links) { align-self: stretch; }
+  .mebox { margin-top: auto !important; order: 9; }
+}
+.nav .logo { display: flex; align-items: center; gap: 10px; padding: 0 4px 20px; cursor: pointer; font-size: inherit !important; }
+.nav .logo i { width: 40px; height: 40px; display: grid; place-items: center; background: var(--red); color: #fff; font: 400 26px Bangers; font-style: normal; border: 2px solid #fff; transform: rotate(-6deg); }
+.nav .logo b { font: 400 30px Bangers; letter-spacing: 2px; color: var(--ink); }
+.navgrp { display: flex; flex-direction: column; }
+.navgrp small { margin: 12px 12px 4px; font: 800 10px Inter; letter-spacing: 2.5px; text-transform: uppercase; color: #77706a; }
+.navgrp:first-child small { margin-top: 0; }
+.nav .links button { display: flex !important; align-items: center; gap: 14px; padding: 7px 12px !important; background: none !important; color: #bdb6a6 !important; font: 400 18px Bangers !important;
+  letter-spacing: 1.4px !important; text-transform: uppercase; border: 2px solid transparent !important; transform: none !important; box-shadow: none !important; text-align: left; border-radius: 0 !important; }
+.nav .links button:hover { color: #fff !important; border-color: #ffffff30 !important; }
+.nav .links button.on { background: var(--ink) !important; color: var(--deep) !important; transform: rotate(-1.5deg) !important; box-shadow: 4px 4px 0 var(--red) !important; }
+.nicon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.nav .links button.on .nicon { color: var(--red); }
+.navlive { margin-left: auto; font: 400 13px Bangers; font-style: normal; letter-spacing: 1px; padding: 1px 7px; background: var(--red); color: #fff; transform: rotate(6deg); }
+.mebox { padding: 10px 12px !important; border: 2px solid #ffffff30 !important; background: none !important; border-radius: 0 !important; }
+.mebox b { font: 400 18px Bangers; letter-spacing: 1px; color: var(--ink); }
+
+/* ---------- phone bottom bar ---------- */
+.mtabs { background: var(--pan) !important; border: 3px solid var(--ink) !important; box-shadow: 4px 4px 0 #000 !important; }
+.mtabs button { font: 400 13px Bangers !important; letter-spacing: 1px; color: #bdb6a6 !important; }
+.mtabs button.on { color: var(--red) !important; }
+.mmore { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-radius: 0 !important; }
+.mmore button { font: 400 16px Bangers !important; letter-spacing: 1px; color: var(--ink) !important; }
+
+/* ---------- global building blocks ---------- */
+h1, h2, h3 { font-family: Bangers, sans-serif !important; font-weight: 400 !important; letter-spacing: 1.5px; color: var(--ink); font-style: normal !important; }
+h2 { font-size: 30px; } h3 { font-size: 22px; }
+.card { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-radius: 0 !important; box-shadow: none !important; clip-path: none !important; transform: none !important; }
+.muted { color: #a39d90 !important; }
+.pill, .btn { font: 400 18px Bangers !important; letter-spacing: 1.4px !important; text-transform: uppercase; border: 3px solid var(--ink) !important; border-radius: 0 !important;
+  background: var(--pan) !important; color: var(--ink) !important; box-shadow: 4px 4px 0 #000 !important; transform: none !important; transition: transform .12s, box-shadow .12s !important; }
+.pill:hover:not(:disabled), .btn:hover:not(:disabled) { transform: translate(-2px, -2px) !important; box-shadow: 6px 6px 0 #000 !important; }
+.pill:active, .btn:active { transform: translate(2px, 2px) !important; box-shadow: 1px 1px 0 #000 !important; }
+.pill:not(.ghost), .btn.primary, .pill.buy, .pill.share, .pill.act { background: var(--red) !important; color: #fff !important; }
+.pill.sell { background: var(--deep) !important; color: var(--ink) !important; }
+.btn.sm { font-size: 14px !important; padding: 4px 10px !important; box-shadow: 3px 3px 0 #000 !important; }
+.tabs { gap: 6px !important; }
+.tabs button { font: 400 17px Bangers !important; letter-spacing: 1.2px !important; background: var(--pan) !important; color: var(--ink) !important; border: 3px solid var(--ink) !important; border-radius: 0 !important; transform: none !important; box-shadow: none !important; }
+.tabs button.on { background: var(--ink) !important; color: var(--deep) !important; box-shadow: 4px 4px 0 var(--red) !important; }
+.search, input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-radius: 0 !important; color: var(--bright) !important; }
+.search:focus, input:focus, select:focus, textarea:focus { outline: none; box-shadow: 4px 4px 0 var(--red) !important; }
+.lrow { border-color: #ffffff14 !important; }
+.up { color: var(--up) !important; } .down, .dn { color: var(--dn) !important; }
+.loading { font: 400 28px Bangers; letter-spacing: 2px; color: var(--ink); }
+.flash { background: var(--ink) !important; color: var(--deep) !important; border: 3px solid #000 !important; border-radius: 0 !important; font: 400 18px Bangers; letter-spacing: 1px; box-shadow: 5px 5px 0 var(--red) !important; }
+
+/* ========== League page ========== */
+.lb { --gold: var(--red); --pink: var(--red); }
+/* hero scoreboard -> manga splash panel */
+.lb-hero { background: var(--pan) !important; border: 3px solid var(--ink) !important; clip-path: none !important; }
+.lb-hero::before { background: repeating-conic-gradient(from 0deg at 82% 55%, #e9e2d0 0 .7deg, transparent .7deg 4deg) !important; opacity: .12; }
+.lb-week .trk { stroke: #ffffff18; } .lb-week .bar { stroke: var(--red); filter: none; }
+.lb-week b, .lb-score > b { font-family: Bangers !important; font-style: normal !important; letter-spacing: 2px; }
+.lb-score > b { color: var(--ink) !important; text-shadow: 5px 5px 0 #000 !important; font-size: 100px !important; }
+.lb-chips span { transform: none !important; border: 2px solid var(--ink) !important; background: var(--deep) !important; font: 400 16px Bangers; letter-spacing: 1px; }
+.lb-chips span.up { background: var(--red) !important; color: #fff !important; }
+.lb-cap { border: 3px solid var(--ink) !important; box-shadow: 6px 6px 0 #000 !important; }
+.lb-cap img { object-position: 50% 25% !important; }
+.lb-cap > div { left: 10px; right: auto; bottom: auto; top: 10px; background: var(--pan); border: 3px solid var(--ink); padding: 3px 10px; }
+.lb-cap::after { display: none; }
+.lb-cap small { color: var(--red) !important; } .lb-cap b { font-family: Bangers !important; letter-spacing: 1.5px; color: var(--ink) !important; }
+.lb-ticker { background: var(--deep) !important; border-top: 3px solid var(--ink) !important; }
+.lb-ticker b { font-family: Bangers; letter-spacing: 1px; font-weight: 400; color: var(--ink); }
+/* tabs */
+.lb-tabs { background: var(--bg) !important; border: 0 !important; border-bottom: 3px solid var(--ink) !important; padding: 8px 0 !important; backdrop-filter: none !important; }
+.lb-tabs .pill { background: var(--ink) !important; transform: none !important; box-shadow: 4px 4px 0 var(--red) !important; border: 0 !important; }
+.lb-tabs button { font: 400 18px Bangers !important; letter-spacing: 1.4px; color: #bdb6a6; }
+.lb-tabs button.on { color: var(--deep) !important; }
+/* race lanes -> panel rows */
+.lb-racehead h2 { font-size: 38px !important; }
+.lb-seg { border: 3px solid var(--ink) !important; background: var(--pan) !important; }
+.lb-seg button { font: 400 16px Bangers !important; letter-spacing: 1px; color: var(--ink); }
+.lb-seg button.on { background: var(--ink) !important; color: var(--deep) !important; }
+.lb-lane { background: var(--pan) !important; border: 3px solid var(--ink) !important; transition: transform .12s, box-shadow .12s !important; }
+.lb-lane:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 #000; }
+.lb-lane.me { outline: 3px solid var(--red); outline-offset: 3px; background: var(--pan) !important; }
+.lb-pos { font-family: Bangers !important; font-style: normal !important; font-size: 40px !important; border-right: 3px solid var(--ink); background: transparent !important; color: var(--ink) !important; }
+.lb-lane.p1 .lb-pos { background: var(--red) !important; color: #fff !important; }
+.lb-lane.p2 .lb-pos, .lb-lane.p3 .lb-pos { background-image: radial-gradient(circle, #e9e2d030 .9px, transparent 1.2px) !important; background-size: 5px 5px !important; color: var(--ink) !important; }
+.lb-pos i.up { color: var(--up) !important; } .lb-pos i.dn { color: var(--dn) !important; } .lb-lane.p1 .lb-pos i { color: #fff !important; }
+.lb-name b { font: 400 22px Bangers; letter-spacing: 1px; color: var(--ink); }
+.lb-fill { height: 8px !important; border: 2px solid var(--ink); border-radius: 0 !important; background: var(--ink) !important; box-shadow: none !important; bottom: 6px !important; }
+.lb-lane.p1 .lb-fill, .lb-lane.me .lb-fill { background: var(--red) !important; }
+.lb-rider { border: 2px solid var(--ink) !important; border-radius: 0 !important; background: var(--red) !important; transform: translateY(-50%) rotate(-6deg) !important; }
+.lb-faces img { border-color: var(--ink) !important; }
+.lb-faces img.cap { border-color: var(--red) !important; }
+.lb-num b { font-family: Bangers !important; font-style: normal !important; font-size: 42px !important; letter-spacing: 1px; color: var(--ink) !important; }
+.lb-lane.p1 .lb-num b { color: var(--red) !important; }
+.lb-mini { background: var(--deep) !important; border: 2px solid var(--ink) !important; }
+.lb-mini b { font: 400 16px Bangers; letter-spacing: 1px; } .lb-mini .tag.gold { background: var(--red) !important; color: #fff !important; }
+.lb-prof { color: var(--red) !important; font: 400 17px Bangers !important; letter-spacing: 1px; }
+/* chips + squad cards */
+.lb-chip { background: var(--pan) !important; border: 3px solid var(--ink) !important; box-shadow: 4px 4px 0 #000 !important; }
+.lb-chip::before { display: none; }
+.lb-chip strong { font-family: Bangers !important; letter-spacing: 1.5px; color: var(--ink) !important; }
+.lb-chip em { color: var(--red) !important; font-family: Bangers; font-size: 14px !important; letter-spacing: 1px; }
+.lb-chip.live { background: var(--red) !important; } .lb-chip.live * { color: #fff !important; }
+.sq-front, .sq-back { border: 3px solid var(--ink) !important; }
+.sq-card.cap .sq-front { border-color: var(--red) !important; box-shadow: 6px 6px 0 var(--red) !important; }
+.sq-front::after { background: linear-gradient(180deg, transparent 55%, #151418ee) !important; }
+.sq-bot { background: var(--pan); border-top: 3px solid var(--ink); left: 0 !important; right: 0 !important; bottom: 0 !important; padding: 8px 10px; }
+.sq-bot > b { font-family: Bangers !important; letter-spacing: 1px; text-shadow: none !important; color: var(--ink) !important; }
+.sq-pts strong { font-family: Bangers !important; color: var(--red) !important; }
+.sq-top i { border: 2px solid var(--ink); background: var(--deep) !important; font-family: Bangers; font-size: 13px; letter-spacing: 1px; transform: rotate(-3deg); }
+.sq-top .sq-crown { background: var(--red) !important; color: #fff !important; transform: rotate(5deg); }
+.sq-back { background: var(--pan) !important; }
+.sq-back > b { font-family: Bangers !important; letter-spacing: 1px; }
+.sq-break i em { background: var(--ink) !important; } .sq-break i em.neg { background: var(--red) !important; }
+.sq-stat { background: var(--pan) !important; border: 3px dashed var(--ink) !important; }
+.sq-stat > b { font-family: Bangers !important; color: var(--up) !important; }
+.fcapbar { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-left: 8px solid var(--red) !important; }
+.fcapbar b { color: var(--red) !important; font-family: Bangers; letter-spacing: 1px; }
+.ffg-bars i { background: #e9e2d055 !important; border-radius: 0 !important; } .ffg-bars i.now { background: var(--red) !important; } .ffg-bars i.neg { background: var(--dn) !important; }
+.fmoment, .ttrade, .fbench { background: var(--pan) !important; border: 3px solid var(--ink) !important; }
+.fhero { background: var(--pan) !important; border: 3px solid var(--ink) !important; }
+.fscore { background: var(--deep) !important; border: 3px solid var(--ink) !important; box-shadow: 6px 6px 0 var(--red) !important; transform: none !important; }
+.fscore b { color: var(--ink) !important; font-family: Bangers !important; }
+
+/* no page-level skew in the manga theme */
+.fantasy, .wrap > div, .wrap > section { transform: none !important; }
+.navtools { order: 8; display: flex; align-items: center; gap: 8px; margin: 10px 0; padding-top: 12px; border-top: 2px dashed #ffffff25; }
+.navtools > * { flex: none; }
+.navtools .navsearch { width: 38px; height: 38px; display: grid; place-items: center; border: 2px solid #ffffff30 !important; background: none !important; color: var(--ink) !important; }
+.navtools .userbox { flex: 1; min-width: 0; }
+.commish { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-left: 8px solid var(--red) !important; }
+/* leftover purple panels -> ink panels */
+.shop, .hudbox, .spanel, .slide, .srow { background: var(--pan) !important; border: 3px solid var(--ink) !important; border-radius: 0 !important; box-shadow: none !important; }
+.srow { border-width: 0 0 2px !important; border-color: #ffffff18 !important; background: transparent !important; }
+.srow:hover { background: #ffffff08 !important; }
+.spbtn { background: var(--red) !important; color: #fff !important; border: 2px solid var(--ink) !important; border-radius: 0 !important; }
+.air { background: var(--deep) !important; color: var(--ink) !important; border: 2px solid var(--ink); border-radius: 0 !important; }
+@media (max-width: 760px) {
+  .nav { background: var(--deep) !important; border-bottom: 3px solid var(--ink) !important; box-shadow: none !important; }
+  .nav .logo { padding: 0; } .nav .logo b { font-size: 24px; } .nav .logo i { width: 32px; height: 32px; font-size: 20px; }
+  .navarrows { display: none; } .navtools { border: 0; margin: 0; padding: 0; } .nav::after { display: none; }
+  .mtabs { left: 10px !important; right: 10px !important; bottom: 10px !important; }
+}
