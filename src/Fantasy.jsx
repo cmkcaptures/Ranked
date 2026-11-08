@@ -5,6 +5,7 @@ import Draft, { ResetDraft, Commish } from './Draft.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
+const CHIPS = { triple: ['👑', 'Triple Captain', 'your captain scores x3 this week'], boost: ['🪑', 'Bench Boost', 'all 6 count this week, nobody benched'], wildcard: ['🃏', 'Wildcard', 'unlimited swaps this week'] }
 export const norm = t => (t || '').toLowerCase().replace(/[^a-z0-9]/g, '')
 export function fantasySeason(d = new Date()) {
   const q = Math.floor(d.getUTCMonth() / 3), y = d.getUTCFullYear()
@@ -44,6 +45,8 @@ export default function Fantasy({ me, friends, openProfile }) {
   const [swaps, setSwaps] = useState([])
   const [caps, setCaps] = useState([])
   const [trades, setTrades] = useState([])
+  const [chipRows, setChipRows] = useState([])
+  const [claims, setClaims] = useState([])
   const [tab, setTab] = useState('table')
   const [err, setErr] = useState('')
   const [tick, setTick] = useState(0)
@@ -65,13 +68,17 @@ export default function Fantasy({ me, friends, openProfile }) {
     sb.from('fantasy_swaps').select('*').eq('season', S.key).then(({ data }) => setSwaps(data || []))
     sb.from('fantasy_captains').select('*').eq('season', S.key).then(({ data }) => setCaps(data || []))
     sb.from('fantasy_trades').select('*').eq('season', S.key).order('created_at', { ascending: false }).then(({ data }) => setTrades(data || []))
+    sb.from('fantasy_chips').select('*').eq('season', S.key).then(({ data }) => setChipRows(data || []))
+    sb.from('fantasy_claims').select('*').eq('season', S.key).order('created_at', { ascending: false }).then(({ data }) => setClaims(data || []))
   }, [tick])
   useEffect(() => {
     if (!sb) return
     const ch = sb.channel('fantasy').on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_events' }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_picks' }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_draft' }, reload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_trades' }, reload).subscribe()
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_trades' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_chips' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_claims' }, reload).subscribe()
     return () => { sb.removeChannel(ch) }
   }, [])
 
@@ -108,6 +115,13 @@ export default function Fantasy({ me, friends, openProfile }) {
   const capOf = u => caps.filter(c => c.user_id === u && c.week <= S.week).sort((a, b) => b.week - a.week)[0]?.char_id
   const capLocked = caps.some(c => c.user_id === me?.id && c.week === S.week)
   const takenBy = Object.fromEntries(picks.map(p => [p.char_id, p.user_id]))
+  // rank movement: where each team stood before this week's points
+  const lastRank = Object.fromEntries([...teams].sort((a, b) => (b.total - b.week) - (a.total - a.week)).map((t, i) => [t.user, i + 1]))
+  const topWeek = teams.length ? Math.max(...teams.map(t => t.week)) : 0
+  // waivers: dropped in the last 24h -> claims only, lowest in the table wins
+  const waivers = {}
+  for (const w of swaps) { const until = new Date(w.created_at).getTime() + 86400000; if (until > Date.now() && !takenBy[w.out_char]) waivers[w.out_char] = Math.max(waivers[w.out_char] || 0, until) }
+  const chipNow = u => chipRows.find(c => c.user_id === u && c.week === S.week)?.chip
 
   if (!sb || !me) return <div className="card pad muted">Sign in to play the Fantasy League.</div>
   const daysLeft = Math.ceil((S.end - Date.now()) / 86400000)
@@ -122,6 +136,7 @@ export default function Fantasy({ me, friends, openProfile }) {
             <span><b>{daysLeft}</b> days left</span>
             <span><b>{teams.length}</b> team{teams.length === 1 ? '' : 's'}</span>
             {mine && <span><b>#{teams.findIndex(t => t.user === me.id) + 1}</b> your rank</span>}
+            {chipNow(me.id) && <span className="fchipon"><b>{CHIPS[chipNow(me.id)][0]}</b> {CHIPS[chipNow(me.id)][1]} on</span>}
           </div>
         </div>
         {mine ? <div className="fscore"><b>{mine.total}</b><span>points</span><em className={mine.week < 0 ? 'down' : 'up'}>{pts(mine.week)} this week</em></div>
@@ -135,15 +150,18 @@ export default function Fantasy({ me, friends, openProfile }) {
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
-        <div className="tabs squadtabs">
-          {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['trades', `Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
+        <div className="tabs squadtabs ftabs">
+          {[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
-        {tab === 'table' && <Standings form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
+        {tab === 'table' && <Standings lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
         {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
-          onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })} />}
+          onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
+          chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })}
+          waivers={waivers} onClaim={(o, i) => run('fantasy_claim', { p_char: i, p_out: o })} myClaims={claims.filter(c => c.user_id === me.id)} onUnclaim={id => run('fantasy_claim_cancel', { p_id: id })}
+          order={[...teams].reverse()} who={who} me={me} />}
         {tab === 'trades' && <Trades me={me} picks={picks} byId={byId} name={name} trades={trades} run={run} />}
         {tab === 'moments' && <Moments events={cur.filter(e => e.source === 'bot')} byId={byId} name={name} />}
         {tab === 'vote' && <Vote S={S} teams={teams} byId={byId} name={name} me={me} votes={votes} reload={reload} setErr={setErr} />}
@@ -199,7 +217,7 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
-function Standings({ form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
+function Standings({ lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
@@ -208,10 +226,11 @@ function Standings({ form, week, capOf, benchOf, teams, byId, who, me, charPts, 
   return <div className="rank">
     <section>
       {teams.map((t, i) => { const p = who(t.user); return <div key={t.user} className={`fteam r${i + 1} ${t.user === me.id ? 'me' : ''}`}>
-        <div className="fpos">{i + 1}</div>
+        <div className="fpos">{i + 1}{lastRank[t.user] !== i + 1 && <i className={lastRank[t.user] > i + 1 ? 'mvup' : 'mvdn'}>{lastRank[t.user] > i + 1 ? '▲' : '▼'}{Math.abs(lastRank[t.user] - i - 1)}</i>}</div>
         <div className="fwho" onClick={() => openProfile(t.user)}>
           {p?.avatar ? <img src={p.avatar} alt="" /> : <div className="blank">{(p?.username || '?')[0]}</div>}
-          <div><b>{p?.username || '?'}</b><span className={t.week < 0 ? 'down' : 'up'}>{pts(t.week)} this week</span></div>
+          <div><b>{p?.username || '?'}{chipNow(t.user) && <i className="fchiptag" title={CHIPS[chipNow(t.user)][1]}>{CHIPS[chipNow(t.user)][0]}</i>}</b>
+            <span className={t.week < 0 ? 'down' : 'up'}>{pts(t.week)} this week{t.week === topWeek && t.week > 0 && ' 🔥'}</span></div>
         </div>
         <div className="fline">
           {t.chars.filter(id => id !== benchOf(t)).map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
@@ -221,7 +240,7 @@ function Standings({ form, week, capOf, benchOf, teams, byId, who, me, charPts, 
             <div className="fcard" onClick={() => openChar(benchOf(t))}><img src={byId[benchOf(t)].image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[benchOf(t)] || 0}</em><Form f={form[benchOf(t)]} week={week} mini /></div>
           </div>}
         </div>
-        <div className="ftotal">{t.total}<small>pts</small></div>
+        <div className="ftotal">{t.total}<small>pts</small>{i > 0 && <span className="fgap">−{teams[0].total - t.total}</span>}</div>
       </div> })}
       {!teams.length && <div className="card pad muted">No teams yet.</div>}
     </section>
@@ -239,15 +258,26 @@ function Standings({ form, week, capOf, benchOf, teams, byId, who, me, charPts, 
   </div>
 }
 
-function MyTeam({ form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim, order, who, me, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
+  const wildcard = chips.some(c => c.chip === 'wildcard' && c.week === chipWeek)
+  const usedThisWeek = chips.find(c => c.week === chipWeek)
+  const pending = myClaims.filter(c => c.status === 'pending')
+  const hrs = t => Math.max(1, Math.round((t - Date.now()) / 3600000))
   return <div className="rank">
     <section>
+      <div className="fchipsrow">{Object.entries(CHIPS).map(([k, [ic, nm, desc]]) => { const u = chips.find(c => c.chip === k)
+        const live = u && u.week === chipWeek
+        return <button key={k} className={`fchip ${live ? 'live' : u ? 'used' : ''}`} disabled={!!u || !!usedThisWeek || (k === 'boost' && team.chars.length < 6)}
+          onClick={() => confirm(`Play ${nm} for week ${chipWeek}? You only get it once a season.`) && onChip(k)}>
+          <b>{ic}</b><strong>{nm}</strong><span>{desc}</span>
+          <em>{live ? 'Active this week' : u ? `Used wk ${u.week}` : k === 'boost' && team.chars.length < 6 ? 'Needs a bench player' : usedThisWeek ? 'One chip per week' : 'Play it'}</em>
+        </button> })}</div>
       <div className="fcapbar">
         <b>👑 Captain</b>
-        <span>{captain ? <>{byId[captain]?.name} scores <b>double</b> this week</> : 'Pick a captain: their points count double'}</span>
+        <span>{captain ? <>{byId[captain]?.name} scores <b>{chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'triple' : 'double'}</b> this week</> : 'Pick a captain: their points count double'}</span>
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
       <div className={`fgrid ${team.chars.length > 5 ? "six" : "five"}`}>
@@ -256,7 +286,7 @@ function MyTeam({ form, week, benched, team, info, byId, chars, takenBy, name, c
           <Form f={form[id]} week={week} />
           <div className="ftilebtns" onClick={e => e.stopPropagation()}>
             {!capLocked && captain !== id && <button className="btn sm" onClick={() => onCaptain(id)}>👑 Captain</button>}
-            {!swapped && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel' : 'Swap'}</button>}
+            {(!swapped || wildcard) && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel' : 'Swap'}</button>}
           </div>
         </CharTile>)}
       </div>
@@ -269,15 +299,23 @@ function MyTeam({ form, week, benched, team, info, byId, chars, takenBy, name, c
         <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
           <CharTile key={c.id} c={c} tag={info[c.id]} onClick={() => confirm(`Add ${c.name} as your bench player?`) && (onBench(c.id), setBenchOpen(false))} />)}</div>
       </div>}
-      {swapped && <p className="muted small">You've used this week's swap.</p>}
+      {swapped && !wildcard && <p className="muted small">You've used this week's swap.</p>}
+      {wildcard && <p className="muted small">🃏 Wildcard on: unlimited swaps this week.</p>}
+      {pending.length > 0 && <div className="card pad"><h3>⏳ Your waiver claims</h3>{pending.map(c => <div key={c.id} className="lrow small">
+        <span>⏳</span><div className="grow"><b>{byId[c.char_id]?.name}</b> for {byId[c.out_char]?.name}<div className="muted">decided in ~{hrs(waivers[c.char_id] || Date.now())}h</div></div>
+        <button className="pill ghost" onClick={() => onUnclaim(c.id)}>Cancel</button></div>)}</div>}
       {out && <div className="card pad">
         <h3>Swap out {byId[out]?.name} for…</h3>
         <input className="search" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
         <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => x !== out && info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
-          <CharTile key={c.id} c={c} onClick={() => { onSwap(out, c.id); setOut(null) }} />)}</div>
+          <CharTile key={c.id} c={c} sub={waivers[c.id] ? `⏳ waivers · ${hrs(waivers[c.id])}h left` : undefined}
+            onClick={() => { if (waivers[c.id]) { confirm(`${c.name} is on waivers. Put in a claim? Lowest in the table gets them when it ends.`) && onClaim(out, c.id) } else onSwap(out, c.id); setOut(null) }} />)}</div>
+        <p className="muted small">⏳ Dropped in the last 24h = on waivers. Claim them and whoever is lowest in the table gets them.</p>
       </div>}
     </section>
     <aside>
+      <h3>Waiver priority</h3>
+      <div className="card">{order.map((t, i) => <div key={t.user} className={`lrow small ${t.user === me.id ? 'meline' : ''}`}><span>{i + 1}</span><div className="grow">{who(t.user)?.username || '?'}</div><b>{t.total}</b></div>)}</div>
       <h3>Your points log</h3>
       <div className="card">{events.slice(0, 40).map(e => <div key={e.id} className="lrow">
         <span>{KINDS[e.kind]?.[0]}</span><div className="grow small"><b>{byId[e.char_id]?.name || 'Team'}</b> {KINDS[e.kind]?.[1].toLowerCase()}<div className="muted">wk {e.week} · {e.note}</div></div>
@@ -340,6 +378,8 @@ function Rules() {
     {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
     {T('Squad', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5'], ['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
     {T('Bench & trades', [['🪑', 'Bench: a free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5'], ['🔄', 'Trade one of yours for one of a mate\'s (they accept or decline). Points already scored stay where they are', '1 for 1']])}
+    {T('🎴 Chips (once a season each, one per week)', Object.values(CHIPS).map(([i, n, d]) => [i, `${n}: ${d}`, '1x']))}
+    {T('⏳ Waivers', [['⏳', 'Anyone dropped goes on waivers for 24 hours. Put in a claim; when it ends the lowest team in the table gets them', 'worst first']])}
     <p className="muted small">One character per show (no stacking two from the same anime). Seasons follow the anime seasons, one swap a week, plus a free swap while your team has two from the same show. Most points when the season ends takes the crown.</p>
   </div>
 }
