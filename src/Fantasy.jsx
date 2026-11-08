@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
+import { sfx } from './sfx.js'
 import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard } from './LeagueUI.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
@@ -89,7 +90,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const run = async (fn, args, after) => {
     setErr('')
     const { error } = await sb.rpc(fn, args)
-    if (error) setErr(error.message); else { after?.(); reload() }
+    if (error) { setErr(error.message); sfx('loss') } else { sfx({ fantasy_play_chip: 'power', fantasy_set_captain: 'crown', fantasy_swap: 'swap', fantasy_claim: 'swap', fantasy_add_bench: 'swap', trade_offer: 'deal', trade_respond: args?.p_accept ? 'win' : 'press' }[fn] || 'press'); after?.(); reload() }
   }
 
   const live = events.filter(e => e.status === 'confirmed')

@@ -171,3 +171,21 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .sq-pts { margin: 2px 0 4px !important; } .sq-pts strong { font-size: 26px !important; } .sq-card.cap:first-child .sq-pts strong { font-size: 40px !important; }
 .sq-bot .ffg-bars { height: 10px !important; }
 .sq-card.bench .sq-front img { filter: none !important; opacity: .6; }
+
+/* ===== manga sound effects ===== */
+.sfx-pop { position: fixed; z-index: 9999; pointer-events: none; transform: translate(-50%, -50%) rotate(var(--r)) scale(.2); opacity: 0;
+  font: 900 34px/1 'Noto Sans JP', sans-serif; letter-spacing: -3px; white-space: nowrap; color: var(--ink);
+  -webkit-text-stroke: 4px #000; paint-order: stroke fill; text-shadow: 4px 4px 0 var(--red); animation: sfxPop .9s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+.sfx-pop.big { font-size: 78px; letter-spacing: -6px; color: #fff; text-shadow: 6px 6px 0 var(--red); animation: sfxBig 1.3s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+.sfx-pop.loss { color: #9aa0b5; text-shadow: 3px 3px 0 #000; animation-name: sfxDrop; }
+.sfx-pop.money, .sfx-pop.crown { color: #ffd84a; }
+.sfx-pop.flip { font-size: 24px; -webkit-text-stroke: 3px #000; text-shadow: none; }
+@keyframes sfxPop { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(.2); } 25% { opacity: 1; transform: translate(-50%, -80%) rotate(var(--r)) scale(1.15); }
+  45% { transform: translate(-50%, -80%) rotate(var(--r)) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -120%) rotate(var(--r)) scale(1); } }
+@keyframes sfxBig { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(3); } 18% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--r)) scale(.9); }
+  24%, 34% { transform: translate(-48%, -50%) rotate(var(--r)) scale(1); } 29% { transform: translate(-52%, -50%) rotate(var(--r)) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(1.1); } }
+@keyframes sfxDrop { 0% { opacity: 0; transform: translate(-50%, -110%) rotate(var(--r)); } 25% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--r)); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -20%) rotate(var(--r)); } }
+.sfx-lines { position: fixed; inset: 0; z-index: 9998; pointer-events: none; animation: sfxLines .7s ease-out forwards;
+  background: repeating-conic-gradient(from 0deg at var(--x) var(--y), #e9e2d038 0 .8deg, transparent .8deg 5deg);
+  mask-image: radial-gradient(circle at var(--x) var(--y), transparent 0 90px, #000 220px); }
+@keyframes sfxLines { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }

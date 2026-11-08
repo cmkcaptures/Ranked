@@ -1,6 +1,7 @@
 import './league.css'
 import { useEffect, useRef, useState } from 'react'
 import { openChar } from './CharProfile.jsx'
+import { sfx } from './sfx.js'
 
 // League v3 UI: scoreboard hero, race-lane standings, flip/tilt squad cards.
 
@@ -81,6 +82,9 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
   const [open, setOpen] = useState(null)
   const [grown, setGrown] = useState(false)
   useEffect(() => { const t = setTimeout(() => setGrown(true), 60); return () => clearTimeout(t) }, [])
+  // you climbed the table since the week started: celebrate once per session
+  useEffect(() => { const i = [...teams].sort((a, b) => b.total - a.total).findIndex(t => t.user === me.id) + 1
+    if (i && lastRank[me.id] > i && !sessionStorage.getItem('sfx-climb')) { sessionStorage.setItem('sfx-climb', 1); setTimeout(() => sfx('win', { text: `${lastRank[me.id] - i}位アップ!`, at: { x: innerWidth / 2, y: 220 } }), 900) } }, [teams.length])
   const val = t => mode === 'season' ? t.total : t.week
   const list = [...teams].sort((a, b) => val(b) - val(a))
   const top = Math.max(1, ...list.map(t => Math.abs(val(t))))
@@ -130,7 +134,7 @@ export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, t
   const by = Object.entries(events.reduce((m, e) => (m[e.kind] = (m[e.kind] || 0) + e.points, m), {})).sort((a, b) => b[1] - a[1])
   const maxAbs = Math.max(1, ...by.map(([, v]) => Math.abs(v)))
   return <div className={`sq-card ${captain ? 'cap' : ''} ${benched ? 'bench' : ''} ${dead ? 'dead' : ''} ${flip ? 'flip' : ''}`} style={{ '--c': c.color || '#7b5cff', animationDelay: `${delay}ms` }} {...tilt}>
-    <div className="sq-in" onClick={() => setFlip(f => !f)}>
+    <div className="sq-in" onClick={() => { setFlip(f => !f); sfx('flip') }}>
       <div className="sq-front">
         <img src={c.image} alt="" referrerPolicy="origin" />
         <i className="shine" />
