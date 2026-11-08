@@ -1,0 +1,62 @@
+/* ===== Anime Wrapped (manga story) ===== */
+.wr { position: fixed; inset: 0; z-index: 9000; background: var(--deep, #151418); color: var(--ink, #e9e2d0); overflow: hidden; user-select: none; font-family: Inter, sans-serif; }
+.wr::before { content: ''; position: absolute; inset: 0; background: repeating-conic-gradient(from 0deg at 50% 45%, #e9e2d0 0 .7deg, transparent .7deg 4deg); opacity: .07; animation: wrSpin 60s linear infinite; }
+@keyframes wrSpin { to { transform: rotate(360deg) scale(1.5); } }
+.wr-prog { position: absolute; top: 14px; left: 16px; right: 60px; z-index: 3; display: flex; gap: 4px; }
+.wr-prog i { flex: 1; height: 5px; border: 1.5px solid var(--ink); background: transparent; }
+.wr-prog i.done { background: var(--ink); } .wr-prog i.on { background: linear-gradient(90deg, var(--red, #e8202f) 50%, transparent 50%); background-size: 200% 100%; animation: wrBar 6s linear forwards; }
+@keyframes wrBar { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.wr-x { position: absolute; top: 6px; right: 12px; z-index: 4; width: 38px; height: 38px; border: 2px solid var(--ink) !important; background: var(--pan, #2b2830) !important; color: var(--ink) !important; font-size: 18px; }
+.wr-tap { position: absolute; top: 0; bottom: 0; z-index: 1; cursor: pointer; } .wr-tap.l { left: 0; width: 30%; } .wr-tap.r { right: 0; width: 70%; }
+.wr-slide { position: absolute; inset: 40px 0 30px; display: grid; place-items: center; padding: 20px; pointer-events: none; animation: wrIn .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+.wr-slide button, .wr-btns { pointer-events: auto; position: relative; z-index: 3; }
+@keyframes wrIn { from { opacity: 0; transform: scale(.85) rotate(-2deg); } to { opacity: 1; transform: none; } }
+.wr-c { position: relative; max-width: 720px; width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.wr-kick { display: inline-block; background: var(--ink); color: var(--deep, #151418); font: 400 20px Bangers; letter-spacing: 2px; padding: 3px 14px; transform: rotate(-2deg); }
+.wr h1 { margin: 0; font: 400 clamp(56px, 11vw, 120px)/.9 Bangers !important; letter-spacing: 3px; color: var(--ink); text-shadow: 6px 6px 0 #000; }
+.wr h1 em { font-style: normal; color: var(--red, #e8202f); }
+.wr h1.sm { font-size: clamp(36px, 6vw, 64px) !important; }
+.wr h2 { margin: -8px 0 0; font: 400 32px Bangers !important; letter-spacing: 3px; }
+.wr-big { font: 400 clamp(110px, 22vw, 220px)/.85 Bangers; color: var(--red, #e8202f); text-shadow: 8px 8px 0 #000; -webkit-text-stroke: 3px #000; animation: wrPunch .7s cubic-bezier(.2, 1.8, .4, 1) both .15s; }
+@keyframes wrPunch { from { transform: scale(2.4) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+.wr-bub { position: relative; background: #fff; color: #111; border: 3px solid #000; border-radius: 50% / 42%; padding: 16px 28px; font: 700 17px Inter; max-width: 460px; margin-top: 10px; }
+.wr-bub::after { content: ''; position: absolute; left: 46px; top: -18px; width: 20px; height: 20px; background: #fff; border-left: 3px solid #000; border-top: 3px solid #000; transform: rotate(35deg) skewX(10deg); }
+.wr-bub.sm { font-size: 15px; padding: 12px 22px; }
+.wr-sfx { position: absolute; right: -10px; top: -30px; font: 900 64px 'Noto Sans JP'; color: var(--ink); -webkit-text-stroke: 3px #000; paint-order: stroke fill; transform: rotate(10deg); text-shadow: 5px 5px 0 var(--red, #e8202f); }
+.wr-sfx.r { left: -10px; right: auto; top: auto; bottom: -20px; transform: rotate(-10deg); color: var(--red, #e8202f); text-shadow: 5px 5px 0 #000; }
+.wr-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.wr-row > div { min-width: 120px; padding: 10px 16px; background: var(--pan, #2b2830); border: 3px solid var(--ink); box-shadow: 4px 4px 0 #000; }
+.wr-row b { display: block; font: 400 40px/1 Bangers; letter-spacing: 1px; } .wr-row span { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #a39d90; }
+.wr-mini { display: flex !important; align-items: center; gap: 10px; text-align: left; } .wr-mini.c { margin-top: 14px; padding: 8px 14px; background: var(--pan, #2b2830); border: 3px solid var(--ink); }
+.wr-mini img { width: 54px; height: 54px; object-fit: cover; object-position: 50% 18%; border: 2px solid var(--ink); }
+.wr-mini b { display: block; font: 400 22px/1 Bangers; letter-spacing: 1px; color: var(--ink); } .wr-mini span { font-size: 12px; color: #a39d90; font-weight: 700; }
+.wr-bars { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.wr-bars > div { display: grid; grid-template-columns: 170px 1fr 40px; align-items: center; gap: 12px; animation: wrIn .5s both; }
+.wr-bars span { font: 400 24px Bangers; letter-spacing: 1px; text-align: left; }
+.wr-bars i { height: 22px; border: 3px solid var(--ink); } .wr-bars em { display: block; height: 100%; background: var(--ink); animation: wrGrow 1s cubic-bezier(.2, .8, .2, 1) both .3s; transform-origin: left; }
+.wr-bars > div:first-child em { background: var(--red, #e8202f); }
+@keyframes wrGrow { from { transform: scaleX(0); } }
+.wr-bars b { font: 400 26px Bangers; }
+.wr-c.split { flex-direction: row; text-align: left; align-items: center; gap: 30px; max-width: 860px; }
+.wr-c.split > div:last-child { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.wr-cover { flex: none; width: min(300px, 38vw); aspect-ratio: 3/4.2; border: 4px solid var(--ink); box-shadow: 8px 8px 0 #000; transform: rotate(-3deg); overflow: hidden; background: #000; }
+.wr-cover.gold { box-shadow: 8px 8px 0 var(--red, #e8202f); }
+.wr-cover img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; }
+.wr-stamp { font: 400 30px Bangers; letter-spacing: 2px; padding: 4px 16px; border: 4px solid var(--up, #4fd88a); color: var(--up, #4fd88a); transform: rotate(-6deg); animation: wrPunch .6s both .4s; }
+.wr-stamp.red { border-color: var(--red, #e8202f); color: var(--red, #e8202f); }
+.wr-card { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; width: min(420px, 100%); margin-top: 10px; border: 4px solid var(--ink); background: var(--pan, #2b2830); box-shadow: 8px 8px 0 var(--red, #e8202f); }
+.wr-card > div { padding: 12px; border: 1.5px solid #e9e2d040; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #a39d90; }
+.wr-card b { display: block; font: 400 32px/1 Bangers; letter-spacing: 1px; color: var(--ink); text-transform: none; }
+.wr-card .w { grid-column: 1 / -1; background: var(--red, #e8202f); } .wr-card .w b { color: #fff; }
+.wr-btns { display: flex; gap: 12px; margin-top: 18px; }
+.wr-hint { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font: 400 15px Bangers; letter-spacing: 2px; color: #77706a; }
+/* launcher */
+.wr-launch { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 18px; margin-bottom: 18px; cursor: pointer; text-align: left;
+  background: var(--pan, #2b2830) !important; border: 3px solid var(--ink) !important; box-shadow: 5px 5px 0 var(--red, #e8202f); transition: transform .12s, box-shadow .12s; color: var(--ink); }
+.wr-launch:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--red, #e8202f); }
+.wr-launch b { font: 400 26px Bangers; letter-spacing: 1.5px; } .wr-launch span { font-size: 13px; color: #a39d90; } .wr-launch i { margin-left: auto; font: 900 28px 'Noto Sans JP'; font-style: normal; color: var(--red, #e8202f); }
+@media (max-width: 700px) {
+  .wr-c.split { flex-direction: column; text-align: center; } .wr-c.split > div:last-child { align-items: center; }
+  .wr-cover { width: 58vw; } .wr-bars > div { grid-template-columns: 110px 1fr 30px; } .wr-bars span { font-size: 18px; }
+  .wr-sfx { font-size: 44px; right: 0; }
+}

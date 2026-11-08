@@ -9,6 +9,7 @@ import Fantasy from './Fantasy.jsx'
 import CharProfile from './CharProfile.jsx'
 import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
+import Wrapped from './Wrapped.jsx'
 import CharRank from './CharRank.jsx'
 import { Bell, Squad } from './Social.jsx'
 import Profile from './Profile.jsx'
@@ -70,7 +71,7 @@ const ICONS = { home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', podium: 'M9 21V9h6v12M3 21v-7h6M15 21v-5h6v5M2 21h20',
   swords: 'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4', cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM16 3v4M8 3v4M3 10h18',
   trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3', users: 'M9 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 13.5a6 6 0 0 1 4 6',
-  bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
+  bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', bolt: 'M13 2 4 14h7l-1 8 9-12h-7z', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
 const Icon = ({ n }) => <svg className="nicon" viewBox="0 0 24 24"><path d={ICONS[n]} /></svg>
 const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime']
 function readHash() {
@@ -192,6 +193,7 @@ function Main({ me, setMe }) {
     if (me) { const { data } = await sb.from('profiles').update({ anilist_name: name }).eq('id', me.id).select().single(); if (data) setMe(data) }
   }
   const [rating, setRating] = useState(null)
+  const [wrapped, setWrapped] = useState(false)
 
   async function load(name) {
     setLoading(true); setErr('')
@@ -214,7 +216,7 @@ function Main({ me, setMe }) {
     return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1)
   }
 
-  const ctx = { list, media, user, activity, rankings, setRankings, ratings, overall, openRating: setRating, elo, setElo, history, me, friends, extra, setExtra, openProfile, setStatus, setProgress, openAnime }
+  const ctx = { list, media, user, activity, rankings, setRankings, ratings, overall, openRating: setRating, elo, setElo, history, me, friends, extra, setExtra, openProfile, setStatus, setProgress, openAnime, openWrapped: () => setWrapped(true) }
 
   return (
     <>
@@ -228,6 +230,7 @@ function Main({ me, setMe }) {
           {NAV.map(([g, items]) => <div key={g} className="navgrp"><small>{g}</small>
             {items.map(([k, l, ic]) => <button key={k} className={page === k ? 'on' : ''} onClick={() => setPage(k)}><Icon n={ic} />{l}{k === 'league' && <i className="navlive">LIVE!</i>}</button>)}
           </div>)}
+          <button className="navwrapped" onClick={() => setWrapped(true)}><Icon n="bolt" />Wrapped<i className="navlive">NEW</i></button>
         </div>
         <div className="navtools">
           <UserBox user={user} onChange={changeAnilist} />
@@ -237,6 +240,7 @@ function Main({ me, setMe }) {
         {me && <div className="mebox" title="Your profile" onClick={() => openProfile(me.id)}><b>{me.username}</b><span>{synced ? 'synced' : 'syncing…'}</span></div>}
       </nav>
       <MobileNav page={page} setPage={setPage} />
+      {wrapped && <Wrapped me={me} list={list} rankings={rankings} friends={friends} onClose={() => setWrapped(false)} />}
       <CharProfile friends={friends} />
       <main className="wrap">
         {err && <div className="card error">{err.startsWith('AniList is busy') ? err : `Couldn't load your AniList: ${err}`}</div>}
@@ -287,12 +291,13 @@ function UserBox({ user, onChange }) {
   )
 }
 
-function Home({ activity, list, rankings, media }) {
+function Home({ activity, list, rankings, media, openWrapped }) {
   const progress = list.filter(e => e.status === 'CURRENT')
   const top = rankings[10].slice(0, 5).map(id => media[id]).filter(Boolean)
   return (
     <div className="home">
       <section>
+        <button className="wr-launch" onClick={openWrapped}><div><b>Your {currentSeason().season[0] + currentSeason().season.slice(1).toLowerCase()} Wrapped is here</b><br /><span>Episodes, genres, league, market and your anime personality</span></div><i>ドン!</i></button>
         <h3>Activity</h3>
         {activity.map(a => (
           <div key={a.id} className="card act">

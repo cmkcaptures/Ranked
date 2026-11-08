@@ -189,3 +189,4 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
   background: repeating-conic-gradient(from 0deg at var(--x) var(--y), #e9e2d038 0 .8deg, transparent .8deg 5deg);
   mask-image: radial-gradient(circle at var(--x) var(--y), transparent 0 90px, #000 220px); }
 @keyframes sfxLines { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+.nav .links .navwrapped { margin-top: 10px; border-top: 2px dashed #ffffff25 !important; padding-top: 12px !important; color: var(--ink) !important; }
