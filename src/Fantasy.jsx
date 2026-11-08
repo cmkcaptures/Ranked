@@ -93,6 +93,8 @@ export default function Fantasy({ me, friends, openProfile }) {
     return Object.values(t).sort((a, b) => b.total - a.total)
   }, [picks, events])
   const charPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
+  // form guide: each character's points per week this season
+  const form = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id) { (m[e.char_id] ||= {})[e.week] = ((m[e.char_id] || {})[e.week] || 0) + e.points } return m }, [events])
   // who's on the bench right now: on a 6-character team, whoever has the fewest points this week (decided for real at week's end)
   const weekPts = useMemo(() => { const m = {}; for (const e of cur) if (e.char_id && e.week === S.week) m[e.char_id] = (m[e.char_id] || 0) + e.points; return m }, [events])
   const benchOf = t => !t || t.chars.length < 6 ? null : [...t.chars].sort((a, b) => (weekPts[a] || 0) - (weekPts[b] || 0) || (charPts[a] || 0) - (charPts[b] || 0))[0]
@@ -137,8 +139,8 @@ export default function Fantasy({ me, friends, openProfile }) {
           {[['table', 'Standings'], ['team', 'My team'], ['moments', 'Moments'], ['trades', `Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "Who's hyper?"], ['rules', 'Scoring']].map(([k, l]) =>
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
         </div>
-        {tab === 'table' && <Standings capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
-        {tab === 'team' && <MyTeam benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
+        {tab === 'table' && <Standings form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
+        {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })} />}
@@ -197,7 +199,7 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
-function Standings({ capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
+function Standings({ form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
@@ -213,10 +215,10 @@ function Standings({ capOf, benchOf, teams, byId, who, me, charPts, dead, openPr
         </div>
         <div className="fline">
           {t.chars.filter(id => id !== benchOf(t)).map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
-            <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}</div> })}
+            <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}<Form f={form[id]} week={week} mini /></div> })}
           {benchOf(t) && byId[benchOf(t)] && <div className="fbenchslot" title="On the bench this week: lowest scorer, doesn't count">
             <span>Bench</span>
-            <div className="fcard" onClick={() => openChar(benchOf(t))}><img src={byId[benchOf(t)].image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[benchOf(t)] || 0}</em></div>
+            <div className="fcard" onClick={() => openChar(benchOf(t))}><img src={byId[benchOf(t)].image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[benchOf(t)] || 0}</em><Form f={form[benchOf(t)]} week={week} mini /></div>
           </div>}
         </div>
         <div className="ftotal">{t.total}<small>pts</small></div>
@@ -237,7 +239,7 @@ function Standings({ capOf, benchOf, teams, byId, who, me, charPts, dead, openPr
   </div>
 }
 
-function MyTeam({ benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -251,6 +253,7 @@ function MyTeam({ benched, team, info, byId, chars, takenBy, name, charPts, dead
       <div className={`fgrid ${team.chars.length > 5 ? "six" : "five"}`}>
         {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} tag={info[id]} onClick={() => openChar(id)}
           sub={dead[id] ? '💀 dead: scores 0 until they return' : benched === id ? `🪑 on the bench this week · ${charPts[id] || 0} pts` : `${charPts[id] || 0} pts`}>
+          <Form f={form[id]} week={week} />
           <div className="ftilebtns" onClick={e => e.stopPropagation()}>
             {!capLocked && captain !== id && <button className="btn sm" onClick={() => onCaptain(id)}>👑 Captain</button>}
             {!swapped && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel' : 'Swap'}</button>}
@@ -384,5 +387,17 @@ function Trades({ me, picks, byId, name, trades, run }) {
         <div className="grow"><b>{name(t.from_user)}</b> {byId[t.give_char]?.name} ↔ <b>{name(t.to_user)}</b> {byId[t.get_char]?.name}<div className="muted">{t.status}</div></div>
       </div>)}{!done.length && <div className="pad muted small">No trades yet.</div>}</div>
     </aside>
+  </div>
+}
+
+// last 5 weeks of points as little bars; this week highlighted. Hover/tap a bar for the number.
+function Form({ f = {}, week, mini }) {
+  const weeks = [4, 3, 2, 1, 0].map(k => week - k).filter(w => w >= 1)
+  const vals = weeks.map(w => f[w] || 0)
+  const max = Math.max(30, ...vals.map(Math.abs))
+  return <div className={`fform-guide ${mini ? 'mini' : ''}`} onClick={e => e.stopPropagation()} title={weeks.map((w, i) => `Wk ${w}: ${vals[i]}`).join(' · ')}>
+    {!mini && <span>Form</span>}
+    <div className="ffg-bars">{weeks.map((w, i) => <i key={w} className={`${w === week ? 'now' : ''} ${vals[i] < 0 ? 'neg' : ''}`}
+      style={{ height: `${Math.max(vals[i] ? 12 : 4, Math.abs(vals[i]) / max * 100)}%` }} title={`Week ${w}: ${vals[i]} pts`} />)}</div>
   </div>
 }

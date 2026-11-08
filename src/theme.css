@@ -1051,3 +1051,13 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .ftotal { padding-left: 6px; }
 @media (max-width: 1100px) { .fline > .fcard { width: auto; height: auto; } }
 @media (max-width: 760px) { .fline > .fcard { width: auto; height: auto; } }
+
+/* ===== Form guide ===== */
+.fform-guide { position: absolute; left: 8px; right: 8px; bottom: 50px; z-index: 2; display: flex; align-items: flex-end; gap: 6px; }
+.fform-guide span { font-family: var(--display); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #fff; text-shadow: 1px 1px 0 #000; }
+.ffg-bars { flex: 1; height: 26px; display: flex; align-items: flex-end; gap: 3px; }
+.ffg-bars i { flex: 1; background: #ffffff55; border-radius: 2px 2px 0 0; min-height: 2px; }
+.ffg-bars i.now { background: var(--blue); } .ffg-bars i.neg { background: #ff4d6d; }
+.fform-guide.mini { left: 3px; right: 3px; bottom: 17px; } .fform-guide.mini .ffg-bars { height: 14px; gap: 2px; }
+.fform-guide.mini .ffg-bars i { background: #ffffffaa; } .fform-guide.mini .ffg-bars i.now { background: var(--blue); }
+.fchar .ftilebtns { top: 34px; }
