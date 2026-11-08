@@ -1061,3 +1061,8 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .fform-guide.mini { left: 3px; right: 3px; bottom: 17px; } .fform-guide.mini .ffg-bars { height: 14px; gap: 2px; }
 .fform-guide.mini .ffg-bars i { background: #ffffffaa; } .fform-guide.mini .ffg-bars i.now { background: var(--blue); }
 .fchar .ftilebtns { top: 34px; }
+/* form guide on My team cards: bottom-right, next to the points, clear of the name and tags */
+.fchar .fform-guide:not(.mini) { left: auto; right: 8px; bottom: 10px; width: 42%; z-index: 3; }
+.fchar .fform-guide:not(.mini) span { display: none; }
+.fchar .fform-guide:not(.mini) .ffg-bars { height: 18px; }
+.fchar.big .fcap span { max-width: 52%; }
