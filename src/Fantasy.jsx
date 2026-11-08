@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
+import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard } from './LeagueUI.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
@@ -127,7 +128,9 @@ export default function Fantasy({ me, friends, openProfile }) {
   const daysLeft = Math.ceil((S.end - Date.now()) / 86400000)
 
   return (
-    <div className="fantasy">
+    <div className="fantasy lb">
+      {mine ? <Scoreboard S={S} mine={mine} rank={teams.findIndex(t => t.user === me.id) + 1} count={teams.length} captain={byId[capOf(me.id)]}
+        chip={chipNow(me.id) && CHIPS[chipNow(me.id)]} feed={cur.filter(e => e.char_id).slice(0, 12)} byId={byId} KINDS={KINDS} /> :
       <div className="fhero">
         <div className="fhero-l">
           <div className="fkick"><span>Fantasy League</span>{S.label}</div>
@@ -143,18 +146,15 @@ export default function Fantasy({ me, friends, openProfile }) {
           : <div className="fscore"><b>5</b><span>picks to make</span><em>draft is open</em></div>}
         <div className="fhero-art">{(mine ? mine.chars : chars.filter(c => c.form).slice(0, 5).map(c => c.id)).map((id, i) => byId[id] &&
           <img key={id} src={byId[id].image} alt="" referrerPolicy="origin" />)}</div>
-      </div>
+      </div>}
       {err && <div className="card pad ferr">{err}</div>}
 
       {draft && draft.status !== 'done' ? <Draft d={draft} me={me} friends={friends} chars={chars} info={info} picks={picks} reload={reload} />
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
-        <div className="tabs squadtabs ftabs">
-          {[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']].map(([k, l]) =>
-            <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}
-        </div>
-        {tab === 'table' && <Standings lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
+        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
+        {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
         {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
@@ -217,7 +217,7 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
-function Standings({ lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
+function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
@@ -225,24 +225,8 @@ function Standings({ lastRank, topWeek, chipNow, form, week, capOf, benchOf, tea
   const feed = events.filter(e => e.season === S.key).slice(0, 25)
   return <div className="rank">
     <section>
-      {teams.map((t, i) => { const p = who(t.user); return <div key={t.user} className={`fteam r${i + 1} ${t.user === me.id ? 'me' : ''}`}>
-        <div className="fpos">{i + 1}{lastRank[t.user] !== i + 1 && <i className={lastRank[t.user] > i + 1 ? 'mvup' : 'mvdn'}>{lastRank[t.user] > i + 1 ? '▲' : '▼'}{Math.abs(lastRank[t.user] - i - 1)}</i>}</div>
-        <div className="fwho" onClick={() => openProfile(t.user)}>
-          {p?.avatar ? <img src={p.avatar} alt="" /> : <div className="blank">{(p?.username || '?')[0]}</div>}
-          <div><b>{p?.username || '?'}{chipNow(t.user) && <i className="fchiptag" title={CHIPS[chipNow(t.user)][1]}>{CHIPS[chipNow(t.user)][0]}</i>}</b>
-            <span className={t.week < 0 ? 'down' : 'up'}>{pts(t.week)} this week{t.week === topWeek && t.week > 0 && ' 🔥'}</span></div>
-        </div>
-        <div className="fline">
-          {t.chars.filter(id => id !== benchOf(t)).map(id => { const c = byId[id]; return c && <div key={id} className={`fcard ${dead[id] ? 'dead' : ''} ${capOf(t.user) === id ? 'cap' : ''}`} title={`${c.name}${c.form ? ` (${c.form})` : ''}`} onClick={() => openChar(id)}>
-            <img src={c.image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[id] || 0}</em>{capOf(t.user) === id && <i className="fcap-badge">C</i>}<Form f={form[id]} week={week} mini /></div> })}
-          {benchOf(t) && byId[benchOf(t)] && <div className="fbenchslot" title="On the bench this week: lowest scorer, doesn't count">
-            <span>Bench</span>
-            <div className="fcard" onClick={() => openChar(benchOf(t))}><img src={byId[benchOf(t)].image} alt="" loading="lazy" referrerPolicy="origin" /><em>{charPts[benchOf(t)] || 0}</em><Form f={form[benchOf(t)]} week={week} mini /></div>
-          </div>}
-        </div>
-        <div className="ftotal">{t.total}<small>pts</small>{i > 0 && <span className="fgap">−{teams[0].total - t.total}</span>}</div>
-      </div> })}
-      {!teams.length && <div className="card pad muted">No teams yet.</div>}
+      <Race teams={teams} who={who} me={me} lastRank={lastRank} topWeek={topWeek} capOf={capOf} benchOf={benchOf} chipNow={chipNow} CHIPS={CHIPS}
+        byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} events={events.filter(e => e.season === S.key)} openProfile={openProfile} KINDS={KINDS} />
     </section>
     <aside>
       <h3>Latest points</h3>
@@ -268,27 +252,28 @@ function MyTeam({ chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim
   const hrs = t => Math.max(1, Math.round((t - Date.now()) / 3600000))
   return <div className="rank">
     <section>
-      <div className="fchipsrow">{Object.entries(CHIPS).map(([k, [ic, nm, desc]]) => { const u = chips.find(c => c.chip === k)
+      <div className="lb-chiprow">{Object.entries(CHIPS).map(([k, [ic, nm, desc]]) => { const u = chips.find(c => c.chip === k)
         const live = u && u.week === chipWeek
-        return <button key={k} className={`fchip ${live ? 'live' : u ? 'used' : ''}`} disabled={!!u || !!usedThisWeek || (k === 'boost' && team.chars.length < 6)}
-          onClick={() => confirm(`Play ${nm} for week ${chipWeek}? You only get it once a season.`) && onChip(k)}>
-          <b>{ic}</b><strong>{nm}</strong><span>{desc}</span>
-          <em>{live ? 'Active this week' : u ? `Used wk ${u.week}` : k === 'boost' && team.chars.length < 6 ? 'Needs a bench player' : usedThisWeek ? 'One chip per week' : 'Play it'}</em>
-        </button> })}</div>
+        return <ChipCard key={k} ic={ic} name={nm} desc={desc} state={live ? 'live' : u ? 'used' : ''} disabled={!!u || !!usedThisWeek || (k === 'boost' && team.chars.length < 6)}
+          label={live ? 'Active this week' : u ? `Used wk ${u.week}` : k === 'boost' && team.chars.length < 6 ? 'Needs a bench player' : usedThisWeek ? 'One chip per week' : 'Play it'}
+          onClick={() => confirm(`Play ${nm} for week ${chipWeek}? You only get it once a season.`) && onChip(k)} /> })}</div>
       <div className="fcapbar">
         <b>👑 Captain</b>
         <span>{captain ? <>{byId[captain]?.name} scores <b>{chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'triple' : 'double'}</b> this week</> : 'Pick a captain: their points count double'}</span>
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
-      <div className={`fgrid ${team.chars.length > 5 ? "six" : "five"}`}>
-        {team.chars.map(id => <CharTile key={id} big c={byId[id]} on={out === id} capt={captain === id} tag={info[id]} onClick={() => openChar(id)}
-          sub={dead[id] ? '💀 dead: scores 0 until they return' : benched === id ? `🪑 on the bench this week · ${charPts[id] || 0} pts` : `${charPts[id] || 0} pts`}>
-          <Form f={form[id]} week={week} />
-          <div className="ftilebtns" onClick={e => e.stopPropagation()}>
-            {!capLocked && captain !== id && <button className="btn sm" onClick={() => onCaptain(id)}>👑 Captain</button>}
-            {(!swapped || wildcard) && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel' : 'Swap'}</button>}
-          </div>
-        </CharTile>)}
+      <div className={`sq-grid n${team.chars.length}`}>
+        {[...team.chars].sort((a, b) => (b === captain) - (a === captain) || (charPts[b] || 0) - (charPts[a] || 0)).map((id, i) =>
+          <SquadCard key={id} delay={i * 80} c={byId[id]} pts={charPts[id] || 0} wk={(form[id] || {})[week] || 0} events={events.filter(e => e.char_id === id)} KINDS={KINDS}
+            captain={captain === id ? (chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'x3' : 'x2') : null} benched={benched === id} dead={dead[id]} tag={info[id]}
+            form={<Form f={form[id]} week={week} />}
+            actions={<>
+              {!capLocked && captain !== id && <button className="btn sm primary" onClick={() => onCaptain(id)}>👑 Make captain</button>}
+              {(!swapped || wildcard) && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel swap' : '🔄 Swap out'}</button>}
+            </>} />)}
+        {(() => { const mvp = [...team.chars].sort((a, b) => ((form[b] || {})[week] || 0) - ((form[a] || {})[week] || 0))[0]; const wk = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
+          return <div className="sq-stat"><small>Week {week}</small><b>{wk > 0 ? '+' : ''}{wk}</b><span>team points this week</span>
+            {byId[mvp] && <div className="mvp" onClick={() => openChar(mvp)}><img src={byId[mvp].image} alt="" referrerPolicy="origin" /><div><small>⭐ MVP</small><b>{byId[mvp].name}</b></div></div>}</div> })()}
       </div>
       {team.chars.length < 6 ? <div className="fbench" onClick={() => setBenchOpen(o => !o)}>
         <b>🪑 Add your bench player</b><span>A free 6th character. Each week only your best 5 count: your lowest scorer is benched automatically, so the bench covers anyone who goes quiet or dies.</span>
