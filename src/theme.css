@@ -1066,3 +1066,7 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .fchar .fform-guide:not(.mini) span { display: none; }
 .fchar .fform-guide:not(.mini) .ffg-bars { height: 18px; }
 .fchar.big .fcap span { max-width: 52%; }
+
+/* Active/Legacy tag sits top-left under the form badge, never under long names */
+.fchar .ftag { bottom: auto; top: 34px; }
+.fchar:not(:has(.fform)) .ftag { top: 8px; }
