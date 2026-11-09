@@ -18,8 +18,8 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
-  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'],
-  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
+  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
+  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['🐷', 'Piggy bank smashed'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
 const pts = n => (n > 0 ? '+' : '') + n
@@ -48,6 +48,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const [caps, setCaps] = useState([])
   const [trades, setTrades] = useState([])
   const [chipRows, setChipRows] = useState([])
+  const [vaults, setVaults] = useState([])
   const [claims, setClaims] = useState([])
   const [tab, setTab] = useState('table')
   const [err, setErr] = useState('')
@@ -71,6 +72,7 @@ export default function Fantasy({ me, friends, openProfile }) {
     sb.from('fantasy_captains').select('*').eq('season', S.key).then(({ data }) => setCaps(data || []))
     sb.from('fantasy_trades').select('*').eq('season', S.key).order('created_at', { ascending: false }).then(({ data }) => setTrades(data || []))
     sb.from('fantasy_chips').select('*').eq('season', S.key).then(({ data }) => setChipRows(data || []))
+    sb.from('fantasy_vaults').select('*').eq('season', S.key).then(({ data }) => setVaults(data || []))
     sb.from('fantasy_claims').select('*').eq('season', S.key).order('created_at', { ascending: false }).then(({ data }) => setClaims(data || []))
   }, [tick])
   useEffect(() => {
@@ -80,7 +82,8 @@ export default function Fantasy({ me, friends, openProfile }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_draft' }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_trades' }, reload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_chips' }, reload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_claims' }, reload).subscribe()
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_claims' }, reload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fantasy_vaults' }, reload).subscribe()
     return () => { sb.removeChannel(ch) }
   }, [])
 
@@ -117,6 +120,8 @@ export default function Fantasy({ me, friends, openProfile }) {
   const capOf = u => caps.filter(c => c.user_id === u && c.week <= S.week).sort((a, b) => b.week - a.week)[0]?.char_id
   const capLocked = caps.some(c => c.user_id === me?.id && c.week === S.week)
   const takenBy = Object.fromEntries(picks.map(p => [p.char_id, p.user_id]))
+  // 🐷 piggy banks: only count for the owner who saved them up
+  const vault = Object.fromEntries(vaults.filter(v => v.amount > 0 && takenBy[v.char_id] === v.user_id).map(v => [v.char_id, v.amount]))
   // rank movement: where each team stood before this week's points
   const lastRank = Object.fromEntries([...teams].sort((a, b) => (b.total - b.week) - (a.total - a.week)).map((t, i) => [t.user, i + 1]))
   const topWeek = teams.length ? Math.max(...teams.map(t => t.week)) : 0
@@ -155,8 +160,8 @@ export default function Fantasy({ me, friends, openProfile }) {
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
         <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
-        {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} openProfile={openProfile} events={live} S={S} />}
-        {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead}
+        {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} vault={vault} openProfile={openProfile} events={live} S={S} />}
+        {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead} vault={vault}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.some(s => s.user_id === me.id && s.week === S.week)}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
@@ -218,7 +223,7 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
-function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, openProfile, events, S }) {
+function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, vault, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
@@ -227,7 +232,7 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   return <div className="rank">
     <section>
       <Race teams={teams} who={who} me={me} lastRank={lastRank} topWeek={topWeek} capOf={capOf} benchOf={benchOf} chipNow={chipNow} CHIPS={CHIPS}
-        byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} events={events.filter(e => e.season === S.key)} openProfile={openProfile} KINDS={KINDS} />
+        byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} vault={vault} events={events.filter(e => e.season === S.key)} openProfile={openProfile} KINDS={KINDS} />
     </section>
     <aside>
       <h3>Latest points</h3>
@@ -243,7 +248,7 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   </div>
 }
 
-function MyTeam({ chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim, order, who, me, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ vault = {}, chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim, order, who, me, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -266,7 +271,7 @@ function MyTeam({ chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim
       <div className={`sq-grid n${team.chars.length}`}>
         {[...team.chars].sort((a, b) => (b === captain) - (a === captain) || (charPts[b] || 0) - (charPts[a] || 0)).map((id, i) =>
           <SquadCard key={id} delay={i * 80} c={byId[id]} pts={charPts[id] || 0} wk={(form[id] || {})[week] || 0} events={events.filter(e => e.char_id === id)} KINDS={KINDS}
-            captain={captain === id ? (chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'x3' : 'x2') : null} benched={benched === id} dead={dead[id]} tag={info[id]}
+            captain={captain === id ? (chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'x3' : 'x2') : null} benched={benched === id} dead={dead[id]} tag={info[id]} vault={vault[id]}
             form={<Form f={form[id]} week={week} />}
             actions={<>
               {!capLocked && captain !== id && <button className="btn sm primary" onClick={() => onCaptain(id)}>👑 Make captain</button>}
@@ -357,10 +362,14 @@ function Rules() {
   const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'], ['🌟', 'New form debut: a transformation shown for the very first time (on top of the +20, outside the weekly cap)', '+30'],
     ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
   const hype = [['📊', 'Weekly hype ranking: every drafted character ranked by how much their hype grew vs their own usual week', '+30 (1st) → +5 (last)'],
-    ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15']]
+    ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15'], ['🎬', 'New trailer: an official trailer, PV or teaser for a show, film or game they’re in', '+20']]
+  const piggy = [['🐷', 'Every quiet week (show not airing, manga not releasing) your character’s piggy bank fills up, faster the longer you hold them', '5 → 11 → 18 → 27 → 37 → 49 → 60'],
+    ['💥', 'Big news, a new trailer, or their story comes back (new season, chapter, fight)? The piggy bank smashes and pays out everything at once', 'max 60'],
+    ['🔒', 'Trade or drop them and the piggy bank is lost. Captain doesn’t double it, and it’s outside the weekly cap', 'hold to win']]
   const T = (title, rows, note) => <div className="card pad"><h3>{title}</h3>{note && <p className="muted small">{note}</p>}{rows.map(([i, l, p]) => <div key={l} className="lrow"><span>{i}</span><div className="grow">{l}</div><b>{p}</b></div>)}</div>
   return <div className="frules">
     {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
+    {T('🐷 Piggy bank (for your investments)', piggy, 'Old-show legends don’t score every week, so they save up instead and cash out when big news drops.')}
     {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
     {T('Squad', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5'], ['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
     {T('Bench & trades', [['🪑', 'Bench: a free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5'], ['🔄', 'Trade one of yours for one of a mate\'s (they accept or decline). Points already scored stay where they are', '1 for 1']])}

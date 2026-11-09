@@ -1095,3 +1095,7 @@ body::before { content: ''; position: fixed; inset: 0; z-index: -1; pointer-even
 .fchip.used { opacity: .45; } .fchip:disabled { cursor: default; } .fchip:disabled:not(.live):not(.used) em { color: #a49ccf; }
 .lrow.meline { background: #ffd60a14; box-shadow: inset 3px 0 0 var(--gold); }
 @media (max-width: 760px) { .fchipsrow { grid-template-columns: 1fr; } .fteam:hover { transform: none; } }
+
+/* 🐷 piggy bank */
+.sq-act.vault { background: #ff8fb8; color: #2a0614; }
+.lb-mini .tag.pig { background: #ff8fb8; color: #2a0614; }

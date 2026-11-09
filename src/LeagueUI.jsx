@@ -77,7 +77,7 @@ export function SlideTabs({ tabs, tab, setTab }) {
 }
 
 // ===== Standings: race lanes =====
-export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNow, CHIPS, byId, charPts, weekPts, dead, events, openProfile, KINDS }) {
+export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNow, CHIPS, byId, charPts, weekPts, dead, vault = {}, events, openProfile, KINDS }) {
   const [mode, setMode] = useState('season')
   const [open, setOpen] = useState(null)
   const [grown, setGrown] = useState(false)
@@ -115,7 +115,7 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
             const big = Object.entries(ev.reduce((m, e) => (m[e.kind] = (m[e.kind] || 0) + e.points, m), {})).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 3)
             return <div key={id} className={`lb-mini ${id === cap ? 'cap' : ''} ${id === bench ? 'bench' : ''} ${dead[id] ? 'dead' : ''}`} onClick={() => openChar(id)}>
               <img src={c.image} alt="" referrerPolicy="origin" />
-              {id === cap && <i className="tag gold">👑 C</i>}{id === bench && <i className="tag">🪑 Bench</i>}{dead[id] && <i className="tag red">💀</i>}
+              {id === cap && <i className="tag gold">👑 C</i>}{id === bench && <i className="tag">🪑 Bench</i>}{dead[id] && <i className="tag red">💀</i>}{vault[id] > 0 && <i className="tag pig">🐷 {vault[id]}</i>}
               <div className="info"><b>{c.name}</b><span>{charPts[id] || 0} pts · <em className={(weekPts[id] || 0) < 0 ? 'dn' : 'up'}>{sign(weekPts[id] || 0)} wk</em></span>
                 <div className="kinds">{big.map(([k, v]) => <span key={k}>{KINDS[k]?.[0]} {sign(v)}</span>)}</div></div>
             </div> })}
@@ -127,7 +127,7 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
 }
 
 // ===== My team: flip + tilt cards =====
-export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, tag, form, actions, delay = 0 }) {
+export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, tag, vault, form, actions, delay = 0 }) {
   const [flip, setFlip] = useState(false)
   const tilt = useTilt(12)
   if (!c) return null
@@ -141,6 +141,7 @@ export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, t
         <div className="sq-top">
           {c.form && <i className="sq-f">{c.form}</i>}
           {tag && <i className={`sq-act ${tag.active ? 'live' : ''}`}>{tag.active ? '📺 Active' : '🏛️ Legacy'}</i>}
+          {vault > 0 && <i className="sq-act vault" title="Piggy bank: pays out when big news or their story returns">🐷 {vault}</i>}
           {captain && <i className="sq-crown">👑 {captain}</i>}
           {benched && <i className="sq-bn">🪑 Bench</i>}
           {dead && <i className="sq-bn">💀 Dead</i>}
