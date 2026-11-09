@@ -19,7 +19,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
   trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'],
-  transform: ['⚡', 'Transformation / power-up'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
+  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
 const pts = n => (n > 0 ? '+' : '') + n
@@ -354,7 +354,7 @@ function Vote({ S, teams, byId, name, me, votes, reload, setErr }) {
 }
 
 function Rules() {
-  const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'],
+  const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'], ['🌟', 'New form debut: a transformation shown for the very first time (on top of the +20, outside the weekly cap)', '+30'],
     ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
   const hype = [['📊', 'Weekly hype ranking: every drafted character ranked by how much their hype grew vs their own usual week', '+30 (1st) → +5 (last)'],
     ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15']]

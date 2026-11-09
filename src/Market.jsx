@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { openChar } from './CharProfile.jsx'
 import { sfx } from './sfx.js'
+import './shock.css'
 import { sb, fetchAll } from './cloud.js'
 import { coins, pct, change24, powerGap, SOURCES, START_CASH, TICK_MS } from './market.js'
 
@@ -123,6 +124,7 @@ function MarketLive({ me, friends }) {
         </div>
       </div>
       {err && <div className="error">{err}</div>}
+      <ShockFeed byId={byId} onPick={id => { setSelId(id); setView('market') }} />
       <CrashBanner wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} />
       {view === 'market' && <LaunchStrip chars={chars} pre={pre} onPick={setSelId} />}
 
@@ -603,5 +605,25 @@ function LaunchStrip({ chars, pre, onPick }) {
         <em><Ticker fn={() => fmtLeft(new Date(c.ipo_at) - Date.now())} /></em>
         <small>IPO price {coins(c.price)}{pre.some(x => x.char_id === c.id) ? ' · pre-ordered ✓' : ''}</small></div>
     </div>)}</div>
+  </div>
+}
+
+// story shocks from the last 3 days: real episode moments that moved prices
+function ShockFeed({ byId, onPick }) {
+  const [rows, setRows] = useState([])
+  useEffect(() => {
+    const load = () => sb.from('story_shocks').select('*').gte('at', new Date(Date.now() - 3 * 864e5).toISOString()).order('at', { ascending: false }).limit(20).then(({ data }) => setRows(data || []))
+    load()
+    const ch = sb.channel('shockfeed').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'story_shocks' }, load).subscribe()
+    return () => { sb.removeChannel(ch) }
+  }, [])
+  const list = rows.filter(r => byId[r.char_id])
+  if (!list.length) return null
+  return <div className="shockfeed"><h4>Story shocks</h4>
+    {list.map(r => { const c = byId[r.char_id]; return <div key={r.id} onClick={() => onPick(c.id)} title={r.note || ''}>
+      <img src={c.image} alt="" referrerPolicy="origin" />
+      <div><b>{c.name}</b><small>{r.kind} · {new Date(r.at).toLocaleDateString(undefined, { weekday: 'short' })}</small></div>
+      <em className={r.pct < 0 ? 'dn' : 'upx'}>{r.pct < 0 ? '−' : '+'}{Math.round(Math.abs(r.pct) * 100)}%</em>
+    </div> })}
   </div>
 }

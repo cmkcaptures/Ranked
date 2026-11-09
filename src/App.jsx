@@ -10,6 +10,7 @@ import CharProfile from './CharProfile.jsx'
 import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
 import Wrapped from './Wrapped.jsx'
+import ShockAlert from './Shock.jsx'
 import CharRank from './CharRank.jsx'
 import { Bell, Squad } from './Social.jsx'
 import Profile from './Profile.jsx'
@@ -240,6 +241,7 @@ function Main({ me, setMe }) {
         {me && <div className="mebox" title="Your profile" onClick={() => openProfile(me.id)}><b>{me.username}</b><span>{synced ? 'synced' : 'syncing…'}</span></div>}
       </nav>
       <MobileNav page={page} setPage={setPage} />
+      <ShockAlert me={me} />
       {wrapped && <Wrapped me={me} list={list} rankings={rankings} friends={friends} onClose={() => setWrapped(false)} />}
       <CharProfile friends={friends} />
       <main className="wrap">

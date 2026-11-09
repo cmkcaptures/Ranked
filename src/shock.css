@@ -1,0 +1,46 @@
+/* live story-shock alert: manga panel sliding in top-right */
+.shock { position: fixed; top: 18px; right: 18px; z-index: 8000; width: min(420px, calc(100vw - 24px)); background: var(--pan, #2b2830); color: var(--ink, #e9e2d0);
+  border: 3px solid var(--ink, #e9e2d0); box-shadow: 8px 8px 0 #000; animation: shockIn .5s cubic-bezier(.2, 1.5, .4, 1) both; overflow: hidden; }
+.shock.down { box-shadow: 8px 8px 0 var(--red, #e8202f); animation: shockIn .5s cubic-bezier(.2, 1.5, .4, 1) both, shockShake .4s .45s; }
+.shock.up { box-shadow: 8px 8px 0 #4fd88a; }
+@keyframes shockIn { from { transform: translateX(120%) rotate(6deg); } to { transform: none; } }
+@keyframes shockShake { 20%, 60% { transform: translateX(-6px) rotate(-1deg); } 40%, 80% { transform: translateX(6px) rotate(1deg); } }
+.shock-head { display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 12px; background: var(--red, #e8202f); color: #fff; border-bottom: 3px solid var(--ink, #e9e2d0); }
+.shock.up .shock-head { background: #1f7a48; }
+.shock-head b { font: 400 20px Bangers; letter-spacing: 2px; }
+.shock-head span { font: 800 10px Inter; letter-spacing: 2px; padding: 1px 6px; border: 1.5px solid #fff; animation: shockBlink 1s infinite; }
+@keyframes shockBlink { 50% { opacity: .3; } }
+.shock-x { margin-left: auto; width: 28px; height: 28px; border: 2px solid #fff !important; background: transparent !important; color: #fff !important; }
+.shock-body { position: relative; display: flex; gap: 12px; padding: 12px; }
+.shock-body::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .1;
+  background: repeating-conic-gradient(from 0deg at 85% 50%, #e9e2d0 0 .8deg, transparent .8deg 5deg); }
+.shock-body img { position: relative; width: 84px; height: 108px; object-fit: cover; object-position: 50% 15%; border: 3px solid var(--ink, #e9e2d0); cursor: pointer; flex: none; }
+.shock.down .shock-body img { filter: grayscale(.6) contrast(1.1); }
+.shock-info { position: relative; min-width: 0; flex: 1; }
+.shock-kind { display: inline-block; font: 400 14px Bangers; letter-spacing: 1.5px; padding: 0 8px; background: var(--ink, #e9e2d0); color: #151418; transform: rotate(-2deg); }
+.shock-info h3 { margin: 4px 0 2px; font-size: 26px !important; line-height: 1; }
+.shock-px { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.shock-px em { font: 400 40px/1 Bangers; font-style: normal; color: var(--red, #e8202f); -webkit-text-stroke: 1.5px #000; }
+.shock.up .shock-px em { color: #4fd88a; }
+.shock-px span { font-size: 12px; font-weight: 700; color: #a39d90; } .shock-px b { color: var(--ink, #e9e2d0); }
+.shock-info p { margin: 4px 0 0; font-size: 12px; color: #c9c2b2; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.shock-word { position: absolute; right: 10px; bottom: 2px; font: 900 40px 'Noto Sans JP'; color: var(--ink, #e9e2d0); -webkit-text-stroke: 3px #000; paint-order: stroke fill;
+  transform: rotate(-10deg); opacity: .9; pointer-events: none; animation: shockWord .6s cubic-bezier(.2, 1.8, .4, 1) both .25s; }
+.shock.down .shock-word { color: #9aa0b5; }
+@keyframes shockWord { from { transform: rotate(-10deg) scale(2.5); opacity: 0; } }
+.shock-acts { display: flex; gap: 8px; padding: 0 12px 12px; flex-wrap: wrap; }
+.shock-acts .pill { font-size: 16px !important; padding: 6px 12px !important; flex: 1; white-space: nowrap; }
+.shock-msg { padding: 0 12px 10px; font: 400 16px Bangers; letter-spacing: 1px; color: var(--ink, #e9e2d0); }
+.shock-more { position: absolute; top: 44px; right: 8px; font: 800 10px Inter; letter-spacing: 1px; color: #a39d90; }
+.shock-timer { display: block; height: 4px; background: var(--ink, #e9e2d0); animation: shockTime 20s linear forwards; transform-origin: left; }
+@keyframes shockTime { to { transform: scaleX(0); } }
+.shock:hover .shock-timer { animation-play-state: paused; }
+@media (max-width: 760px) { .shock { top: auto; bottom: 90px; right: 12px; } }
+
+/* market page: recent shocks feed */
+.shockfeed { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 16px; scrollbar-width: thin; }
+.shockfeed > div { flex: none; display: flex; gap: 10px; align-items: center; padding: 8px 12px 8px 8px; background: var(--pan, #2b2830); border: 3px solid var(--ink, #e9e2d0); cursor: pointer; }
+.shockfeed img { width: 40px; height: 40px; object-fit: cover; object-position: 50% 15%; border: 2px solid var(--ink, #e9e2d0); }
+.shockfeed b { display: block; font: 400 17px/1 Bangers; letter-spacing: 1px; } .shockfeed small { font-size: 11px; color: #a39d90; font-weight: 700; }
+.shockfeed em { font: 400 24px Bangers; font-style: normal; margin-left: 6px; } .shockfeed .dn { color: var(--red, #e8202f); } .shockfeed .upx { color: #4fd88a; }
+.shockfeed h4 { flex: none; align-self: center; margin: 0; font: 400 20px Bangers; letter-spacing: 1.5px; writing-mode: vertical-rl; transform: rotate(180deg); color: var(--red, #e8202f); }
