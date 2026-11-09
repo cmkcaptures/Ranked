@@ -190,3 +190,6 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
   mask-image: radial-gradient(circle at var(--x) var(--y), transparent 0 90px, #000 220px); }
 @keyframes sfxLines { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 .nav .links .navwrapped { margin-top: 10px; border-top: 2px dashed #ffffff25 !important; padding-top: 12px !important; color: var(--ink) !important; }
+.sq-top .sq-act.streak { background: #ff7a1a !important; color: #151418 !important; }
+.fmercy { margin: 0 0 14px; padding: 10px 14px; background: var(--pan); border: 3px solid var(--ink); border-left: 8px solid #3d8bff; font-size: 14px; }
+.fmercy b { font-family: Bangers; font-weight: 400; letter-spacing: 1px; font-size: 17px; }

@@ -127,7 +127,7 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
 }
 
 // ===== My team: flip + tilt cards =====
-export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, tag, vault, form, actions, delay = 0 }) {
+export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, tag, vault, streak, form, actions, delay = 0 }) {
   const [flip, setFlip] = useState(false)
   const tilt = useTilt(12)
   if (!c) return null
@@ -142,6 +142,7 @@ export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, t
           {c.form && <i className="sq-f">{c.form}</i>}
           {tag && <i className={`sq-act ${tag.active ? 'live' : ''}`}>{tag.active ? '📺 Active' : '🏛️ Legacy'}</i>}
           {vault > 0 && <i className="sq-act vault" title="Piggy bank: pays out when big news or their story returns">🐷 {vault}</i>}
+          {streak > 0 && <i className="sq-act streak" title={`Scoring streak: ${streak} week${streak > 1 ? 's' : ''}, pays +${Math.min(2 * streak, 10)} if they score again`}>🔥 {streak}</i>}
           {captain && <i className="sq-crown">👑 {captain}</i>}
           {benched && <i className="sq-bn">🪑 Bench</i>}
           {dead && <i className="sq-bn">💀 Dead</i>}
