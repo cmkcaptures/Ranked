@@ -202,3 +202,52 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .saletoast.out { opacity: 0; transform: translateX(-50%) translateY(20px); }
 @keyframes saleIn { from { transform: translateX(-50%) translateY(60px) scale(.8); opacity: 0; } }
 @media (max-width: 760px) { .saletoast { bottom: 100px; } }
+/* short selling */
+.shortbox { margin-top: 12px; padding: 12px; border: 3px dashed var(--red); background: var(--deep); display: flex; flex-direction: column; gap: 8px; }
+.shorthead b { display: block; font: 400 20px Bangers; letter-spacing: 1px; color: var(--red); } .shorthead span { font-size: 12px; color: #a39d90; }
+.shortline { display: flex; align-items: center; gap: 10px; font-size: 13px; padding-top: 6px; border-top: 1px solid #ffffff18; }
+.shortline b { font: 400 18px Bangers; letter-spacing: 1px; } .shortline .liq { margin-left: auto; font-style: normal; font-size: 11px; color: #a39d90; }
+.shortline .pill { font-size: 14px !important; padding: 3px 10px !important; }
+/* notifications page */
+.bellall { display: block; width: 100%; margin-top: 6px; padding: 8px; border: 2px solid var(--ink) !important; background: var(--ink) !important; color: var(--deep) !important; font: 400 16px Bangers; letter-spacing: 1px; }
+.inbox { max-width: 860px; }
+.inbox-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; } .inbox-head h2 { margin: 0; font-size: 40px; }
+.inbox .tabs small { font: 700 11px Inter; opacity: .7; margin-left: 4px; }
+.inbox-day { margin: 18px 0 6px; font: 400 18px Bangers; letter-spacing: 1.5px; color: #a39d90; }
+.inbox-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; margin-bottom: 6px; background: var(--pan); border: 2px solid #ffffff20; border-left: 6px solid #77706a; font-size: 14px; }
+.inbox-row small { margin-left: auto; flex: none; color: #a39d90; font-size: 11px; font-weight: 700; }
+.inbox-row.unread { border-color: var(--ink); box-shadow: 4px 4px 0 #000; }
+.inbox-row.c-market { border-left-color: #4fd88a; } .inbox-row.c-league { border-left-color: var(--red); } .inbox-row.c-ach { border-left-color: #ffd84a; } .inbox-row.c-squad { border-left-color: #3d8bff; }
+
+/* ===================== Paper (light) mode ===================== */
+:root[data-theme="paper"] {
+  --bg: #f1ece1; --fg: #ffffff; --fg2: #e6e0d3; --text: #2a2622; --bright: #111; --pan: #ffffff; --ink: #151418; --deep: #f1ece1; --up: #108a4b; --dn: #d81b2b;
+}
+:root[data-theme="paper"] body { color: #2a2622; }
+:root[data-theme="paper"] .muted, :root[data-theme="paper"] .muted * { color: #6b665c !important; }
+/* the sidebar stays a dark "spine" */
+:root[data-theme="paper"] .nav { background: #151418 !important; border-right-color: #151418 !important; --ink: #e9e2d0; --deep: #151418; --pan: #2b2830; }
+:root[data-theme="paper"] .nav .logo b { color: #e9e2d0; }
+:root[data-theme="paper"] .mtabs, :root[data-theme="paper"] .mmore { --ink: #151418; --pan: #fff; }
+:root[data-theme="paper"] .mtabs button { color: #6b665c !important; }
+/* hard-coded light text from the dark theme */
+:root[data-theme="paper"] .lb-mini span, :root[data-theme="paper"] .shorthead span, :root[data-theme="paper"] .inbox-row small,
+:root[data-theme="paper"] .inbox-day, :root[data-theme="paper"] .sq-pts span, :root[data-theme="paper"] .lb-num small,
+:root[data-theme="paper"] .saletoast span, :root[data-theme="paper"] .shock-px span, :root[data-theme="paper"] .shock-info p,
+:root[data-theme="paper"] .shockfeed small, :root[data-theme="paper"] .rp-now small, :root[data-theme="paper"] .rp-now span, :root[data-theme="paper"] .rp-pick span i { color: #6b665c !important; }
+:root[data-theme="paper"] .lb-hero::before, :root[data-theme="paper"] .rp::before, :root[data-theme="paper"] .wr::before { opacity: .12; filter: invert(1); }
+:root[data-theme="paper"] .lb-score > b { text-shadow: 5px 5px 0 var(--red) !important; }
+:root[data-theme="paper"] .sq-front::after { background: linear-gradient(180deg, transparent 60%, #00000055) !important; }
+:root[data-theme="paper"] .lb-ticker { background: #151418 !important; } :root[data-theme="paper"] .lb-ticker * { color: #e9e2d0; }
+:root[data-theme="paper"] .sfx-pop { color: #fff; }
+:root[data-theme="paper"] .card, :root[data-theme="paper"] .lrow { color: #2a2622; }
+:root[data-theme="paper"] .inbox-row.unread, :root[data-theme="paper"] .lb-lane:hover { box-shadow: 4px 4px 0 #151418; }
+.themebtn { font-size: 18px; }
+/* paper: anything the dark theme hard-coded white */
+:root[data-theme="paper"] .wrap h1, :root[data-theme="paper"] .wrap h2, :root[data-theme="paper"] .wrap h3 { color: var(--ink) !important; }
+:root[data-theme="paper"] .lb-week b, :root[data-theme="paper"] .lb-chips span:not(.up):not(.gold), :root[data-theme="paper"] .lb-name b,
+:root[data-theme="paper"] .sq-bot > b, :root[data-theme="paper"] .lb-mini b, :root[data-theme="paper"] .mv b, :root[data-theme="paper"] .tchar { color: var(--ink) !important; }
+:root[data-theme="paper"] .lb-tabs button { color: #6b665c; } :root[data-theme="paper"] .lb-tabs button.on { color: #f1ece1 !important; }
+:root[data-theme="paper"] .lb-seg button.on, :root[data-theme="paper"] .tabs button.on { color: #f1ece1 !important; }
+:root[data-theme="paper"] .lb-chips span.up { color: #fff !important; }
+:root[data-theme="paper"] .hudbox b, :root[data-theme="paper"] .sbig, :root[data-theme="paper"] .blue, :root[data-theme="paper"] .ssym, :root[data-theme="paper"] .sname b, :root[data-theme="paper"] .sprice b { color: var(--ink) !important; }

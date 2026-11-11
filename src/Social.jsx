@@ -45,6 +45,7 @@ export function Bell({ me }) {
       {open && <div className="bellpop" onClick={e => e.stopPropagation()}>
         {items.map(n => <div key={n.id} className={n.read ? '' : 'unread'}>{n.text}<small>{ago(n.created_at) === 'just now' ? 'just now' : `${ago(n.created_at)} ago`}</small></div>)}
         {!items.length && <div>No notifications yet. Set a price alert or limit order on the Market.</div>}
+        <button className="bellall" onClick={() => { setOpen(false); location.hash = '#/inbox' }}>See all & filter →</button>
       </div>}
     </div>
   )
@@ -362,4 +363,40 @@ function Battles({ me, friends }) {
       {!battles.length && <div className="card pad muted">No battles yet. Challenge someone: the squad decides whose Top 10 is better.</div>}
     </>
   )
+}
+
+// ---------- Notifications page: everything, sorted into Market / League / Squad / Achievements ----------
+const CATS = [
+  ['league', '🏆 League', /waiver|trade|offers .* for your|declined your|dropped|swap|draft|chip|captain|fantasy|league|benched|piggy|played (triple|bench|wildcard)/i],
+  ['market', '📈 Market', /\$|crash|spike|order|dividend|bet |liquidated|ipo|coins|price/i],
+  ['ach', '🎖️ Achievements', /achievement|unlocked|badge|level/i],
+  ['squad', '💬 Squad', /hyped your|poll|battle|vote|mention|joined|friend|watch/i],
+]
+const catOf = t => (CATS.find(([, , re]) => re.test(t)) || ['other'])[0]
+export function Inbox({ me }) {
+  const [items, setItems] = useState(null)
+  const [f, setF] = useState('all')
+  const load = () => sb.from('notifications').select('*').eq('user_id', me.id).order('created_at', { ascending: false }).limit(300).then(({ data }) => setItems(data || []))
+  useEffect(() => {
+    if (!me) return
+    load()
+    const ch = sb.channel('inbox').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${me.id}` }, load).subscribe()
+    return () => { sb.removeChannel(ch) }
+  }, [me?.id])
+  if (!items) return <div className="loading">Loading…</div>
+  const tagged = items.map(n => ({ ...n, cat: catOf(n.text) }))
+  const count = k => k === 'all' ? tagged.length : k === 'unread' ? tagged.filter(n => !n.read).length : tagged.filter(n => n.cat === k).length
+  const shown = tagged.filter(n => f === 'all' || (f === 'unread' ? !n.read : n.cat === f))
+  const day = t => { const d = new Date(t), y = new Date(Date.now() - 864e5); return d.toDateString() === new Date().toDateString() ? 'Today' : d.toDateString() === y.toDateString() ? 'Yesterday' : d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' }) }
+  let lastDay = ''
+  return <div className="inbox">
+    <div className="inbox-head"><h2>Notifications</h2>
+      <button className="pill ghost" onClick={async () => { await sb.from('notifications').update({ read: true }).eq('user_id', me.id).eq('read', false); load() }}>Mark all read</button></div>
+    <div className="tabs">{[['all', 'All'], ['unread', '● Unread'], ...CATS.map(([k, l]) => [k, l]), ['other', 'Other']].map(([k, l]) =>
+      <button key={k} className={f === k ? 'on' : ''} onClick={() => setF(k)}>{l} <small>{count(k)}</small></button>)}</div>
+    <div className="inbox-list">{shown.map(n => { const d = day(n.created_at), head = d !== lastDay; lastDay = d
+      return <div key={n.id}>{head && <h4 className="inbox-day">{d}</h4>}
+        <div className={`inbox-row c-${n.cat} ${n.read ? '' : 'unread'}`}><span>{n.text}</span><small>{new Date(n.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</small></div></div> })}
+      {!shown.length && <div className="card pad muted">Nothing here.</div>}</div>
+  </div>
 }

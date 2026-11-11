@@ -3,6 +3,7 @@ import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
 import { sfx } from './sfx.js'
+import DraftReplay from './DraftReplay.jsx'
 import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard } from './LeagueUI.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
@@ -52,6 +53,7 @@ export default function Fantasy({ me, friends, openProfile }) {
   const [streaks, setStreaks] = useState([])
   const [claims, setClaims] = useState([])
   const [tab, setTab] = useState('table')
+  const [replay, setReplay] = useState(false)
   const [err, setErr] = useState('')
   const [tick, setTick] = useState(0)
   const reload = () => setTick(t => t + 1)
@@ -166,6 +168,8 @@ export default function Fantasy({ me, friends, openProfile }) {
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
         <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
+        {tab === 'table' && <button className="pill ghost rp-open" onClick={() => setReplay(true)}>🎬 Draft-day replay</button>}
+        {replay && <DraftReplay S={S} draft={draft} chars={chars} charPts={charPts} who={who} onClose={() => setReplay(false)} />}
         {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} vault={vault} openProfile={openProfile} events={live} S={S} />}
         {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead} vault={vault}
           events={cur.filter(e => e.team_user === me.id)} swapped={swaps.filter(s => s.user_id === me.id && s.week === S.week).length >= (mercy ? 2 : 1)} mercy={mercy} streak={streak}

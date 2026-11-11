@@ -22,10 +22,12 @@ function useMarket(me) {
   const timer = useRef()
   const sparkAt = useRef(0)
   const [pre, setPre] = useState([])
+  const [shorts, setShorts] = useState([])
 
   async function load() {
     sb.from('market_events').select('*').gt('ends_at', new Date().toISOString()).then(({ data }) => setEvents(data || []))
     sb.from('ipo_preorders').select('*').eq('user_id', me.id).then(({ data }) => setPre(data || []))
+    sb.from('shorts').select('*').eq('user_id', me.id).eq('status', 'open').order('opened_at').then(({ data }) => setShorts(data || []))
     const [c, n, w] = await Promise.all([
       fetchAll(() => sb.from('characters').select('id, name, sym, image, media_title, color, price, price_24h, power, p0, base, hype, hype_at, ipo_at, ipo_filled, rumour, rumour_until, event_until, event_label, event_key, updated_at').order('id')).then(data => ({ data })),
       sb.from('news').select('*').order('created_at', { ascending: false }).limit(40),
@@ -47,7 +49,7 @@ function useMarket(me) {
       .subscribe()
     return () => { sb.removeChannel(ch); clearTimeout(timer.current) }
   }, [me.id])
-  return { chars, sparks, news, wallet, setWallet, events, pre, reload: load }
+  return { chars, sparks, news, wallet, setWallet, events, pre, shorts, setShorts, reload: load }
 }
 
 export default function Market({ me, friends = [] }) {
@@ -56,7 +58,7 @@ export default function Market({ me, friends = [] }) {
 }
 
 function MarketLive({ me, friends }) {
-  const { chars, sparks, news, wallet, setWallet, events, pre, reload } = useMarket(me)
+  const { chars, sparks, news, wallet, setWallet, events, pre, shorts, setShorts, reload } = useMarket(me)
   const [selId, setSelId] = useState(null)
   const [view, setView] = useState('market')
   const [sort, setSort] = useState('hype')
@@ -74,7 +76,8 @@ function MarketLive({ me, friends }) {
 
   const sel = byId[selId] || chars[0]
   const holdingsValue = Object.entries(wallet.holdings || {}).reduce((a, [id, h]) => a + (Number(byId[id]?.price) || 0) * h.qty, 0)
-  const worth = Number(wallet.cash) + holdingsValue
+  const shortValue = shorts.reduce((a, s) => a + shortWorth(s, byId[s.char_id]), 0)
+  const worth = Number(wallet.cash) + holdingsValue + shortValue
   const pnl = worth - START_CASH
 
   async function trade(c, qty) {
@@ -89,7 +92,23 @@ function MarketLive({ me, friends }) {
   }
   async function reset() {
     if (!confirm('Reset your wallet to 10,000 coins?')) return
+    await sb.rpc('reset_shorts'); setShorts([])
     const { data } = await sb.rpc('reset_wallet'); if (data) setWallet(data)
+  }
+  async function openShort(c, qty) {
+    setErr('')
+    const { data, error } = await sb.rpc('short_open', { p_char: c.id, p_qty: qty })
+    if (error) { setErr(error.message); sfx('loss') } else { setWallet(data); sfx('power', { text: 'ショート!' }); reload() }
+  }
+  async function closeShort(s) {
+    setErr('')
+    const c = byId[s.char_id]
+    const { data, error } = await sb.rpc('short_close', { p_id: s.id })
+    if (error) { setErr(error.message); sfx('loss') } else {
+      const pay = Number(data.cash) - Number(wallet.cash)
+      showSale({ profit: pay - Number(s.collateral), proceeds: pay, pct: (pay - Number(s.collateral)) / Number(s.collateral), sold: s.qty, all: true }, `${c?.name || 'short'} (short)`)
+      setWallet(data); reload()
+    }
   }
 
   const sorters = {
@@ -143,11 +162,11 @@ function MarketLive({ me, friends }) {
           </div>
           {limit < list.length && <MoreSentinel onMore={() => setLimit(l => l + 60)} left={list.length - limit} />}
         </section>
-        <aside><StockPanel c={sel} wallet={wallet} trade={trade} preorder={preorder} myPre={pre.find(x => x.char_id === sel.id)} /></aside>
+        <aside><StockPanel c={sel} wallet={wallet} shorts={shorts.filter(s => s.char_id === sel.id)} openShort={openShort} closeShort={closeShort} trade={trade} preorder={preorder} myPre={pre.find(x => x.char_id === sel.id)} /></aside>
       </div>}
 
       {view === 'portfolio' && <OpenOrders byId={byId} />}
-      {view === 'portfolio' && <Portfolio wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} reset={reset} trade={trade} pre={pre} />}
+      {view === 'portfolio' && <Portfolio shorts={shorts} closeShort={closeShort} wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} reset={reset} trade={trade} pre={pre} />}
       {view === 'board' && <Leaderboard byId={byId} friends={friends} me={me} />}
       {view === 'bets' && <Bets chars={chars} byId={byId} friends={friends} me={me} wallet={wallet} refresh={async () => {
         const { data } = await sb.from('wallets').select('*').eq('user_id', me.id).maybeSingle(); if (data) setWallet(data)
@@ -228,7 +247,7 @@ function WhyPanel({ c: base }) {
   )
 }
 
-function StockPanel({ c, wallet, trade, preorder, myPre }) {
+function StockPanel({ c, wallet, shorts = [], openShort, closeShort, trade, preorder, myPre }) {
   const [hours, setHours] = useState(24)
   const [qty, setQty] = useState(1)
   const [busy, setBusy] = useState(false)
@@ -288,11 +307,19 @@ function StockPanel({ c, wallet, trade, preorder, myPre }) {
         {!h && <div className="muted small">You don't own any {c.sym} yet, so there's nothing to sell.</div>}
         {h && <div className="hold">You own <b>{h.qty}</b> @ {coins(h.avg)} · P/L <b className={c.price >= h.avg ? 'up' : 'down'}>{coins((c.price - h.avg) * h.qty)}</b></div>}
       </div>}
+      {!isSoon(c) && <div className="shortbox">
+        <div className="shorthead"><b>📉 Short {c.sym}</b><span>Bet the price drops. Locks {coins(c.price * qty)} as collateral · wiped if the price doubles</span></div>
+        <button className="pill sell" disabled={busy || c.price * qty > wallet.cash} onClick={async () => { setBusy(true); await openShort(c, qty); setBusy(false) }}>Short {qty}</button>
+        {shorts.map(s => { const pl = (Number(s.entry) - c.price) * s.qty; return <div key={s.id} className="shortline">
+          <span>{s.qty} short @ {coins(s.entry)}</span><b className={pl >= 0 ? 'up' : 'down'}>{pl >= 0 ? '+' : ''}{coins(pl)}</b>
+          <i className="liq">wiped at {coins(s.entry * 2)}</i>
+          <button className="pill ghost" disabled={busy} onClick={async () => { setBusy(true); await closeShort(s); setBusy(false) }}>Close</button></div> })}
+      </div>}
     </div>
   )
 }
 
-function Portfolio({ wallet, byId, onPick, reset, trade, pre = [] }) {
+function Portfolio({ shorts = [], closeShort, wallet, byId, onPick, reset, trade, pre = [] }) {
   const [busy, setBusy] = useState(null)
   const sell = async (e, c, n) => { e.stopPropagation(); setBusy(c.id); await trade(c, -n); setBusy(null) }
   const rows = Object.entries(wallet.holdings || {}).map(([id, h]) => ({ c: byId[id], ...h })).filter(r => r.c)
@@ -315,6 +342,13 @@ function Portfolio({ wallet, byId, onPick, reset, trade, pre = [] }) {
           })}
           {!rows.length && <div className="card pad muted">No positions yet. Look for high hype and a big power gap on the Market tab.</div>}
         </div>
+        {shorts.length > 0 && <><h3>📉 Shorts</h3><div className="stocks">{shorts.map(s => { const c = byId[s.char_id]; if (!c) return null; const pl = (Number(s.entry) - c.price) * s.qty
+          return <div key={s.id} className="srow" onClick={() => onPick(c.id)}>
+            <img src={c.image} alt="" />
+            <div className="sname"><b>{c.name}</b><span>{c.sym} · {s.qty} short @ {coins(s.entry)} · wiped at {coins(s.entry * 2)}</span></div>
+            <div className="sprice"><b>{coins(shortWorth(s, c))}</b><span className={pl >= 0 ? 'up' : 'down'}>{pl >= 0 ? '+' : ''}{coins(pl)} ({pct(1 - c.price / s.entry)})</span></div>
+            <div className="psell"><button className="pill" onClick={e => { e.stopPropagation(); closeShort(s) }}>Close</button></div>
+          </div> })}</div></>}
       </section>
       <aside>
         <h3>Trade log</h3>
@@ -332,7 +366,8 @@ function Portfolio({ wallet, byId, onPick, reset, trade, pre = [] }) {
 function Leaderboard({ byId, friends, me }) {
   const [rows, setRows] = useState(null)
   useEffect(() => {
-    const load = () => sb.from('wallets').select('user_id, cash, holdings').then(({ data }) => setRows(data || []))
+    const load = () => Promise.all([sb.from('wallets').select('user_id, cash, holdings'), sb.from('shorts').select('user_id, char_id, qty, entry, collateral').eq('status', 'open')])
+      .then(([w, s]) => setRows((w.data || []).map(r => ({ ...r, shorts: (s.data || []).filter(x => x.user_id === r.user_id) }))))
     load()
     const ch = sb.channel('wallets-board').on('postgres_changes', { event: '*', schema: 'public', table: 'wallets' }, load).subscribe()
     return () => { sb.removeChannel(ch) }
@@ -343,7 +378,7 @@ function Leaderboard({ byId, friends, me }) {
     const held = Object.entries(r.holdings || {})
     const value = held.reduce((a, [id, h]) => a + (Number(byId[id]?.price) || 0) * h.qty, 0)
     const best = held.map(([id, h]) => ({ c: byId[id], v: (Number(byId[id]?.price) || 0) * h.qty })).filter(x => x.c).sort((a, b) => b.v - a.v)[0]
-    return { id: r.user_id, name: names[r.user_id] || '???', worth: Number(r.cash) + value, best }
+    return { id: r.user_id, name: names[r.user_id] || '???', worth: Number(r.cash) + value + (r.shorts || []).reduce((a, s) => a + shortWorth(s, byId[s.char_id]), 0), best }
   }).sort((a, b) => b.worth - a.worth)
   return (
     <div className="board">
@@ -628,3 +663,6 @@ function ShockFeed({ byId, onPick }) {
     </div> })}
   </div>
 }
+
+// what an open short is worth right now: collateral back plus the gain (or minus the loss), never below 0
+function shortWorth(s, c) { return Math.max(0, Number(s.collateral) + (Number(s.entry) - (Number(c?.price) || Number(s.entry))) * s.qty) }

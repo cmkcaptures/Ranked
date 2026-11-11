@@ -11,7 +11,9 @@ for (const p of picks) for (let w = 5; w <= 6; w++) for (let k = 0; k < 2 + Math
   events.push({ id: id++, season: 'FALL-2026', week: w, team_user: p.user_id, char_id: p.char_id, kind, points, note: 'preview', source: 'bot', status: 'confirmed', created_at: new Date(Date.now() - id * 3e5).toISOString() }) }
 events.reverse()
 const T = { characters: chars, fantasy_picks: picks, fantasy_events: events, fantasy_captains: [{ season: 'FALL-2026', week: 1, user_id: 'me', char_id: 19492 }, { season: 'FALL-2026', week: 1, user_id: 'a', char_id: 222593 }],
-  fantasy_chips: [{ season: 'FALL-2026', user_id: 'b', chip: 'triple', week: 6 }], fantasy_draft: [{ season: 'FALL-2026', status: 'done' }] }
+  fantasy_chips: [{ season: 'FALL-2026', user_id: 'b', chip: 'triple', week: 6 }], fantasy_draft: [{ season: 'FALL-2026', status: 'done', draft_order: Object.keys(U), rounds: 5 }],
+  activity: (() => { const order = Object.keys(U), out = []; for (let r = 0; r < 5; r++) { const o = r % 2 ? [...order].reverse() : order; for (const u of o) { const c = chars.find(x => x.id === U[u][1][r]); if (c) out.push({ user_id: u, kind: 'fantasy_team', payload: { season: 'FALL-2026', names: [c.name], cover: c.image }, created_at: new Date(Date.now() - 1e9 + out.length * 6e4).toISOString() }) } } return out.reverse() })(),
+  notifications: [{ id: 1, user_id: 'me', text: '📉 CRASH: $GOKU dropped 25% on a story moment', read: false, created_at: new Date().toISOString() }, { id: 2, user_id: 'me', text: '🔄 ROla offers Asta for your Loki. Check the League → Trades tab', read: false, created_at: new Date().toISOString() }, { id: 3, user_id: 'me', text: '🔥 Dayn hyped your profile!', read: true, created_at: new Date(Date.now() - 9e7).toISOString() }, { id: 4, user_id: 'me', text: '✅ Order filled: bought 5 $LOKI @ 61.2', read: true, created_at: new Date(Date.now() - 9e7).toISOString() }] }
 export const friends = Object.entries(U).map(([id, [username]]) => ({ id, username }))
 export const me = { id: 'me', username: 'AspextPro' }
 function q(table) {

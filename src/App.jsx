@@ -12,7 +12,7 @@ import Season, { currentSeason } from './Season.jsx'
 import Wrapped from './Wrapped.jsx'
 import ShockAlert from './Shock.jsx'
 import CharRank from './CharRank.jsx'
-import { Bell, Squad } from './Social.jsx'
+import { Bell, Inbox, Squad } from './Social.jsx'
 import Profile from './Profile.jsx'
 import { useAchievements } from './achievements.js'
 import { renderTopList } from './shareImage.js'
@@ -74,7 +74,7 @@ const ICONS = { home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1
   trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3', users: 'M9 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 13.5a6 6 0 0 1 4 6',
   bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', bolt: 'M13 2 4 14h7l-1 8 9-12h-7z', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
 const Icon = ({ n }) => <svg className="nicon" viewBox="0 0 24 24"><path d={ICONS[n]} /></svg>
-const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime']
+const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime', 'inbox']
 function readHash() {
   const [, pg, id] = (location.hash.match(/^#\/([a-z0-9]+)(?:\/([^/?#]+))?/) || [])
   return PAGES.includes(pg) ? { page: pg, id: id || null } : { page: 'home', id: null }
@@ -237,6 +237,7 @@ function Main({ me, setMe }) {
           <UserBox user={user} onChange={changeAnilist} />
           <button className="navsearch" title="Search anime" onClick={() => setPage('browse')}><Icon n="search" /></button>
           <Bell me={me} />
+          <ThemeToggle />
         </div>
         {me && <div className="mebox" title="Your profile" onClick={() => openProfile(me.id)}><b>{me.username}</b><span>{synced ? 'synced' : 'syncing…'}</span></div>}
       </nav>
@@ -261,6 +262,7 @@ function Main({ me, setMe }) {
             onProfileSaved={p => { setMe(p); setFriends(fs => fs.map(x => x.id === p.id ? p : x)) }} />}
           {page === 'profile' && profileId === me?.id && <div className="center"><button className="pill ghost" onClick={() => confirm('Sign out?') && sb.auth.signOut()}>Sign out</button></div>}
           {page === 'browse' && <Browse {...ctx} />}
+          {page === 'inbox' && <Inbox me={me} />}
           {page === 'anime' && animeId && <Detail key={animeId} id={animeId} {...ctx} />}
         </>}
       </main>
@@ -783,4 +785,12 @@ function MobileNav({ page, setPage }) {
       <button className={inMore || more ? 'on' : ''} onClick={() => setMore(m => !m)}><span>☰</span>More</button>
     </nav>
   </>
+}
+
+// paper (light) / ink (dark) manga theme, remembered per device
+function ThemeToggle() {
+  const [t, setT] = useState(() => { try { return localStorage.getItem('ranked.theme') || 'ink' } catch { return 'ink' } })
+  useEffect(() => { document.documentElement.dataset.theme = t; try { localStorage.setItem('ranked.theme', t) } catch {} }, [t])
+  return <button className="navsearch themebtn" title={t === 'ink' ? 'Switch to paper (light)' : 'Switch to ink (dark)'} data-nosfx="1"
+    onClick={() => setT(x => x === 'ink' ? 'paper' : 'ink')}>{t === 'ink' ? '☀' : '☾'}</button>
 }
