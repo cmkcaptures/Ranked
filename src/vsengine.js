@@ -36,7 +36,8 @@ export function fight(A, B, opts = {}) {
     const near = tierIndex(y) - tierIndex(x) < 4      // hax still matters if you're not hopelessly outclassed
     if (has(y, 'infinity') && !has(x, 'spacecut') && !has(x, 'erase') && !has(x, 'conceptual') && !has(x, 'antimagic') && tierIndex(x) - tierIndex(y) < 4)
       r(side === 'A' ? -3 : -3, `${y.short}'s Infinity means ${x.short} can't land a hit without space-cutting or concept-level attacks`)
-    if (has(x, 'infinity') && (has(y, 'spacecut') || has(y, 'erase'))) r(-1.5, `${y.short} can cut straight through ${x.short}'s Infinity`)
+    // a bypassed Infinity is worth nothing, but never a penalty: switching your own ability off must never help you
+    if (has(x, 'infinity') && (has(y, 'spacecut') || has(y, 'erase') || has(y, 'conceptual') || has(y, 'antimagic'))) reasons.push({ side: '', w: 0.1, t: `${y.short} can cut straight through ${x.short}'s Infinity, so it doesn't protect them here`, hax: true })
     if (has(x, 'erase') && near && !has(y, 'immortal')) r(2.5, `${x.short} can erase ${y.short} outright (existence-level hax)`)
     else if (has(x, 'erase') && near) r(1.2, `${x.short}'s erasure hax pressures even ${y.short}'s immortality`)
     if (has(x, 'futuresight') && near) r(2.2, `${x.short} sees and rewrites the future`)
@@ -48,7 +49,7 @@ export function fight(A, B, opts = {}) {
     if (has(x, 'precog') && !has(y, 'precog')) r(0.7, `${x.short} reads attacks before they happen`)
     if (has(x, 'regen') && !has(y, 'erase') && !has(y, 'soul')) r(0.5, `${x.short} regenerates through damage`)
     if (has(x, 'immortal') && !has(y, 'erase') && !has(y, 'sealing') && !has(y, 'soul')) r(0.8, `${y.short} has no clean way to keep ${x.short} dead`)
-    if (has(x, 'sealing') && has(y, 'immortal')) r(1.2, `${x.short} can seal ${y.short} even if they can't be killed`)
+    if (has(x, 'sealing') && has(y, 'immortal')) reasons.push({ side: '', w: 0.1, t: `${x.short} can seal ${y.short}, so their immortality doesn't save them`, hax: true })
     if (has(x, 'toon') && near) r(0.8, `${x.short}'s toon force makes them absurdly hard to pin down`)
     if (has(x, 'conceptual') && near) r(1, `${x.short} bends the rules of reality`)
     if (has(x, 'copy') && near && tierIndex(x) >= tierIndex(y) - 1) r(0.6, `${x.short} can copy or absorb what ${y.short} throws at them`)

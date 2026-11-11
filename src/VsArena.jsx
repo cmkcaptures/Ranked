@@ -54,7 +54,7 @@ function Picker({ side, sel, setSel, img, form, setForm, off, setOff }) {
     <div className="vs-col"><h5>Form / transformation</h5>
       <div className="vs-chips">{sel.forms.map(x => <button key={x.id} className={x.id === fo.id ? 'on' : ''} onClick={() => { setForm(x.id); setOff([]); sfx('power', { text: 'ゴゴゴ' }) }}>{x.name}</button>)}</div></div>
     <div className="vs-col"><h5>Abilities & moves <small>(tap to turn off)</small></h5>
-      <div className="vs-chips abil">{fo.abil.length ? fo.abil.map(a => <button key={a} className={off.includes(a) ? 'off' : 'on'} onClick={() => setOff(o => o.includes(a) ? o.filter(x => x !== a) : [...o, a])}>{ABILITY[a] || a}</button>)
+      <div className="vs-chips abil">{fo.abil.filter(a => a !== 'magic').length ? fo.abil.filter(a => a !== 'magic').map(a => <button key={a} className={off.includes(a) ? 'off' : 'on'} onClick={() => setOff(o => o.includes(a) ? o.filter(x => x !== a) : [...o, a])}>{ABILITY[a] || a}</button>)
         : <span className="muted small">Pure stats, no special hax</span>}</div></div>
   </div>
 }
