@@ -6,6 +6,13 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-17', headline: 'POINTS EVERY DAY: HYPE NOW PAYS OUT NIGHTLY',
+    items: [
+      ['📊 Daily hype', 'Instead of one big hype payout a week, every drafted character is now ranked every night by that day’s hype growth: +5 for 1st down to +1 (legacy x1.5). Same weekly total, spread across every day.', 'League → Latest points'],
+      ['⚡ Moments twice a day', 'Fights, power-ups, deaths, news and trailers are now checked at noon and 10pm, so weekday chapters and news land the same day.', 'League → Moments'],
+    ],
+  },
+  {
     id: '2026-11-16', headline: 'START YOUR OWN LEAGUE: FANTASY GOES PUBLIC, TRADING CUP KICKS OFF',
     items: [
       ['🏆 Your own leagues', 'Anyone can now start a fantasy league with their mates (invite code included) or jump into a public league with randoms. Characters are only exclusive inside your league.', 'League'],

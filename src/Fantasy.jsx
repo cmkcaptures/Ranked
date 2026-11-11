@@ -22,7 +22,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
-  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
+  trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Daily hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
   transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['🐷', 'Piggy bank smashed'], cup: ['🏆', 'Mid-season Cup champion'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
