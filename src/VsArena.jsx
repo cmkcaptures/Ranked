@@ -66,11 +66,20 @@ function Bar({ label, a, b, max, fmt = v => v }) {
     <span className={b >= a ? 'win' : ''}>{fmt(b)}</span></div>
 }
 
+// #/vs/gojo.present~sukuna.full opens that exact matchup (used by share links and the Google pages)
+const fromHash = () => {
+  const m = decodeURIComponent(location.hash).match(/#\/vs\/([a-z0-9-]+)\.([a-z0-9-]+)~([a-z0-9-]+)\.([a-z0-9-]+)/)
+  if (!m) return null
+  const a = FIGHTERS.find(f => f.id === m[1]), b = FIGHTERS.find(f => f.id === m[3])
+  return a && b ? { a, b, fa: a.forms.some(x => x.id === m[2]) ? m[2] : a.forms.at(-1).id, fb: b.forms.some(x => x.id === m[4]) ? m[4] : b.forms.at(-1).id } : null
+}
 export default function VsArena() {
   const img = useImages()
-  const [A, setA] = useState(() => FIGHTERS.find(f => f.id === 'gojo'))
-  const [B, setB] = useState(() => FIGHTERS.find(f => f.id === 'sukuna'))
-  const [fa, setFa] = useState('present'), [fb, setFb] = useState('full')
+  const init = fromHash()
+  const [A, setA] = useState(() => init?.a || FIGHTERS.find(f => f.id === 'gojo'))
+  const [B, setB] = useState(() => init?.b || FIGHTERS.find(f => f.id === 'sukuna'))
+  const [fa, setFa] = useState(init?.fa || 'present'), [fb, setFb] = useState(init?.fb || 'full')
+  const [copied, setCopied] = useState(false)
   const [offA, setOffA] = useState([]), [offB, setOffB] = useState([])
   const [opt, setOpt] = useState({ noHax: false, prep: false, blood: true })
   const [bang, setBang] = useState(0)
@@ -82,12 +91,20 @@ export default function VsArena() {
   const winName = r.winner === 'A' ? A.name : r.winner === 'B' ? B.name : null
   const pctA = Math.round(r.win * 100)
   const random = () => { let a = pick(), b = pick(); while (b.id === a.id) b = pick(); setA(a); setB(b); setFa(a.forms[a.forms.length - 1].id); setFb(b.forms[b.forms.length - 1].id); setOffA([]); setOffB([]) }
+  const link = `${location.origin}${location.pathname.replace(/[^/]*$/, '')}vs/${A.id}-vs-${B.id}/`
+  const share = async () => {
+    const text = `${winName ? `${winName} beats ${winName === A.name ? B.name : A.name}` : `${A.name} vs ${B.name} is dead even`} (${r.verdict}, ${Math.max(pctA, 100 - pctA)}%). Fight me 👇`
+    const url = `${location.origin}${location.pathname}#/vs/${A.id}.${formA.id}~${B.id}.${formB.id}`
+    try { if (navigator.share) await navigator.share({ title: `${A.name} vs ${B.name}: who would win?`, text, url }); else { await navigator.clipboard.writeText(`${text}\n${url}`); setCopied(true); setTimeout(() => setCopied(false), 2000) } } catch {}
+    sfx('crown', { text: 'シェア!' })
+  }
+  useEffect(() => { const h = `#/vs/${A.id}.${formA.id}~${B.id}.${formB.id}`; if (location.hash !== h) window.history.replaceState(window.history.state, '', h) }, [A.id, B.id, formA.id, formB.id])
   const swap = () => { setA(B); setB(A); setFa(fb); setFb(fa); setOffA(offB); setOffB(offA) }
   const tI = f => TIERS.indexOf(f.tier) + 1 + f.plus * 0.45
   return <div className="vsa">
     <div className="vs-hero">
       <div className="vs-title"><small>ランクド・バトル</small><h1>VS Arena</h1><p>Who would win? Scored from VS Battles Wiki tiers per era & form, series feats and r/PowerScaling consensus.</p></div>
-      <div className="vs-btns"><button className="pill" onClick={random}>🎲 Random fight</button><button className="pill ghost" onClick={swap}>⇄ Swap sides</button></div>
+      <div className="vs-btns"><button className="pill" onClick={random}>🎲 Random fight</button><button className="pill ghost" onClick={swap}>⇄ Swap sides</button><button className="pill" onClick={share}>{copied ? '✓ Copied' : '📤 Share result'}</button></div>
     </div>
 
     <div className="vs-stage">
