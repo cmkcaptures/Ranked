@@ -357,3 +357,18 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .tcup-idle { margin-top: 8px; }
 .tcup-wins { display: flex; gap: 10px; flex-wrap: wrap; } .tcup-wins > div { padding: 8px 14px; background: var(--pan); border: 2px solid var(--ink); text-align: center; }
 .tcup-wins small { display: block; color: #a39d90; font-size: 11px; } .tcup-wins b { display: block; font: 400 20px Bangers; letter-spacing: 1px; } .tcup-wins em { font-style: normal; color: #4fd88a; font-weight: 800; }
+
+/* owner site stats */
+.sstats h2 { margin: 0 0 14px; font-size: 40px; } .sstats h2 small { font: 700 12px Inter; letter-spacing: 1px; color: #a39d90; text-transform: none; }
+.ss-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+.ss-tiles > div { padding: 12px 14px; background: var(--pan); border: 3px solid var(--ink); box-shadow: 4px 4px 0 #000; }
+.ss-tiles small { display: block; font: 800 10px Inter; letter-spacing: 1.5px; text-transform: uppercase; color: #a39d90; }
+.ss-tiles b { display: block; font: 400 40px/1.1 Bangers; letter-spacing: 1px; } .ss-tiles span { font-size: 12px; color: #4fd88a; font-weight: 700; }
+.ss-chart { display: flex; align-items: flex-end; gap: 6px; height: 180px; padding: 12px; background: var(--pan); border: 3px solid var(--ink); margin-bottom: 18px; }
+.ss-chart > div { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; }
+.ss-chart i { width: 100%; background: var(--red); min-height: 3px; } .ss-chart b { font: 400 15px Bangers; } .ss-chart small { font-size: 10px; color: #a39d90; }
+.ss-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.ss-bar { display: grid; grid-template-columns: 130px 1fr 40px; gap: 10px; align-items: center; margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+.ss-bar i { height: 14px; background: #ffffff12; } .ss-bar em { display: block; height: 100%; background: #4fd88a; } .ss-bar b { font: 400 18px Bangers; text-align: right; }
+.ss-row { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid #ffffff14; } .ss-row span { flex: 1; font-weight: 700; } .ss-row b { font: 400 20px Bangers; } .ss-row small { color: #a39d90; font-size: 11px; width: 70px; text-align: right; }
+@media (max-width: 760px) { .ss-tiles { grid-template-columns: 1fr 1fr; } .ss-cols { grid-template-columns: 1fr; } }
