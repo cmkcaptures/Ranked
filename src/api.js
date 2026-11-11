@@ -54,6 +54,11 @@ export async function fetchActivity(userId) {
   return d.Page.activities.filter(a => a.media)
 }
 
+export async function searchCharacters(q) {
+  const d = await gql(`query($q:String){ Page(perPage:12){ characters(search:$q, sort:FAVOURITES_DESC){ id name { full } favourites image { large }
+    media(perPage:1, sort:POPULARITY_DESC){ nodes { title { english romaji } coverImage { color } } } } } }`, { q })
+  return d.Page.characters
+}
 export async function searchAnime(q) {
   const d = await gql(`query($q:String){ Page(perPage:24){ media(search:$q, type:ANIME, sort:POPULARITY_DESC){ ${MEDIA} } } }`, { q })
   return d.Page.media

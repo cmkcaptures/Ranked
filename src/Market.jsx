@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { openChar } from './CharProfile.jsx'
 import { sfx } from './sfx.js'
+import { searchCharacters } from './api.js'
 import { saleResult, showSale } from './profit.js'
 import './shock.css'
 import { sb, fetchAll } from './cloud.js'
@@ -139,7 +140,7 @@ function MarketLive({ me, friends }) {
         <div className="hudbox"><span>Cash</span><b>{coins(wallet.cash)}</b></div>
         <div className="hudbox"><span>Next tick</span><b><Ticker fn={() => { const t = Math.ceil((TICK_MS - (Date.now() % TICK_MS)) / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}` }} /></b></div>
         <div className="tabs">
-          {[['market', 'Market'], ['portfolio', 'Portfolio'], ['bets', 'Bets'], ['news', 'News'], ['board', 'Leaderboard']].map(([k, l]) =>
+          {[['market', 'Market'], ['portfolio', 'Portfolio'], ['bets', 'Bets'], ['news', 'News'], ['ipo', '🗳️ IPO vote'], ['board', 'Leaderboard']].map(([k, l]) =>
             <button key={k} className={view === k ? 'on' : ''} onClick={() => setView(k)}>{l}</button>)}
         </div>
       </div>
@@ -172,6 +173,7 @@ function MarketLive({ me, friends }) {
         const { data } = await sb.from('wallets').select('*').eq('user_id', me.id).maybeSingle(); if (data) setWallet(data)
       }} />}
 
+      {view === 'ipo' && <IpoVote me={me} friends={friends} byId={byId} />}
       {view === 'news' && <div className="newsfeed">
         {news.map(n => {
           const c = byId[n.char_id]
@@ -666,3 +668,57 @@ function ShockFeed({ byId, onPick }) {
 
 // what an open short is worth right now: collateral back plus the gain (or minus the loss), never below 0
 function shortWorth(s, c) { return Math.max(0, Number(s.collateral) + (Number(s.entry) - (Number(c?.price) || Number(s.entry))) * s.qty) }
+
+// the squad nominates and votes for the next listing; Sunday 8pm UK the winner (2+ votes) IPOs, voters get first dibs
+function IpoVote({ me, friends, byId }) {
+  const [noms, setNoms] = useState(null)
+  const [q, setQ] = useState('')
+  const [res, setRes] = useState([])
+  const [err, setErr] = useState('')
+  const load = () => Promise.all([sb.from('ipo_nominations').select('*').order('created_at', { ascending: false }).limit(60), sb.from('ipo_votes').select('*')])
+    .then(([n, v]) => setNoms((n.data || []).map(x => ({ ...x, voters: (v.data || []).filter(y => y.nomination_id === x.id).map(y => y.user_id) }))))
+  useEffect(() => {
+    load()
+    const ch = sb.channel('ipovote').on('postgres_changes', { event: '*', schema: 'public', table: 'ipo_votes' }, load)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ipo_nominations' }, load).subscribe()
+    return () => { sb.removeChannel(ch) }
+  }, [])
+  useEffect(() => {
+    if (q.trim().length < 2) { setRes([]); return }
+    const t = setTimeout(() => searchCharacters(q).then(setRes).catch(() => {}), 350)
+    return () => clearTimeout(t)
+  }, [q])
+  const name = id => friends.find(f => f.id === id)?.username || '?'
+  const nominate = async c => {
+    setErr('')
+    const m = c.media.nodes[0]
+    const { error } = await sb.rpc('ipo_nominate', { p_char: c.id, p_name: c.name.full, p_image: c.image.large, p_show: m?.title.english || m?.title.romaji || '', p_color: m?.coverImage?.color || null, p_fav: c.favourites })
+    if (error) { setErr(error.message); sfx('loss') } else { sfx('win', { text: 'ノミネート!' }); setQ(''); load() }
+  }
+  const vote = async n => { setErr(''); const { error } = await sb.rpc('ipo_vote', { p_nom: n.id }); if (error) setErr(error.message); else load() }
+  // next Sunday 20:00 (local clock, UK for the squad)
+  const close = (() => { const d = new Date(); const t = new Date(d); t.setDate(d.getDate() + ((7 - d.getDay()) % 7)); t.setHours(20, 0, 0, 0); if (t < d) t.setDate(t.getDate() + 7); return t })()
+  const hrs = Math.floor((close - Date.now()) / 36e5)
+  if (!noms) return <div className="loading">Loading…</div>
+  const open = noms.filter(n => n.status === 'open').sort((a, b) => b.voters.length - a.voters.length || b.favourites - a.favourites)
+  const past = noms.filter(n => n.status === 'listed').slice(0, 6)
+  return <div className="ipov">
+    <div className="ipov-head"><div><h2>Vote the next IPO</h2><p className="muted">Nominate anyone not on the market. Every Sunday at 8pm the top pick (2+ votes) is announced as an IPO 48 hours out, and <b>only voters can pre-order for the first 24 hours</b>.</p></div>
+      <div className="ipov-clock"><small>Voting closes in</small><b>{Math.floor(hrs / 24)}d {hrs % 24}h</b></div></div>
+    <div className="ipov-search"><input className="search" placeholder="Search AniList for a character to nominate…" value={q} onChange={e => setQ(e.target.value)} />
+      {res.length > 0 && <div className="ipov-res">{res.map(c => { const listed = !!byId[c.id], nom = noms.find(n => n.char_id === c.id && n.status === 'open')
+        return <div key={c.id} className="ipov-r"><img src={c.image.large} alt="" /><div><b>{c.name.full}</b><span>{c.media.nodes[0]?.title.english || c.media.nodes[0]?.title.romaji} · ♥ {c.favourites.toLocaleString()}</span></div>
+          {listed ? <em>On the market</em> : nom ? <button className="pill ghost" onClick={() => vote(nom)}>{nom.voters.includes(me.id) ? 'Voted ✓' : 'Vote'}</button> : <button className="pill" onClick={() => nominate(c)}>Nominate</button>}</div> })}</div>}
+    </div>
+    {err && <div className="card pad error">{err}</div>}
+    <div className="ipov-list">{open.map((n, i) => { const mine = n.voters.includes(me.id)
+      return <div key={n.id} className={`ipov-n ${i === 0 && n.voters.length >= 2 ? 'lead' : ''}`}>
+        <div className="rank">#{i + 1}</div><img src={n.image} alt="" />
+        <div className="grow"><b>{n.name}</b><span>{n.show}</span><small>nominated by {name(n.nominated_by)} · voters: {n.voters.map(name).join(', ')}</small></div>
+        <div className="votes"><b>{n.voters.length}</b><span>vote{n.voters.length === 1 ? '' : 's'}</span></div>
+        <button className={`pill ${mine ? 'ghost' : ''}`} onClick={() => vote(n)}>{mine ? 'Voted ✓' : 'Vote'}</button>
+      </div> })}
+      {!open.length && <div className="card pad muted">No nominations yet. Search above to nominate the first one.</div>}</div>
+    {past.length > 0 && <><h3>Voted in</h3><div className="ipov-past">{past.map(n => <div key={n.id}><img src={n.image} alt="" /><b>{n.name}</b></div>)}</div></>}
+  </div>
+}

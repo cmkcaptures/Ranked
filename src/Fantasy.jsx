@@ -20,7 +20,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
   trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Weekly hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
-  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['🐷', 'Piggy bank smashed'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
+  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['🐷', 'Piggy bank smashed'], cup: ['🏆', 'Mid-season Cup champion'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
 const pts = n => (n > 0 ? '+' : '') + n
@@ -167,7 +167,7 @@ export default function Fantasy({ me, friends, openProfile }) {
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
-        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
+        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['cup', '🏆 Cup'], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
         {tab === 'table' && <button className="pill ghost rp-open" onClick={() => setReplay(true)}>🎬 Draft-day replay</button>}
         {replay && <DraftReplay S={S} draft={draft} chars={chars} charPts={charPts} who={who} onClose={() => setReplay(false)} />}
         {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} vault={vault} openProfile={openProfile} events={live} S={S} />}
@@ -181,6 +181,7 @@ export default function Fantasy({ me, friends, openProfile }) {
         {tab === 'trades' && <Trades me={me} picks={picks} byId={byId} name={name} trades={trades} run={run} />}
         {tab === 'moments' && <Moments events={cur.filter(e => e.source === 'bot')} byId={byId} name={name} />}
         {tab === 'vote' && <Vote S={S} teams={teams} byId={byId} name={name} me={me} votes={votes} reload={reload} setErr={setErr} />}
+        {tab === 'cup' && <Cup S={S} teams={teams} events={cur} who={who} me={me} openProfile={openProfile} />}
         {tab === 'rules' && <Rules />}
       </>}
     </div>
@@ -446,5 +447,41 @@ function Form({ f = {}, week, mini }) {
     {!mini && <span>Form</span>}
     <div className="ffg-bars">{weeks.map((w, i) => <i key={w} className={`${w === week ? 'now' : ''} ${vals[i] < 0 ? 'neg' : ''}`}
       style={{ height: `${Math.max(vals[i] ? 12 : 4, Math.abs(vals[i]) / max * 100)}%` }} title={`Week ${w}: ${vals[i]} pts`} />)}</div>
+  </div>
+}
+
+// Mid-season Cup: knockout from week 7. Seeds = table before week 7. R1 (wk 7): 3v6, 4v5. Semis (wk 8): 1 v lowest survivor, 2 v the other.
+// Final (wk 9). Most league points that week wins the tie (higher seed wins a draw). Champion +25.
+const CUP_START = 7
+function Cup({ S, teams, events, who, me, openProfile }) {
+  const a = CUP_START
+  const wk = (u, w) => events.filter(e => e.team_user === u && e.week === w && e.kind !== 'cup').reduce((n, e) => n + e.points, 0)
+  const seeds = [...teams].map(t => ({ u: t.user, before: events.filter(e => e.team_user === t.user && e.week < a).reduce((n, e) => n + e.points, 0) }))
+    .sort((x, y) => y.before - x.before || (x.u < y.u ? -1 : 1)).map(x => x.u)
+  if (seeds.length < 4) return <div className="card pad muted">The cup needs at least 4 teams.</div>
+  const seedOf = u => seeds.indexOf(u) + 1
+  const decided = w => S.week > w
+  const tie = (x, y, w) => { if (!x || !y) return { x, y, w, win: null }; const px = wk(x, w), py = wk(y, w)
+    const win = !decided(w) ? null : px > py ? x : py > px ? y : (seedOf(x) < seedOf(y) ? x : y); return { x, y, w, px, py, win } }
+  const r1 = seeds.length >= 6 ? [tie(seeds[2], seeds[5], a), tie(seeds[3], seeds[4], a)] : [{ x: seeds[2], win: seeds[2], bye: true }, { x: seeds[3], win: seeds[3], bye: true }]
+  const surv = r1.map(t => t.win)
+  const [lo, hi] = surv.every(Boolean) ? [...surv].sort((p, q) => seedOf(q) - seedOf(p)) : [null, null]
+  const sf = [tie(seeds[0], lo, a + 1), tie(seeds[1], hi, a + 1)]
+  const fin = tie(sf[0].win, sf[1].win, a + 2)
+  const champ = fin.win
+  const status = S.week < a ? `Starts week ${a}. Seeds lock when week ${a - 1} ends.` : S.week <= a + 2 ? `Live: ${['Round 1', 'Semi-finals', 'Final'][S.week - a]} (week ${S.week})` : 'Finished'
+  const Side = ({ u, p, won, live }) => u ? <div className={`cup-side ${won ? 'won' : won === false ? 'out' : ''} ${u === me.id ? 'me' : ''}`} onClick={() => openProfile(u)}>
+    <i>{seedOf(u)}</i><b>{who(u)?.username || '?'}</b>{p !== undefined && <em className={live ? 'live' : ''}>{p}</em>}</div> : <div className="cup-side tbd"><b>TBD</b></div>
+  const Tie = ({ t, label }) => <div className="cup-tie"><small>{label}</small>
+    {t.bye ? <><Side u={t.x} /><div className="cup-bye">bye</div></> : <><Side u={t.x} p={t.px} won={t.win ? t.win === t.x : undefined} live={S.week === t.w} /><Side u={t.y} p={t.py} won={t.win ? t.win === t.y : undefined} live={S.week === t.w} /></>}</div>
+  return <div className="cup">
+    <div className="cup-head"><div><h2>Mid-season Cup</h2><p className="muted">{status} Each tie is won by whoever scores more league points that week. The champion gets <b>+25</b>.</p></div>
+      {champ && <div className="cup-champ">🏆 <b>{who(champ)?.username}</b><span>Champion</span></div>}</div>
+    <div className="cup-bracket">
+      <div className="cup-col"><h4>Round 1 · wk {a}</h4>{r1.map((t, i) => <Tie key={i} t={t} label={t.bye ? 'Bye' : `Seed ${seedOf(t.x)} v ${seedOf(t.y)}`} />)}
+        <div className="cup-tie byes"><small>Byes to the semis</small><Side u={seeds[0]} /><Side u={seeds[1]} /></div></div>
+      <div className="cup-col"><h4>Semi-finals · wk {a + 1}</h4>{sf.map((t, i) => <Tie key={i} t={t} label={`Semi ${i + 1}`} />)}</div>
+      <div className="cup-col"><h4>Final · wk {a + 2}</h4><Tie t={fin} label="Final" /></div>
+    </div>
   </div>
 }
