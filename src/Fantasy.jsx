@@ -10,10 +10,13 @@ import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard } from './LeagueUI.jsx
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
 const CHIPS = { triple: ['👑', 'Triple Captain', 'your captain scores x3 this week'], boost: ['🪑', 'Bench Boost', 'all 6 count this week, nobody benched'], wildcard: ['🃏', 'Wildcard', 'unlimited swaps this week'] }
 export const norm = t => (t || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+// which league you're in this season: null = the original squad league ('FALL-2026'), otherwise 'FALL-2026:<id>'
+let LEAGUE = null
+export const setLeague = l => { LEAGUE = l || null }
 export function fantasySeason(d = new Date()) {
   const q = Math.floor(d.getUTCMonth() / 3), y = d.getUTCFullYear()
   const start = Date.UTC(y, q * 3, 1), end = Date.UTC(q === 3 ? y + 1 : y, (q * 3 + 3) % 12, 1)
-  return { key: `${SEASONS[q]}-${y}`, label: `${SEASONS[q][0] + SEASONS[q].slice(1).toLowerCase()} ${y}`, week: Math.floor((d - start) / 604800000) + 1, end }
+  return { base: `${SEASONS[q]}-${y}`, league: LEAGUE, key: `${SEASONS[q]}-${y}${LEAGUE ? ':' + LEAGUE : ''}`, label: `${SEASONS[q][0] + SEASONS[q].slice(1).toLowerCase()} ${y}`, week: Math.floor((d - start) / 604800000) + 1, end }
 }
 const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice(1).toLowerCase()} ${y}` }
 
@@ -37,7 +40,29 @@ function matchups(ids, week) {
   return out
 }
 
+// gate: work out which league you're in before loading anything
 export default function Fantasy({ me, friends, openProfile }) {
+  const [st, setSt] = useState(null)        // { main: bool, league: row|null }
+  const [tick, setTick] = useState(0)
+  useEffect(() => {
+    if (!sb || !me) return
+    const base = fantasySeason().base
+    Promise.all([sb.from('league_members').select('league_id, leagues(*)').eq('user_id', me.id).eq('base', base).maybeSingle(),
+      sb.rpc('fantasy_in_main', { p_user: me.id })]).then(([m, main]) => {
+      setLeague(m.data?.league_id || null)
+      setSt({ main: !!main.data, league: m.data?.leagues || null })
+    })
+  }, [me?.id, tick])
+  if (!sb || !me) return <div className="card pad muted">Sign in to play the Fantasy League.</div>
+  if (!st) return <div className="loading">Finding your league…</div>
+  if (!st.main && !st.league) return <LeagueGate me={me} onDone={() => setTick(t => t + 1)} />
+  return <>
+    {st.league && <LeagueBar lg={st.league} me={me} onLeave={() => setTick(t => t + 1)} />}
+    <FantasyLeague key={st.league?.id || 'main'} me={me} friends={friends} openProfile={openProfile} />
+  </>
+}
+
+function FantasyLeague({ me, friends, openProfile }) {
   const S = fantasySeason()
   const [chars, setChars] = useState([])
   const [info, setInfo] = useState({})
@@ -508,5 +533,45 @@ function Deadline({ S, swaps, trades, byId, name }) {
   return <div className="dl">
     <div className="dl-head"><b>⏰ TRANSFER DEADLINE DAY</b><span>Unlimited swaps · no waivers · window shuts in <em>{Math.floor(left / 36e5)}h {Math.floor(left % 36e5 / 6e4)}m</em></span></div>
     <div className="dl-ticker"><div>{(moves.length ? moves : [{ txt: 'No moves yet. Who blinks first?' }]).concat(moves.length ? moves : []).map((m, i) => <span key={i}>{m.txt}</span>)}</div></div>
+  </div>
+}
+
+// ---------- leagues: create, join with a code, or get matched into a public one ----------
+function LeagueGate({ me, onDone }) {
+  const [name, setName] = useState(`${me.username}'s League`)
+  const [code, setCode] = useState('')
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  const go = async (fn, args) => { setBusy(true); setErr(''); const { error } = await sb.rpc(fn, args); setBusy(false); if (error) { setErr(error.message); sfx('loss') } else { sfx('win', { text: 'ドン!' }); onDone() } }
+  const S = fantasySeason()
+  return <div className="lgate">
+    <div className="lg-head"><small>{S.label} · Fantasy League</small><h1>Draft anime characters.<br /><em>Score when they go off.</em></h1>
+      <p>Pick 5 characters (one per show) in a live snake draft. They score when their episodes and chapters drop, when they power up, win fights or trend, and lose points when they die. Captain, chips, trades and a mid-season cup on top.</p></div>
+    <div className="lg-opts">
+      <div className="lg-card main"><b>🏆 Start a league</b><span>Play with your mates. You get an invite code to share.</span>
+        <input className="search" value={name} onChange={e => setName(e.target.value)} maxLength={40} />
+        <button className="pill" disabled={busy} onClick={() => go('league_create', { p_name: name, p_public: false })}>Create league</button></div>
+      <div className="lg-card"><b>🔑 Join with a code</b><span>A friend sent you a 6-letter code.</span>
+        <input className="search" placeholder="e.g. 7F3K9A" value={code} onChange={e => setCode(e.target.value.toUpperCase())} maxLength={6} />
+        <button className="pill" disabled={busy || code.length < 6} onClick={() => go('league_join', { p_code: code })}>Join league</button></div>
+      <div className="lg-card"><b>🎲 Play with randoms</b><span>Jump into an open public league. The draft starts when it fills up (8 players), or anyone can start it early.</span>
+        <button className="pill" disabled={busy} onClick={() => go('league_join_public', {})}>Find me a league</button></div>
+    </div>
+    {err && <div className="card pad error">{err}</div>}
+  </div>
+}
+
+function LeagueBar({ lg, me, onLeave }) {
+  const [copied, setCopied] = useState(false)
+  const link = `${location.origin}${location.pathname}#/league`
+  const invite = async () => {
+    const text = `Join my anime fantasy league "${lg.name}" on Ranked! Code: ${lg.code}`
+    try { if (navigator.share) await navigator.share({ title: 'Join my league', text, url: link }); else { await navigator.clipboard.writeText(`${text}\n${link}`); setCopied(true); setTimeout(() => setCopied(false), 2000) } } catch {}
+  }
+  return <div className="lbar">
+    <div><small>{lg.public ? 'Public league' : 'Your league'}</small><b>{lg.name}</b></div>
+    <div className="lbar-code"><small>Invite code</small><b>{lg.code}</b></div>
+    <button className="pill" onClick={invite}>{copied ? '✓ Copied' : '📨 Invite friends'}</button>
+    <button className="pill ghost" onClick={async () => { if (!confirm('Leave this league? Only possible before the draft starts.')) return; const { error } = await sb.rpc('league_leave'); if (error) alert(error.message); else onLeave() }}>Leave</button>
   </div>
 }

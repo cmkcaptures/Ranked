@@ -325,3 +325,35 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .lobbybox { background: #2b2830 !important; border: 3px solid #e9e2d0 !important; box-shadow: 8px 8px 0 #e8202f !important; clip-path: none !important; transform: none !important; }
 .lobbybox .kicker { color: #e8202f !important; font: 400 18px Bangers !important; letter-spacing: 2px; }
 .lobbybox .tabs button { color: #e9e2d0 !important; }
+
+/* ===== leagues ===== */
+.lgate { max-width: 1000px; }
+.lg-head small { font: 800 11px Inter; letter-spacing: 2px; text-transform: uppercase; color: var(--red); }
+.lg-head h1 { margin: 8px 0; font-size: clamp(40px, 6vw, 64px) !important; line-height: .95; } .lg-head h1 em { font-style: normal; color: var(--red); }
+.lg-head p { max-width: 640px; color: #c9c2b2; font-size: 15px; }
+.lg-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0; }
+.lg-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: var(--pan); border: 3px solid var(--ink); box-shadow: 5px 5px 0 #000; }
+.lg-card.main { box-shadow: 6px 6px 0 var(--red); }
+.lg-card b { font: 400 24px Bangers; letter-spacing: 1px; } .lg-card span { font-size: 13px; color: #a39d90; flex: 1; } .lg-card .search { margin: 0; }
+.lbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 14px; background: var(--pan); border: 3px solid var(--ink); border-left: 8px solid var(--red); }
+.lbar small { display: block; font: 800 10px Inter; letter-spacing: 1.5px; text-transform: uppercase; color: #a39d90; }
+.lbar b { font: 400 22px Bangers; letter-spacing: 1px; } .lbar > div:first-child { flex: 1; }
+.lbar-code b { font-family: ui-monospace, monospace; font-weight: 800; font-size: 20px; letter-spacing: 3px; color: var(--red); }
+@media (max-width: 860px) { .lg-opts { grid-template-columns: 1fr; } }
+
+/* trading cup */
+.tcup-head { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 14px; } .tcup-head h2 { margin: 0; font-size: 40px; }
+.tcup-head small { font: 800 11px Inter; letter-spacing: 2px; text-transform: uppercase; color: var(--red); } .tcup-head p { max-width: 600px; margin: 4px 0 0; }
+.tcup-clock { flex: none; text-align: center; padding: 8px 16px; background: var(--pan); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--red); }
+.tcup-clock small { display: block; color: #a39d90; } .tcup-clock b { font: 400 30px Bangers; letter-spacing: 1px; }
+.tcup-me { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 16px; margin-bottom: 14px; background: var(--pan); border: 3px solid var(--ink); box-shadow: 5px 5px 0 #4fd88a; }
+.tcup-me.dn { box-shadow: 5px 5px 0 var(--red); } .tcup-me span { font: 800 11px Inter; letter-spacing: 2px; text-transform: uppercase; color: #a39d90; }
+.tcup-me b { font: 400 34px Bangers; letter-spacing: 1px; } .tcup-me em { font: 400 30px Bangers; font-style: normal; } .tcup-me.up em { color: #4fd88a; } .tcup-me.dn em { color: var(--red); }
+.tcup-me small { margin-left: auto; color: #a39d90; font-weight: 700; }
+.tcup-row { display: grid; grid-template-columns: 48px 1fr auto 100px; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 6px; background: var(--pan); border: 2px solid #e9e2d030; }
+.tcup-row i { font: 400 24px Bangers; font-style: normal; text-align: center; } .tcup-row b { font: 400 21px Bangers; letter-spacing: 1px; }
+.tcup-row span { font-size: 12px; color: #a39d90; font-weight: 700; } .tcup-row em { font: 400 24px Bangers; font-style: normal; text-align: right; }
+.tcup-row.p1 { border-color: #ffd84a; box-shadow: 5px 5px 0 #ffd84a55; } .tcup-row.me { outline: 3px solid var(--red); outline-offset: 2px; }
+.tcup-idle { margin-top: 8px; }
+.tcup-wins { display: flex; gap: 10px; flex-wrap: wrap; } .tcup-wins > div { padding: 8px 14px; background: var(--pan); border: 2px solid var(--ink); text-align: center; }
+.tcup-wins small { display: block; color: #a39d90; font-size: 11px; } .tcup-wins b { display: block; font: 400 20px Bangers; letter-spacing: 1px; } .tcup-wins em { font-style: normal; color: #4fd88a; font-weight: 800; }

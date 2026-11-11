@@ -5,7 +5,7 @@ import Stats from './Stats.jsx'
 import Market from './Market.jsx'
 import Detail from './Detail.jsx'
 import HypeBracket from './HypeBracket.jsx'
-import Fantasy from './Fantasy.jsx'
+import Fantasy, { fantasySeason, setLeague } from './Fantasy.jsx'
 import CharProfile from './CharProfile.jsx'
 import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
@@ -157,6 +157,7 @@ function Main({ me, setMe }) {
   ])
   const [friends, setFriends] = useState([])
   useEffect(() => { if (me) fetchProfiles().then(setFriends) }, [me?.id])
+  useEffect(() => { if (me && sb) sb.from('league_members').select('league_id').eq('user_id', me.id).eq('base', fantasySeason().base).maybeSingle().then(({ data }) => setLeague(data?.league_id)) }, [me?.id])
   useEffect(() => { if (me && (me.anilist_name || '') !== username) setUsername(me.anilist_name || '') }, [me?.id])
   const prevTop = useRef(undefined)
   useEffect(() => {

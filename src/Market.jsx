@@ -146,7 +146,7 @@ function MarketLive({ me, friends }) {
         <div className="hudbox"><span>Cash</span><b>{coins(wallet.cash)}</b></div>
         <div className="hudbox"><span>Next tick</span><b><Ticker fn={() => { const t = Math.ceil((TICK_MS - (Date.now() % TICK_MS)) / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}` }} /></b></div>
         <div className="tabs">
-          {[['market', 'Market'], ['portfolio', 'Portfolio'], ['bets', 'Bets'], ['news', 'News'], ['ipo', '🗳️ IPO vote'], ['board', 'Leaderboard']].map(([k, l]) =>
+          {[['market', 'Market'], ['portfolio', 'Portfolio'], ['bets', 'Bets'], ['news', 'News'], ['cup', '🏆 Trading Cup'], ['ipo', '🗳️ IPO vote'], ['board', 'Leaderboard']].map(([k, l]) =>
             <button key={k} className={view === k ? 'on' : ''} onClick={() => setView(k)}>{l}</button>)}
         </div>
       </div>
@@ -183,6 +183,7 @@ function MarketLive({ me, friends }) {
         const { data } = await sb.from('wallets').select('*').eq('user_id', me.id).maybeSingle(); if (data) setWallet(data)
       }} />}
 
+      {view === 'cup' && <TradingCup me={me} />}
       {view === 'ipo' && <IpoVote me={me} friends={friends} byId={byId} />}
       {view === 'news' && <div className="newsfeed">
         {news.map(n => {
@@ -730,5 +731,37 @@ function IpoVote({ me, friends, byId }) {
       </div> })}
       {!open.length && <div className="card pad muted">No nominations yet. Search above to nominate the first one.</div>}</div>
     {past.length > 0 && <><h3>Voted in</h3><div className="ipov-past">{past.map(n => <div key={n.id}><img src={n.image} alt="" /><b>{n.name}</b></div>)}</div></>}
+  </div>
+}
+
+// weekly Trading Cup: % gain since Monday, so a brand-new 10k wallet can beat a whale
+function TradingCup({ me }) {
+  const [rows, setRows] = useState(null)
+  const [wins, setWins] = useState([])
+  useEffect(() => {
+    const load = () => sb.rpc('trading_cup_board').then(({ data }) => setRows(data || []))
+    load(); const t = setInterval(load, 30000)
+    sb.from('cup_winners').select('*, profiles(username)').order('week_key', { ascending: false }).limit(6).then(({ data }) => setWins(data || []))
+    return () => clearInterval(t)
+  }, [])
+  // next Monday 00:00 local
+  const end = (() => { const d = new Date(); const t = new Date(d); t.setHours(24, 0, 0, 0); while (t.getDay() !== 1) t.setDate(t.getDate() + 1); return t })()
+  const left = end - Date.now(), dd = Math.floor(left / 864e5), hh = Math.floor(left % 864e5 / 36e5)
+  if (!rows) return <div className="loading">Loading the cup…</div>
+  const ranked = rows.filter(r => r.trades > 0), idle = rows.filter(r => !r.trades)
+  const mine = rows.find(r => r.user_id === me.id), myRank = ranked.findIndex(r => r.user_id === me.id) + 1
+  const P = v => `${v >= 0 ? '+' : ''}${(v * 100).toFixed(2)}%`
+  return <div className="tcup">
+    <div className="tcup-head">
+      <div><small>Weekly competition</small><h2>Trading Cup</h2><p className="muted">Ranked by <b>% gain</b> on your net worth since Monday, so a fresh 10k wallet can beat a whale. Make at least one trade to qualify. Winner gets <b>+2,000 coins</b> and the 🏆.</p></div>
+      <div className="tcup-clock"><small>Ends in</small><b>{dd}d {hh}h</b></div>
+    </div>
+    {mine && <div className={`tcup-me ${mine.pct >= 0 ? 'up' : 'dn'}`}><span>You</span><b>{myRank ? `#${myRank}` : 'Not ranked yet'}</b><em>{P(mine.pct || 0)}</em>
+      <small>{mine.trades ? `${mine.trades} trade${mine.trades > 1 ? 's' : ''} this week` : 'Make a trade to enter'}</small></div>}
+    <div className="tcup-list">{ranked.map((r, i) => <div key={r.user_id} className={`tcup-row p${i + 1} ${r.user_id === me.id ? 'me' : ''}`}>
+      <i>{i === 0 ? '🏆' : i + 1}</i><b>{r.username}</b><span>{Math.round(r.worth).toLocaleString()} coins</span><em className={r.pct >= 0 ? 'up' : 'down'}>{P(r.pct)}</em></div>)}
+      {!ranked.length && <div className="card pad muted">Nobody has traded this week yet. First trade takes the lead.</div>}
+      {idle.length > 0 && <div className="muted small tcup-idle">Not trading yet: {idle.map(r => r.username).join(', ')}</div>}</div>
+    {wins.length > 0 && <><h3>Past champions</h3><div className="tcup-wins">{wins.map(w => <div key={w.week_key}><small>Week {w.week_key.split('-')[1]}</small><b>{w.profiles?.username || 'Nobody'}</b><em>{w.pct != null ? P(w.pct) : '—'}</em></div>)}</div></>}
   </div>
 }
