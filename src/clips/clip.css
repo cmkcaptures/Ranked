@@ -15,14 +15,14 @@ html, body { margin: 0; background: #151418; }
 .up { color: #4fd88a; } .dn { color: #e8202f; }
 
 /* vs */
-.vs .c-fighter { width: 250px; text-align: center; top: 200px; } .vs .c-fighter.a { left: 14px; animation: cL .6s cubic-bezier(.2, 1.4, .4, 1) both .8s; } .vs .c-fighter.b { right: 14px; top: 300px; animation: cR .6s cubic-bezier(.2, 1.4, .4, 1) both 1.5s; }
-.c-fighter img { width: 100%; height: 300px; object-fit: cover; object-position: 50% 15%; border: 4px solid #e9e2d0; box-shadow: 6px 6px 0 #3d8bff; }
+.vs .c-fighter { width: 240px; text-align: center; top: 190px; } .vs .c-fighter.a { left: 14px; animation: cL .6s cubic-bezier(.2, 1.4, .4, 1) both .8s; } .vs .c-fighter.b { right: 14px; top: 190px; animation: cR .6s cubic-bezier(.2, 1.4, .4, 1) both 1.5s; }
+.c-fighter img { width: 100%; height: 280px; object-fit: cover; object-position: 50% 15%; border: 4px solid #e9e2d0; box-shadow: 6px 6px 0 #3d8bff; }
 .c-fighter.b img { box-shadow: -6px 6px 0 #e8202f; }
 .c-fighter b { display: block; font: 400 42px/1 Bangers; letter-spacing: 1px; margin-top: 8px; } .c-fighter span { display: block; font: 400 20px Bangers; color: #ffd84a; } .c-fighter em { font-size: 13px; font-weight: 800; font-style: normal; color: #a39d90; }
-.c-vs { top: 400px; left: 0; right: 0; text-align: center; font: 400 120px Bangers; color: #fff; -webkit-text-stroke: 4px #000; text-shadow: 6px 6px 0 #e8202f; animation: cSlam .6s cubic-bezier(.2, 1.8, .4, 1) both 2.3s; }
-.c-reasons { left: 24px; right: 24px; top: 680px; display: flex; flex-direction: column; gap: 8px; }
+.c-vs { z-index: 3 !important; top: 250px; left: 0; right: 0; text-align: center; font: 400 120px Bangers; color: #fff; -webkit-text-stroke: 4px #000; text-shadow: 6px 6px 0 #e8202f; animation: cSlam .6s cubic-bezier(.2, 1.8, .4, 1) both 2.3s; }
+.c-reasons { left: 24px; right: 24px; top: 760px; display: flex; flex-direction: column; gap: 8px; }
 .c-reasons div { padding: 8px 12px; background: #2b2830; border-left: 6px solid #ffd84a; font-size: 17px; font-weight: 800; animation: cIn .45s both; }
-.c-verdict { left: 0; right: 0; top: 520px; text-align: center; animation: cSlam .6s cubic-bezier(.2, 1.8, .4, 1) both 4.2s; }
+.c-verdict { left: 0; right: 0; top: 600px; text-align: center; animation: cSlam .6s cubic-bezier(.2, 1.8, .4, 1) both 4.2s; }
 .c-stamp { display: inline-block; font: 400 40px Bangers; letter-spacing: 2px; padding: 4px 20px; border: 5px solid #ffd84a; color: #ffd84a; background: #151418; transform: rotate(-6deg); }
 .c-verdict b { display: block; font: 400 58px/1 Bangers; color: #fff; -webkit-text-stroke: 2px #000; margin-top: 6px; } .c-verdict em { font: 400 32px Bangers; font-style: normal; color: #4fd88a; }
 .vs .c-end { --end: 10.5s; }

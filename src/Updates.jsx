@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-16', headline: 'START YOUR OWN LEAGUE: FANTASY GOES PUBLIC, TRADING CUP KICKS OFF',
+    items: [
+      ['🏆 Your own leagues', 'Anyone can now start a fantasy league with their mates (invite code included) or jump into a public league with randoms. Characters are only exclusive inside your league.', 'League'],
+      ['🔑 Invite friends', 'Every league has a 6-letter code and an Invite button. Leagues hold up to 8 players.', 'League → Invite friends'],
+      ['📈 Weekly Trading Cup', 'Everyone is ranked by % gain on their net worth since Monday, so a fresh 10k wallet can beat a whale. Winner gets +2,000 coins and the 🏆.', 'Market → Trading Cup'],
+    ],
+  },
+  {
     id: '2026-11-15', headline: 'SHARE YOUR FIGHTS: RANKED OPENS ITS DOORS',
     items: [
       ['📤 Share any matchup', 'Every VS Arena fight now has its own link. Hit Share result and send your mates the verdict.', 'VS Arena → Share result'],

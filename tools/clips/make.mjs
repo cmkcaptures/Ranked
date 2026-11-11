@@ -47,15 +47,24 @@ const base = `http://localhost:${server.config.server.port}`
 const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--autoplay-policy=no-user-gesture-required'] })
 const lines = []
 for (const c of clips) {
-  const ctx = await browser.newContext({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2, recordVideo: { dir: out, size: { width: 1080, height: 1920 } } })
+  const ctx = await browser.newContext({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1, recordVideo: { dir: out, size: { width: 1080, height: 1920 } } })
   await ctx.addInitScript(f => { window.__FEED = f }, feed)
+  const t0 = Date.now()
   const page = await ctx.newPage()
   await page.goto(`${base}/clips.html?${c.url}`, { waitUntil: 'networkidle' })
+  // preload fonts + every image in the feed, then start the scene and remember when it began
+  await page.evaluate(async f => {
+    const urls = [...new Set([...Object.values(f.images || {}), ...['shocks', 'moments', 'movers'].flatMap(k => (f[k] || []).map(x => x.image))].filter(Boolean))]
+    await Promise.all(urls.slice(0, 120).map(u => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = u })))
+    await document.fonts.load('40px Bangers'); await document.fonts.load('900 40px "Noto Sans JP"'); await document.fonts.ready
+  }, feed)
+  await page.evaluate(() => window.startClip())
+  const start = (Date.now() - t0) / 1000 + 0.15
   await page.waitForTimeout(c.secs * 1000)
   const vid = page.video(); await ctx.close()
   const webm = await vid.path(), mp4 = path.join(out, c.file + '.mp4')
-  // trim the first 0.6s (page load) and encode for TikTok
-  execFileSync(ffmpeg, ['-y', '-ss', '0.6', '-i', webm, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', '30', '-preset', 'medium', '-crf', '20', '-movflags', '+faststart', mp4], { stdio: 'ignore' })
+  // cut everything before the scene started and encode for TikTok
+  execFileSync(ffmpeg, ['-y', '-ss', start.toFixed(2), '-i', webm, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-r', '30', '-preset', 'medium', '-crf', '20', '-movflags', '+faststart', mp4], { stdio: 'ignore' })
   fs.unlinkSync(webm)
   lines.push(`${c.file}.mp4\n${c.caption}\n`)
   console.log('made', mp4)
