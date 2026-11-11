@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-14', headline: 'WHO WOULD WIN? THE VS ARENA IS OPEN',
+    items: [
+      ['⚔️ VS Arena', 'Put any two of 46 fighters head to head (Goku, Luffy, Gojo, Sukuna, Ichigo, Aizen, Naruto, Saitama and more) and get a verdict: STOMP, DEFINITELY, LIKELY or TOSS-UP, with the reasons why.', 'Sidebar → VS Arena'],
+      ['📜 Real powerscaling', 'Every era and form is tiered from the VS Battles Wiki, with hax like Infinity, erasure, soul attacks, time stop and anti-magic weighed in, plus r/PowerScaling takes.', 'VS Arena'],
+      ['🎛️ Pick the exact version', 'Filter by period of the series, form or transformation, and switch individual abilities off. Toggle bloodlust, prep time or a stats-only fight.', 'VS Arena'],
+    ],
+  },
+  {
     id: '2026-11-13', headline: 'THE MARKET COMES ALIVE: NEW TRADING TERMINAL OPENS',
     items: [
       ['📈 New trading terminal', 'The Market is now a three-panel exchange: watchlist on the left, big chart and trade panel in the middle, live feeds on the right.', 'Market'],
