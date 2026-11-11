@@ -399,7 +399,7 @@ function Vote({ S, teams, byId, name, me, votes, reload, setErr }) {
 function Rules() {
   const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'], ['🌟', 'New form debut: a transformation shown for the very first time (on top of the +20, outside the weekly cap)', '+30'],
     ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
-  const hype = [['📊', 'Weekly hype ranking: every drafted character ranked by how much their hype grew vs their own usual week', '+30 (1st) → +5 (last)'],
+  const hype = [['📊', 'Daily hype ranking: every night each drafted character is ranked by how much their hype grew that day', '+5 (1st) → +1 (last) daily'],
     ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15'], ['🎬', 'New trailer: an official trailer, PV or teaser for a show, film or game they’re in', '+20']]
   const piggy = [['🐷', 'Every quiet week (show not airing, manga not releasing) your character’s piggy bank fills up, faster the longer you hold them', '5 → 11 → 18 → 27 → 37 → 49 → 60'],
     ['💥', 'Big news, a new trailer, or their story comes back (new season, chapter, fight)? The piggy bank smashes and pays out everything at once', 'max 60'],
