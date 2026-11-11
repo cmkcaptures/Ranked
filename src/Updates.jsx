@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-15', headline: 'SHARE YOUR FIGHTS: RANKED OPENS ITS DOORS',
+    items: [
+      ['📤 Share any matchup', 'Every VS Arena fight now has its own link. Hit Share result and send your mates the verdict.', 'VS Arena → Share result'],
+      ['🌍 Arena is public', 'Anyone can open a VS link without an account, so your shared fights work for everyone.', 'VS Arena'],
+      ['🚪 New front door', 'New visitors get a proper landing page, and sign-up no longer needs an AniList account.', 'Sign-up page'],
+    ],
+  },
+  {
     id: '2026-11-14', headline: 'WHO WOULD WIN? THE VS ARENA IS OPEN',
     items: [
       ['⚔️ VS Arena', 'Put any two of 46 fighters head to head (Goku, Luffy, Gojo, Sukuna, Ichigo, Aizen, Naruto, Saitama and more) and get a verdict: STOMP, DEFINITELY, LIKELY or TOSS-UP, with the reasons why.', 'Sidebar → VS Arena'],

@@ -13,6 +13,7 @@ import Wrapped from './Wrapped.jsx'
 import ShockAlert from './Shock.jsx'
 import Times from './Times.jsx'
 import VsArena from './VsArena.jsx'
+import { PublicVs } from './Lobby.jsx'
 import UpdatePaper from './Updates.jsx'
 import CharRank from './CharRank.jsx'
 import { Bell, Inbox, Squad } from './Social.jsx'
@@ -62,7 +63,7 @@ export default function App() {
   }, [session?.user.id])
 
   if (session === undefined) return <div className="loading">Loading…</div>
-  if (sb && !session) return <Lobby />
+  if (sb && !session) return /^#\/vs/.test(location.hash) ? <PublicVs /> : <Lobby />
   if (sb && !me) return <div className="loading">{authErr ? `Profile error: ${authErr}` : 'Entering the lobby…'}</div>
   return <Main me={me} setMe={setMe} />
 }
@@ -106,7 +107,7 @@ function Main({ me, setMe }) {
     window.addEventListener('popstate', on)
     return () => window.removeEventListener('popstate', on)
   }, [])
-  const [username, setUsername] = useStored('ranked.user', 'AspextPro')
+  const [username, setUsername] = useStored('ranked.user', '')
   const [user, setUser] = useState(null)
   const [alList, setList] = useState([])
   const [activity, setActivity] = useState([])
@@ -156,7 +157,7 @@ function Main({ me, setMe }) {
   ])
   const [friends, setFriends] = useState([])
   useEffect(() => { if (me) fetchProfiles().then(setFriends) }, [me?.id])
-  useEffect(() => { if (me?.anilist_name && me.anilist_name !== username) setUsername(me.anilist_name) }, [me?.id])
+  useEffect(() => { if (me && (me.anilist_name || '') !== username) setUsername(me.anilist_name || '') }, [me?.id])
   const prevTop = useRef(undefined)
   useEffect(() => {
     const top = rankings['10']?.[0]
@@ -200,6 +201,7 @@ function Main({ me, setMe }) {
   const [wrapped, setWrapped] = useState(false)
 
   async function load(name) {
+    if (!name) { setUser(null); setList([]); setActivity([]); setLoading(false); return }
     setLoading(true); setErr('')
     try {
       const u = await fetchUser(name)

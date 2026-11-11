@@ -35,7 +35,7 @@ export const fetchAll = async fn => (await fn()).data
 export const logActivity = () => {}
 // full-app preview bits
 const meProfile = { id: 'me', username: 'AspextPro', anilist_name: 'AspextPro' }
-export function useSession() { return { user: { id: 'me', email: 'preview@local' } } }
+export function useSession() { return location.search.includes('out') ? null : { user: { id: 'me', email: 'preview@local' } } }
 export async function ensureProfile() { return meProfile }
 export async function fetchProfiles() { return [meProfile, ...friends.filter(f => f.id !== 'me')] }
 export function useRowSync() { return true }
