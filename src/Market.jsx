@@ -2,6 +2,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { openChar } from './CharProfile.jsx'
 import { sfx } from './sfx.js'
 import { searchCharacters } from './api.js'
+import { useLivePrices, livePrice, liveChange, Flash, Movers, Heatmap, TradeTape } from './MarketLive.jsx'
 import { saleResult, showSale } from './profit.js'
 import './shock.css'
 import { sb, fetchAll } from './cloud.js'
@@ -66,6 +67,9 @@ function MarketLive({ me, friends }) {
   const [q, setQ] = useState('')
   // rows shown; grows as you scroll (hooks must stay above the early returns below)
   const [limit, setLimit] = useState(60)
+  const [mode, setMode] = useState('list')
+  const liveIds = useRef([])
+  const live = useLivePrices(chars, liveIds)
   useEffect(() => setLimit(60), [q, sort])
   const [err, setErr] = useState('')
 
@@ -121,6 +125,8 @@ function MarketLive({ me, friends }) {
     price: (a, b) => b.price - a.price,
   }
   const list = chars.filter(c => (c.sym + c.name).toLowerCase().includes(q.toLowerCase())).sort(sorters[sort])
+  liveIds.current = [...new Set([...list.slice(0, Math.min(limit, 60)).map(c => c.id), sel?.id,
+    ...chars.filter(c => c.price_24h > 0).sort((a, b) => Math.abs(change24(b)) - Math.abs(change24(a))).slice(0, 30).map(c => c.id)].filter(Boolean))]
   const tape = news.length ? news : chars.slice().sort((a, b) => Math.abs(change24(b)) - Math.abs(change24(a))).slice(0, 6)
     .map(c => ({ id: c.id, up: change24(c) >= 0, text: `$${c.sym} ${change24(c) >= 0 ? 'UP' : 'DOWN'} ${Math.abs(change24(c) * 100).toFixed(1)}% TODAY` }))
 
@@ -145,25 +151,29 @@ function MarketLive({ me, friends }) {
         </div>
       </div>
       {err && <div className="error">{err}</div>}
-      <ShockFeed byId={byId} onPick={id => { setSelId(id); setView('market') }} />
+      {view !== 'market' && <ShockFeed byId={byId} onPick={id => { setSelId(id); setView('market') }} />}
       <CrashBanner wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} />
       {view === 'market' && <LaunchStrip chars={chars} pre={pre} onPick={setSelId} />}
 
-      {view === 'market' && <div className="mgrid">
-        <section>
+      {view === 'market' && <Movers chars={chars} live={live} onPick={setSelId} />}
+      {view === 'market' && <div className="mterm">
+        <section className="mt-left">
           <div className="row gap mfilter">
+            <div className="mt-mode"><button className={mode === 'list' ? 'on' : ''} onClick={() => setMode('list')}>☰ List</button><button className={mode === 'heat' ? 'on' : ''} onClick={() => setMode('heat')}>▦ Heatmap</button></div>
             <input className="search" placeholder="Search ticker or name…" value={q} onChange={e => setQ(e.target.value)} />
             <select className="search msort" value={sort} onChange={e => setSort(e.target.value)}>
               <option value="hype">Most hyped</option><option value="events">IPOs &amp; episode days</option><option value="gap">Biggest power gap</option>
               <option value="gain">Top gainers 24h</option><option value="loss">Top losers 24h</option><option value="price">Highest price</option>
             </select>
           </div>
+          {mode === 'heat' ? <Heatmap chars={q ? list : chars} live={live} onPick={setSelId} sel={sel} /> : <>
           <div className="stocks">
-            {list.slice(0, limit).map(c => <StockRow key={c.id} c={c} selected={sel === c} pts={sparks[c.id]} onPick={setSelId} />)}
+            {list.slice(0, limit).map(c => <StockRow key={c.id} c={c} lp={livePrice(c, live)} lch={liveChange(c, live)} selected={sel === c} pts={sparks[c.id]} onPick={setSelId} />)}
           </div>
-          {limit < list.length && <MoreSentinel onMore={() => setLimit(l => l + 60)} left={list.length - limit} />}
+          {limit < list.length && <MoreSentinel onMore={() => setLimit(l => l + 60)} left={list.length - limit} />}</>}
         </section>
-        <aside><StockPanel c={sel} wallet={wallet} shorts={shorts.filter(s => s.char_id === sel.id)} openShort={openShort} closeShort={closeShort} trade={trade} preorder={preorder} myPre={pre.find(x => x.char_id === sel.id)} /></aside>
+        <aside className="mt-mid"><StockPanel lp={sel ? livePrice(sel, live) : 0} lch={sel ? liveChange(sel, live) : 0} c={sel} wallet={wallet} shorts={shorts.filter(s => s.char_id === sel.id)} openShort={openShort} closeShort={closeShort} trade={trade} preorder={preorder} myPre={pre.find(x => x.char_id === sel.id)} /></aside>
+        <aside className="mt-right"><TradeTape friends={friends} byId={byId} onPick={setSelId} /><ShockFeed vertical byId={byId} onPick={setSelId} /></aside>
       </div>}
 
       {view === 'portfolio' && <OpenOrders byId={byId} />}
@@ -249,7 +259,7 @@ function WhyPanel({ c: base }) {
   )
 }
 
-function StockPanel({ c, wallet, shorts = [], openShort, closeShort, trade, preorder, myPre }) {
+function StockPanel({ lp, lch, c, wallet, shorts = [], openShort, closeShort, trade, preorder, myPre }) {
   const [hours, setHours] = useState(24)
   const [qty, setQty] = useState(1)
   const [busy, setBusy] = useState(false)
@@ -268,7 +278,7 @@ function StockPanel({ c, wallet, shorts = [], openShort, closeShort, trade, preo
           <Badges c={c} big />
           <div className="sfull"><span className="tick">{c.sym}</span></div>
           <div className="muted small">{c.media_title}</div>
-          <div className="sbig">{coins(c.price)} <span className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</span></div>
+          <div className="sbig"><Flash v={lp || c.price}>{coins(lp || c.price)}</Flash> <span className={(lch ?? ch) >= 0 ? 'up' : 'down'}>{pct(lch ?? ch)}</span><i className="livepill">● LIVE</i></div>
         </div>
       </div>
       <div className="tabs rtabs">{RANGES.map(([l, v]) => <button key={l} className={hours === v ? 'on' : ''} onClick={() => setHours(v)}>{l}</button>)}</div>
@@ -595,14 +605,14 @@ function Ticker({ fn }) {
   return fn()
 }
 
-const StockRow = memo(function StockRow({ c, selected, pts, onPick }) {
-  const ch = change24(c), gap = powerGap(c)
+const StockRow = memo(function StockRow({ c, lp, lch, selected, pts, onPick }) {
+  const ch = lch ?? change24(c), gap = powerGap(c), price = lp ?? c.price
   return (
     <div className={`srow ${selected ? 'sel' : ''}`} onClick={() => onPick(c.id)}>
       <img src={c.image} alt="" loading="lazy" decoding="async" title="Open profile" onClick={e => { e.stopPropagation(); openChar(c.id) }} />
       <div className="sname"><b>{c.name}<Badges c={c} /></b><span className="tick">{c.sym}</span></div>
       <Spark pts={pts} up={ch >= 0} />
-      <div className="sprice"><b>{coins(c.price)}</b><span className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</span></div>
+      <div className="sprice"><Flash v={price}><b>{coins(price)}</b></Flash><span className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</span></div>
       <div className={`sgap ${gap > 0.03 ? 'hot' : gap < -0.03 ? 'cold' : ''}`} title="Power vs price: positive means price hasn't caught up yet">
         <HypeMeter h={c.hype} /><span>{gap > 0 ? '+' : ''}{(gap * 100).toFixed(0)}%</span>
       </div>
@@ -647,7 +657,7 @@ function LaunchStrip({ chars, pre, onPick }) {
 }
 
 // story shocks from the last 3 days: real episode moments that moved prices
-function ShockFeed({ byId, onPick }) {
+function ShockFeed({ byId, onPick, vertical }) {
   const [rows, setRows] = useState([])
   useEffect(() => {
     const load = () => sb.from('story_shocks').select('*').gte('at', new Date(Date.now() - 3 * 864e5).toISOString()).order('at', { ascending: false }).limit(20).then(({ data }) => setRows(data || []))
@@ -657,7 +667,7 @@ function ShockFeed({ byId, onPick }) {
   }, [])
   const list = rows.filter(r => byId[r.char_id])
   if (!list.length) return null
-  return <div className="shockfeed"><h4>Story shocks</h4>
+  return <div className={`shockfeed ${vertical ? 'vert' : ''}`}><h4>Story shocks</h4>
     {list.map(r => { const c = byId[r.char_id]; return <div key={r.id} onClick={() => onPick(c.id)} title={r.note || ''}>
       <img src={c.image} alt="" referrerPolicy="origin" />
       <div><b>{c.name}</b><small>{r.kind === 'ripple' ? (r.note || '').split(':')[0] : r.kind} · {new Date(r.at).toLocaleDateString(undefined, { weekday: 'short' })}</small></div>

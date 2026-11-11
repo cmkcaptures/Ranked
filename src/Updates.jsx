@@ -6,6 +6,16 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-13', headline: 'THE MARKET COMES ALIVE: NEW TRADING TERMINAL OPENS',
+    items: [
+      ['📈 New trading terminal', 'The Market is now a three-panel exchange: watchlist on the left, big chart and trade panel in the middle, live feeds on the right.', 'Market'],
+      ['⚡ Live-ticking prices', 'Prices move every couple of seconds between server updates and flash green or red on every move. Trades still fill at the real price.', 'Market'],
+      ['▦ Heatmap', 'See the whole market as a wall of tiles, sized by value and coloured by today's move.', 'Market → Heatmap'],
+      ['🔴 Live trade tape', 'Every squad buy, sell and short streams in as it happens, with sound effects for big trades.', 'Market → right panel'],
+      ['🏁 Top movers', 'Today's biggest gainers and losers across the top, updating live.', 'Market'],
+    ],
+  },
+  {
     id: '2026-11-12', headline: 'RIVALS RIPPLE, DEADLINE DAY ARRIVES AND THE PRESS IS BORN',
     items: [
       ['⚔️ Families & rivals', 'When a story moment moves a character\'s price, their family (same show) moves 30% as far the same way, and their rival moves 15% the OPPOSITE way. Goku up = Vegeta down.', 'Tap any character → Family & rivals'],

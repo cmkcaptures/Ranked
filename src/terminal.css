@@ -1,0 +1,64 @@
+/* ===== Market terminal ===== */
+.mterm { display: grid; grid-template-columns: minmax(300px, 1fr) minmax(360px, 1.25fr) minmax(240px, .7fr); gap: 16px; align-items: start; }
+.mterm > * { min-width: 0; }
+.mt-mid, .mt-right { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; scrollbar-width: thin; }
+.mt-left .stocks { max-height: calc(100vh - 220px); overflow: auto; scrollbar-width: thin; padding-right: 4px; }
+.mt-mode { display: flex; border: 3px solid var(--ink); flex: none; }
+.mt-mode button { padding: 6px 10px; font: 400 15px Bangers; letter-spacing: 1px; background: var(--pan); color: var(--ink); border: 0; cursor: pointer; }
+.mt-mode button.on { background: var(--ink); color: var(--deep); }
+.mfilter { flex-wrap: wrap; }
+@media (max-width: 1300px) { .mterm { grid-template-columns: minmax(300px, 1fr) minmax(340px, 1.2fr); } .mt-right { grid-column: 1 / -1; position: static; max-height: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } }
+@media (max-width: 860px) { .mterm { grid-template-columns: 1fr; } .mt-mid { position: static; max-height: none; } .mt-left .stocks { max-height: 60vh; } .mt-right { grid-template-columns: 1fr; } }
+
+/* price flashes */
+.fl-up, .fl-dn { animation: flUp .7s ease-out; border-radius: 2px; }
+.fl-dn { animation-name: flDn; }
+@keyframes flUp { 0% { background: #2ebe6e88; color: #fff; } 100% { background: transparent; } }
+@keyframes flDn { 0% { background: #e8202f88; color: #fff; } 100% { background: transparent; } }
+.livepill { margin-left: 8px; font: 800 10px Inter; font-style: normal; letter-spacing: 1.5px; color: var(--red); vertical-align: middle; animation: shockBlink 1.4s infinite; }
+.srow { transition: background .3s, transform .15s; } .srow:hover { transform: translateX(3px); }
+
+/* movers strip */
+.movers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.mv-side { min-width: 0; } .mv-side h4 { margin: 0 0 6px; font: 400 16px Bangers; letter-spacing: 1.5px; }
+.mv-side:first-child h4 { color: #4fd88a; } .mv-side:last-child h4 { color: var(--red); }
+.mv-side > div { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.mv-chip { flex: none; display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px; background: var(--pan); border: 2px solid var(--ink); color: var(--ink); cursor: pointer; transition: transform .15s; }
+.mv-chip:hover { transform: translateY(-2px); } .mv-chip.up { box-shadow: 3px 3px 0 #2ebe6e; } .mv-chip.dn { box-shadow: 3px 3px 0 var(--red); }
+.mv-chip img { width: 30px; height: 30px; object-fit: cover; object-position: 50% 15%; }
+.mv-chip b { font: 400 15px Bangers; letter-spacing: 1px; } .mv-p { font-size: 12px; font-weight: 700; padding: 0 2px; }
+.mv-chip em { font: 400 16px Bangers; font-style: normal; } .mv-chip.up em { color: #4fd88a; } .mv-chip.dn em { color: var(--red); }
+
+/* heatmap */
+.heat { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); grid-auto-rows: 64px; grid-auto-flow: dense; gap: 4px;
+  max-height: calc(100vh - 220px); overflow: auto; scrollbar-width: thin; }
+.ht { position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; padding: 5px 7px; border: 2px solid #000; color: #fff; cursor: pointer; text-align: left; transition: transform .15s, filter .15s; }
+.ht:hover { transform: scale(1.04); z-index: 2; filter: brightness(1.15); } .ht.sel { outline: 3px solid var(--ink); outline-offset: -3px; }
+.ht.s2 { grid-column: span 2; grid-row: span 2; } .ht.s3 { grid-column: span 3; grid-row: span 3; }
+.ht img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; opacity: .35; mix-blend-mode: luminosity; }
+.ht b { position: relative; font: 400 15px Bangers; letter-spacing: 1px; text-shadow: 1px 1px 0 #000; } .ht.s3 b { font-size: 28px; } .ht.s2 b { font-size: 20px; }
+.ht em { position: relative; font: 800 12px Inter; font-style: normal; text-shadow: 1px 1px 0 #000; } .ht.s3 em { font-size: 18px; }
+
+/* live trade tape */
+.ttape { background: var(--pan); border: 3px solid var(--ink); box-shadow: 5px 5px 0 #000; margin-bottom: 14px; }
+.ttape h4 { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; font: 400 18px Bangers; letter-spacing: 1.5px; border-bottom: 3px solid var(--ink); }
+.ttape-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: shockBlink 1s infinite; }
+.ttape-list { max-height: 420px; overflow: auto; scrollbar-width: thin; }
+.tt { display: flex; gap: 8px; align-items: center; padding: 7px 10px; border-bottom: 1px solid #ffffff12; border-left: 4px solid transparent; font-size: 12px; cursor: pointer; }
+.tt.buy { border-left-color: #2ebe6e; } .tt.sell { border-left-color: var(--red); } .tt.short { border-left-color: #b06bff; }
+.tt.fresh { animation: ttIn .6s cubic-bezier(.2, 1.5, .4, 1), ttGlow 2.5s; }
+@keyframes ttIn { from { transform: translateX(40px); opacity: 0; } } @keyframes ttGlow { 0% { background: #ffffff22; } }
+.tt img { width: 30px; height: 30px; object-fit: cover; object-position: 50% 15%; flex: none; }
+.tt > div { min-width: 0; flex: 1; } .tt b { font-weight: 800; } .tt small { display: block; color: #a39d90; } .tt time { color: #77706a; font-size: 11px; font-weight: 700; }
+.shockfeed.vert { flex-direction: column; overflow: visible; background: var(--pan); border: 3px solid var(--ink); padding: 8px; gap: 6px; }
+.shockfeed.vert h4 { writing-mode: horizontal-tb; transform: none; align-self: flex-start; }
+.shockfeed.vert > div { border-width: 2px; }
+
+/* pulsing hot badges */
+.badge.ipo, .badge.soon, .badge.ep, .badge.ch { animation: badgePulse 1.6s ease-in-out infinite; }
+@keyframes badgePulse { 50% { transform: scale(1.08); filter: brightness(1.25); } }
+
+:root[data-theme="paper"] .tt small, :root[data-theme="paper"] .tt time { color: #6b665c; }
+.mt-left .srow { grid-template-columns: 46px minmax(0, 1fr) 64px 86px !important; }
+.mt-left .srow .sgap { display: none; }
+.mt-left .srow .sname b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
