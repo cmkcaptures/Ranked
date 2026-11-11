@@ -10,9 +10,9 @@ export const UPDATES = [
     items: [
       ['📈 New trading terminal', 'The Market is now a three-panel exchange: watchlist on the left, big chart and trade panel in the middle, live feeds on the right.', 'Market'],
       ['⚡ Live-ticking prices', 'Prices move every couple of seconds between server updates and flash green or red on every move. Trades still fill at the real price.', 'Market'],
-      ['▦ Heatmap', 'See the whole market as a wall of tiles, sized by value and coloured by today's move.', 'Market → Heatmap'],
+      ['▦ Heatmap', 'See the whole market as a wall of tiles, sized by value and coloured by today’s move.', 'Market → Heatmap'],
       ['🔴 Live trade tape', 'Every squad buy, sell and short streams in as it happens, with sound effects for big trades.', 'Market → right panel'],
-      ['🏁 Top movers', 'Today's biggest gainers and losers across the top, updating live.', 'Market'],
+      ['🏁 Top movers', 'Today’s biggest gainers and losers across the top, updating live.', 'Market'],
     ],
   },
   {
