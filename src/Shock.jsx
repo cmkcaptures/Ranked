@@ -20,6 +20,7 @@ export default function ShockAlert({ me }) {
   useEffect(() => {
     if (!sb || !me) return
     const ch = sb.channel('shocks').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'story_shocks' }, async ({ new: s }) => {
+      if (s.kind === 'ripple') return
       const { data: c } = await sb.from('characters').select('id, name, image, sym, price, color').eq('id', s.char_id).maybeSingle()
       if (c) setQ(x => [...x, { ...s, c }])
     }).subscribe()

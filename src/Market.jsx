@@ -660,7 +660,7 @@ function ShockFeed({ byId, onPick }) {
   return <div className="shockfeed"><h4>Story shocks</h4>
     {list.map(r => { const c = byId[r.char_id]; return <div key={r.id} onClick={() => onPick(c.id)} title={r.note || ''}>
       <img src={c.image} alt="" referrerPolicy="origin" />
-      <div><b>{c.name}</b><small>{r.kind} · {new Date(r.at).toLocaleDateString(undefined, { weekday: 'short' })}</small></div>
+      <div><b>{c.name}</b><small>{r.kind === 'ripple' ? (r.note || '').split(':')[0] : r.kind} · {new Date(r.at).toLocaleDateString(undefined, { weekday: 'short' })}</small></div>
       <em className={r.pct < 0 ? 'dn' : 'upx'}>{r.pct < 0 ? '−' : '+'}{Math.round(Math.abs(r.pct) * 100)}%</em>
     </div> })}
   </div>

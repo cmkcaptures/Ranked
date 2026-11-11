@@ -11,6 +11,8 @@ import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
 import Wrapped from './Wrapped.jsx'
 import ShockAlert from './Shock.jsx'
+import Times from './Times.jsx'
+import UpdatePaper from './Updates.jsx'
 import CharRank from './CharRank.jsx'
 import { Bell, Inbox, Squad } from './Social.jsx'
 import Profile from './Profile.jsx'
@@ -67,14 +69,14 @@ export default function App() {
 // pages live in the URL hash (#/league, #/profile/<id>, #/anime/<id>) so browser back/forward, phone swipe-back,
 // refresh and shared links all work
 const NAV = [['Anime', [['home', 'Home', 'home'], ['browse', 'Browse', 'search'], ['list', 'Anime List', 'list'], ['rank', 'Rankings', 'podium'], ['h2h', 'Head-to-Head', 'swords'], ['season', 'Season', 'cal']]],
-  ['Play', [['league', 'League', 'trophy'], ['squad', 'Squad', 'users'], ['stats', 'Stats', 'bars'], ['market', 'Market', 'chart']]]]
+  ['Play', [['league', 'League', 'trophy'], ['squad', 'Squad', 'users'], ['stats', 'Stats', 'bars'], ['market', 'Market', 'chart'], ['times', 'The Times', 'paper']]]]
 const ICONS = { home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', podium: 'M9 21V9h6v12M3 21v-7h6M15 21v-5h6v5M2 21h20',
   swords: 'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4', cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM16 3v4M8 3v4M3 10h18',
   trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3', users: 'M9 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 13.5a6 6 0 0 1 4 6',
-  bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', bolt: 'M13 2 4 14h7l-1 8 9-12h-7z', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
+  bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', bolt: 'M13 2 4 14h7l-1 8 9-12h-7z', paper: 'M4 4h13v15a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2zM17 8h3v11a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
 const Icon = ({ n }) => <svg className="nicon" viewBox="0 0 24 24"><path d={ICONS[n]} /></svg>
-const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime', 'inbox']
+const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime', 'inbox', 'times']
 function readHash() {
   const [, pg, id] = (location.hash.match(/^#\/([a-z0-9]+)(?:\/([^/?#]+))?/) || [])
   return PAGES.includes(pg) ? { page: pg, id: id || null } : { page: 'home', id: null }
@@ -243,6 +245,7 @@ function Main({ me, setMe }) {
       </nav>
       <MobileNav page={page} setPage={setPage} />
       <ShockAlert me={me} />
+      <UpdatePaper me={me} />
       {wrapped && <Wrapped me={me} list={list} rankings={rankings} friends={friends} onClose={() => setWrapped(false)} />}
       <CharProfile friends={friends} />
       <main className="wrap">
@@ -263,6 +266,7 @@ function Main({ me, setMe }) {
           {page === 'profile' && profileId === me?.id && <div className="center"><button className="pill ghost" onClick={() => confirm('Sign out?') && sb.auth.signOut()}>Sign out</button></div>}
           {page === 'browse' && <Browse {...ctx} />}
           {page === 'inbox' && <Inbox me={me} />}
+          {page === 'times' && <Times me={me} friends={friends} openProfile={openProfile} />}
           {page === 'anime' && animeId && <Detail key={animeId} id={animeId} {...ctx} />}
         </>}
       </main>

@@ -25,6 +25,7 @@ export default function CharProfile({ friends = [] }) {
   const [ticks, setTicks] = useState([])
   const [owner, setOwner] = useState(null)
   const [moments, setMoments] = useState([])
+  const [links, setLinks] = useState({ family: [], rivals: [] })
   useEffect(() => {
     const on = e => setId(e.detail)
     window.addEventListener('ranked:char', on)
@@ -32,9 +33,19 @@ export default function CharProfile({ friends = [] }) {
   }, [])
   useEffect(() => {
     if (!id || !sb) return
-    setC(null); setTicks([]); setOwner(null); setMoments([])
+    setC(null); setTicks([]); setOwner(null); setMoments([]); setLinks({ family: [], rivals: [] })
     const S = fantasySeason()
-    sb.from('characters').select('*').eq('id', id).maybeSingle().then(({ data }) => setC(data || { missing: true }))
+    sb.from('characters').select('*').eq('id', id).maybeSingle().then(async ({ data }) => {
+      setC(data || { missing: true })
+      if (!data) return
+      const [fam, riv] = await Promise.all([
+        sb.from('characters').select('id, name, image, price, price_24h').eq('media_title', data.media_title).neq('id', id).order('favourites', { ascending: false }).limit(5),
+        sb.from('char_links').select('b').eq('a', id).eq('kind', 'rival'),
+      ])
+      const rids = (riv.data || []).map(r => r.b)
+      const rv = rids.length ? (await sb.from('characters').select('id, name, image, price, price_24h').in('id', rids)).data || [] : []
+      setLinks({ family: fam.data || [], rivals: rv })
+    })
     sb.from('price_ticks').select('t, price').eq('char_id', id).gt('t', new Date(Date.now() - 7 * 86400000).toISOString()).order('t').limit(1000)
       .then(({ data }) => setTicks((data || []).filter((_, i, a) => i % Math.ceil(a.length / 80 || 1) === 0).map(r => +r.price)))
     sb.from('fantasy_picks').select('user_id').eq('season', S.key).eq('char_id', id).maybeSingle().then(({ data }) => setOwner(data?.user_id || null))
@@ -83,6 +94,11 @@ export default function CharProfile({ friends = [] }) {
           <b className={e.points < 0 ? 'down' : 'up'}>{e.points > 0 ? '+' : ''}{e.points}</b>
         </div>)}</div>}
 
+        {(links.rivals.length > 0 || links.family.length > 0) && <><h3>Family & rivals</h3>
+          <p className="muted small">When a story moment moves {c.name}'s price, family moves 30% as far the same way and rivals move 15% the opposite way.</p>
+          <div className="cplinks">{[...links.rivals.map(x => ({ ...x, rival: true })), ...links.family].map(x => { const ch = x.price_24h ? x.price / x.price_24h - 1 : 0
+            return <div key={x.id} className={`cplink ${x.rival ? 'rival' : ''}`} onClick={() => openChar(x.id)}>
+              <img src={x.image} alt="" referrerPolicy="origin" /><b>{x.name}</b><small>{x.rival ? '⚔️ Rival' : '👪 Family'}</small><em className={ch >= 0 ? 'up' : 'down'}>{pct(ch)}</em></div> })}</div></>}
         {parts.length > 0 && <><h3>Why the hype</h3>
           <div className="cpparts">{parts.map(([k, v]) => <div key={k}><span>{k}</span><div className="cpbar"><div style={{ width: `${Math.max(3, Math.min(100, Math.abs(v.score) * 100))}%` }} /></div><em>{v.label}</em></div>)}</div></>}
       </>}

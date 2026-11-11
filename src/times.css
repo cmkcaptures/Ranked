@@ -1,0 +1,41 @@
+/* The Ranked Times: newspaper look (always paper, whatever the site theme) */
+.times, .upd-paper { --np: #f4efe3; --npink: #141414; background: var(--np); color: var(--npink); border: 3px solid #141414; box-shadow: 8px 8px 0 #000; padding: 22px 26px; max-width: 1080px;
+  font-family: Georgia, 'Times New Roman', serif; position: relative; }
+.times::before, .upd-paper::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background: radial-gradient(circle, #0000000d .8px, transparent 1.2px) 0 0/5px 5px; }
+.t-mast { text-align: center; border-bottom: 4px double #141414; padding-bottom: 8px; margin-bottom: 14px; }
+.t-ears { display: flex; justify-content: space-between; font: 700 11px Inter; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #141414; padding-bottom: 4px; }
+.times h1, .upd-paper h1 { margin: 6px 0 2px; font: 900 clamp(40px, 7vw, 76px)/1 'Playfair Display', Georgia, serif !important; letter-spacing: -1px !important; color: #141414 !important; text-transform: none; }
+.t-date { font: italic 14px Georgia, serif; border-top: 1px solid #141414; padding-top: 4px; }
+.t-kicker { display: inline-block; font: 800 10px Inter; letter-spacing: 2px; text-transform: uppercase; background: #141414; color: #f4efe3; padding: 2px 8px; margin-bottom: 6px; }
+.t-lead h2 { margin: 2px 0 6px; font: 400 clamp(32px, 5vw, 54px)/.95 Bangers !important; letter-spacing: 1.5px !important; color: #c8102e !important; }
+.t-deck { font-size: 17px; line-height: 1.4; margin: 0 0 12px; }
+.t-table { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; margin-bottom: 18px; }
+.t-table > div { display: flex; align-items: baseline; gap: 6px; padding: 6px 8px; border: 1.5px solid #141414; cursor: pointer; background: #fffdf7; }
+.t-table > div.me { background: #141414; color: #f4efe3; }
+.t-table i { font: 400 18px Bangers; font-style: normal; } .t-table b { font: 700 14px Inter; } .t-table em { margin-left: auto; font: 400 20px Bangers; font-style: normal; } .t-table small { display: none; }
+.t-cols { column-count: 3; column-gap: 22px; column-rule: 1px solid #141414; }
+.t-story { break-inside: avoid; margin-bottom: 18px; } .t-story h3 { margin: 0 0 6px; font: 900 22px/1.1 'Playfair Display', Georgia, serif !important; letter-spacing: 0 !important; color: #141414 !important; text-transform: uppercase; }
+.t-story p { margin: 0 0 8px; font-size: 15px; line-height: 1.45; } .t-story small { font: italic 13px Georgia; }
+.t-story .up { color: #0f7a40 !important; } .t-story .down { color: #c8102e !important; }
+.t-story.photo { cursor: pointer; } .t-story.photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 50% 15%; filter: grayscale(1) contrast(1.15); border: 2px solid #141414; margin-bottom: 8px; }
+.t-story.photo:hover img { filter: none; }
+.t-story.ad { border: 3px double #141414; padding: 10px; text-align: center; } .t-story.ad h3 { font: 400 30px Bangers !important; color: #c8102e !important; }
+.t-foot { margin-top: 10px; padding-top: 6px; border-top: 4px double #141414; font: italic 12px Georgia; text-align: center; }
+@media (max-width: 900px) { .t-cols { column-count: 2; } } @media (max-width: 600px) { .t-cols { column-count: 1; } .times { padding: 14px; } }
+
+/* ===== What's-new update paper (popup) ===== */
+.upd-bg { position: fixed; inset: 0; z-index: 9200; background: #000b; display: grid; place-items: center; padding: 20px; overflow: auto; animation: updFade .3s both; }
+@keyframes updFade { from { opacity: 0; } }
+.upd-paper { width: min(860px, 100%); max-height: calc(100vh - 40px); overflow: auto; animation: updSpin .7s cubic-bezier(.2, 1.3, .4, 1) both; }
+@keyframes updSpin { from { transform: rotate(-200deg) scale(.1); opacity: 0; } to { transform: rotate(-1deg); } }
+.upd-paper .t-lead h2 { color: #c8102e !important; }
+.upd-list { column-count: 2; column-gap: 22px; column-rule: 1px solid #141414; }
+.upd-item { break-inside: avoid; margin-bottom: 14px; } .upd-item h3 { margin: 0 0 4px; font: 900 19px/1.15 'Playfair Display', Georgia, serif !important; color: #141414 !important; letter-spacing: 0 !important; }
+.upd-item p { margin: 0; font-size: 14.5px; line-height: 1.45; } .upd-item .where { display: block; margin-top: 3px; font: 700 11px Inter; letter-spacing: 1px; text-transform: uppercase; color: #c8102e; }
+.upd-ed { margin: 4px 0 12px; font: italic 13px Georgia; border-bottom: 1px solid #141414; padding-bottom: 4px; }
+.upd-close { position: sticky; bottom: 0; display: flex; justify-content: center; padding-top: 10px; background: linear-gradient(transparent, var(--np) 40%); }
+.upd-close button { font: 400 22px Bangers !important; letter-spacing: 1.5px; padding: 8px 26px; background: #141414 !important; color: #f4efe3 !important; border: 3px solid #141414 !important; box-shadow: 4px 4px 0 #c8102e; cursor: pointer; }
+@media (max-width: 640px) { .upd-list { column-count: 1; } }
+.times, .upd-paper { box-sizing: border-box; } .times { width: 100%; } .times h1 { overflow-wrap: anywhere; }
+.times h3::before, .upd-paper h3::before { display: none !important; }

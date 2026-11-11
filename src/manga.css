@@ -286,3 +286,19 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .cup-side.won { background: #4fd88a22; } .cup-side.won b::after { content: ' ✓'; color: #4fd88a; } .cup-side.out { opacity: .45; } .cup-side.out b { text-decoration: line-through; }
 .cup-side.me b { color: var(--red); } .cup-side.tbd b { color: #77706a; } .cup-bye { padding: 6px 10px; font-size: 12px; color: #a39d90; }
 @media (max-width: 760px) { .cup-bracket { grid-template-columns: 1fr; } }
+
+/* family & rivals */
+.cplinks { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.cplink { position: relative; text-align: center; padding: 6px; background: var(--pan); border: 2px solid var(--ink); cursor: pointer; transition: transform .12s; }
+.cplink:hover { transform: translateY(-3px); } .cplink.rival { border-color: var(--red); box-shadow: 3px 3px 0 var(--red); }
+.cplink img { width: 100%; aspect-ratio: 1; object-fit: cover; object-position: 50% 15%; }
+.cplink b { display: block; font: 400 14px/1.1 Bangers; letter-spacing: .5px; margin-top: 3px; } .cplink small { font-size: 10px; color: #a39d90; font-weight: 700; }
+.cplink em { position: absolute; top: 8px; right: 8px; font: 400 13px Bangers; font-style: normal; background: var(--deep); padding: 0 4px; }
+
+/* deadline day */
+.dl { margin: 0 0 14px; border: 3px solid var(--ink); background: var(--red); color: #fff; box-shadow: 6px 6px 0 #000; overflow: hidden; animation: shockShake .5s .3s; }
+.dl-head { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; padding: 8px 14px; } .dl-head b { font: 400 28px Bangers; letter-spacing: 2px; }
+.dl-head span { font-size: 13px; font-weight: 700; } .dl-head em { font-style: normal; font: 400 20px Bangers; letter-spacing: 1px; }
+.dl-ticker { background: #151418; border-top: 3px solid var(--ink); overflow: hidden; white-space: nowrap; padding: 6px 0; }
+.dl-ticker > div { display: inline-flex; gap: 40px; animation: lbTick 30s linear infinite; padding-left: 100%; } .dl-ticker span { font: 400 18px Bangers; letter-spacing: 1px; color: #e9e2d0; }
+.dl-soon { margin: 0 0 14px; padding: 8px 14px; border: 3px dashed var(--red); background: var(--pan); font-size: 14px; } .dl-soon b { font: 400 18px Bangers; letter-spacing: 1px; color: var(--red); }

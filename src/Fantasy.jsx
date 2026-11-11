@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
@@ -168,11 +168,12 @@ export default function Fantasy({ me, friends, openProfile }) {
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
         <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['cup', '🏆 Cup'], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
+        <Deadline S={S} swaps={swaps} trades={trades} byId={byId} name={name} />
         {tab === 'table' && <button className="pill ghost rp-open" onClick={() => setReplay(true)}>🎬 Draft-day replay</button>}
         {replay && <DraftReplay S={S} draft={draft} chars={chars} charPts={charPts} who={who} onClose={() => setReplay(false)} />}
         {tab === 'table' && <Standings weekPts={weekPts} lastRank={lastRank} topWeek={topWeek} chipNow={chipNow} form={form} week={S.week} capOf={capOf} benchOf={benchOf} teams={teams} byId={byId} who={who} me={me} charPts={charPts} dead={dead} vault={vault} openProfile={openProfile} events={live} S={S} />}
         {tab === 'team' && <MyTeam form={form} week={S.week} benched={benchOf(mine)} team={mine} info={info} byId={byId} chars={chars} takenBy={takenBy} name={name} charPts={charPts} dead={dead} vault={vault}
-          events={cur.filter(e => e.team_user === me.id)} swapped={swaps.filter(s => s.user_id === me.id && s.week === S.week).length >= (mercy ? 2 : 1)} mercy={mercy} streak={streak}
+          events={cur.filter(e => e.team_user === me.id)} swapped={!isDeadline() && swaps.filter(s => s.user_id === me.id && s.week === S.week).length >= (mercy ? 2 : 1)} mercy={mercy} streak={streak}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
           chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })}
@@ -483,5 +484,29 @@ function Cup({ S, teams, events, who, me, openProfile }) {
       <div className="cup-col"><h4>Semi-finals · wk {a + 1}</h4>{sf.map((t, i) => <Tie key={i} t={t} label={`Semi ${i + 1}`} />)}</div>
       <div className="cup-col"><h4>Final · wk {a + 2}</h4><Tie t={fin} label="Final" /></div>
     </div>
+  </div>
+}
+
+// ⏰ Transfer Deadline Day: first Saturday of the month (UK). Unlimited swaps, no waivers, live ticker of every move.
+const isDeadline = (d = new Date()) => d.getDay() === 6 && d.getDate() <= 7
+function nextDeadline(d = new Date()) {
+  for (let i = 0; i < 40; i++) { const x = new Date(d); x.setDate(d.getDate() + i); x.setHours(0, 0, 0, 0); if (isDeadline(x) && (i > 0 || isDeadline(d))) return x }
+}
+function Deadline({ S, swaps, trades, byId, name }) {
+  const [, tick] = useState(0)
+  useEffect(() => { const t = setInterval(() => tick(x => x + 1), 30000); return () => clearInterval(t) }, [])
+  const now = new Date(), on = isDeadline(now)
+  const seen = useRef(null)
+  const today = d => new Date(d).toDateString() === now.toDateString()
+  const moves = on ? [...swaps.filter(s => today(s.created_at)).map(s => ({ t: s.created_at, txt: `✍️ ${name(s.user_id)} signs ${byId[s.in_char]?.name || '?'} · releases ${byId[s.out_char]?.name || '?'}` })),
+    ...trades.filter(t => t.status === 'accepted' && today(t.decided_at)).map(t => ({ t: t.decided_at, txt: `🔄 DEAL DONE: ${name(t.from_user)} ⇄ ${name(t.to_user)} · ${byId[t.give_char]?.name} for ${byId[t.get_char]?.name}` }))]
+    .sort((a, b) => new Date(b.t) - new Date(a.t)) : []
+  useEffect(() => { if (seen.current !== null && moves.length > seen.current) sfx('win', { text: 'ドン!', at: { x: innerWidth / 2, y: 140 } }); seen.current = moves.length }, [moves.length])
+  if (!on) { const n = nextDeadline(now); const days = Math.ceil((n - now) / 864e5)
+    return days <= 7 ? <div className="dl-soon">⏰ <b>Transfer Deadline Day</b> in {days} day{days > 1 ? 's' : ''} ({n.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}): unlimited swaps, no waivers.</div> : null }
+  const end = new Date(now); end.setHours(24, 0, 0, 0); const left = end - now
+  return <div className="dl">
+    <div className="dl-head"><b>⏰ TRANSFER DEADLINE DAY</b><span>Unlimited swaps · no waivers · window shuts in <em>{Math.floor(left / 36e5)}h {Math.floor(left % 36e5 / 6e4)}m</em></span></div>
+    <div className="dl-ticker"><div>{(moves.length ? moves : [{ txt: 'No moves yet. Who blinks first?' }]).concat(moves.length ? moves : []).map((m, i) => <span key={i}>{m.txt}</span>)}</div></div>
   </div>
 }
