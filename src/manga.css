@@ -193,3 +193,12 @@ h2 { font-size: 30px; } h3 { font-size: 22px; }
 .sq-top .sq-act.streak { background: #ff7a1a !important; color: #151418 !important; }
 .fmercy { margin: 0 0 14px; padding: 10px 14px; background: var(--pan); border: 3px solid var(--ink); border-left: 8px solid #3d8bff; font-size: 14px; }
 .fmercy b { font-family: Bangers; font-weight: 400; letter-spacing: 1px; font-size: 17px; }
+/* sale profit toast */
+.saletoast { position: fixed; left: 50%; bottom: 40px; z-index: 9500; transform: translateX(-50%); min-width: 280px; padding: 12px 20px; text-align: center;
+  background: var(--pan); color: var(--ink); border: 3px solid var(--ink); box-shadow: 6px 6px 0 #4fd88a; animation: saleIn .45s cubic-bezier(.2, 1.6, .4, 1) both; transition: opacity .4s, transform .4s; }
+.saletoast.down { box-shadow: 6px 6px 0 var(--red); }
+.saletoast b { display: block; font: 400 30px/1.1 Bangers; letter-spacing: 1.5px; color: #4fd88a; } .saletoast.down b { color: var(--red); }
+.saletoast span { font-size: 13px; color: #c9c2b2; font-weight: 600; }
+.saletoast.out { opacity: 0; transform: translateX(-50%) translateY(20px); }
+@keyframes saleIn { from { transform: translateX(-50%) translateY(60px) scale(.8); opacity: 0; } }
+@media (max-width: 760px) { .saletoast { bottom: 100px; } }

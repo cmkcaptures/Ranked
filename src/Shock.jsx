@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { sb } from './cloud.js'
 import { sfx } from './sfx.js'
+import { saleResult, showSale } from './profit.js'
 import { openChar } from './CharProfile.jsx'
 import './shock.css'
 
@@ -42,7 +43,7 @@ export default function ShockAlert({ me }) {
     const { data, error } = await sb.rpc('trade', { p_char: cur.char_id, p_qty: qty })
     setBusy(false)
     if (error) { setMsg(error.message); sfx('loss') }
-    else { setWallet(data); setMsg(qty < 0 ? `Sold ${-qty}. Phew.` : `Bought ${qty}. Diamond hands.`); sfx(qty < 0 ? 'swap' : 'money') }
+    else { if (qty < 0) { const r = saleResult(wallet, data, cur.char_id, -qty); showSale(r, cur.c.name); setMsg(r ? `Sold ${-qty}: ${r.profit >= 0 ? '+' : '−'}${Math.round(Math.abs(r.profit))} coins` : `Sold ${-qty}.`) } else { setMsg(`Bought ${qty}. Diamond hands.`); sfx('money') } setWallet(data) }
   }
   if (!cur) return null
   const up = cur.pct > 0, p = Math.round(Math.abs(cur.pct) * 100)

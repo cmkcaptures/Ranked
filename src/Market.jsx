@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { openChar } from './CharProfile.jsx'
 import { sfx } from './sfx.js'
+import { saleResult, showSale } from './profit.js'
 import './shock.css'
 import { sb, fetchAll } from './cloud.js'
 import { coins, pct, change24, powerGap, SOURCES, START_CASH, TICK_MS } from './market.js'
@@ -79,7 +80,7 @@ function MarketLive({ me, friends }) {
   async function trade(c, qty) {
     setErr('')
     const { data, error } = await sb.rpc('trade', { p_char: c.id, p_qty: qty })
-    if (error) { setErr(error.message); sfx('loss') } else { setWallet(data); sfx(qty > 0 ? 'money' : 'deal') }
+    if (error) { setErr(error.message); sfx('loss') } else { if (qty < 0) showSale(saleResult(wallet, data, c.id, -qty), c.name); else sfx('money'); setWallet(data) }
   }
   async function preorder(c, qty) {
     setErr('')
