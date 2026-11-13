@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-19', headline: 'LEAGUE GETS A MAKEOVER: PODIUM, RACE TRACK, BIG CAPTAIN',
+    items: [
+      ['🎬 New header', 'Your week, points and rank now sit on a big banner with your captain art.', 'League'],
+      ['🏁 Race track', 'Every team races across the top, led by its captain, so you can see the gap at a glance.', 'League → Standings'],
+      ['🥇 Podium + full squads', 'Top 3 get podium cards and every team shows its whole squad with each character’s points. Tap a team to open the full breakdown.', 'League → Standings'],
+    ],
+  },
+  {
     id: '2026-11-18', headline: 'MARKET REBUILT: A CLEANER TRADING TERMINAL',
     items: [
       ['🖥️ New layout', 'Watchlist on the left, the big chart and trade box in the middle, live trades on the right. Less clutter, faster trading.', 'Market'],

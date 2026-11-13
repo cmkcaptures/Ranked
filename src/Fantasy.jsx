@@ -266,18 +266,17 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
   const champs = Object.entries(past).map(([s, t]) => { const [u, p] = Object.entries(t).sort((a, b) => b[1] - a[1])[0]; return { s, u, p } }).sort((a, b) => b.s.localeCompare(a.s))
   const feed = events.filter(e => e.season === S.key).slice(0, 25)
-  return <div className="rank">
+  return <div className="rank lg-rank">
     <section>
       <Race teams={teams} who={who} me={me} lastRank={lastRank} topWeek={topWeek} capOf={capOf} benchOf={benchOf} chipNow={chipNow} CHIPS={CHIPS}
         byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} vault={vault} events={events.filter(e => e.season === S.key)} openProfile={openProfile} KINDS={KINDS} />
     </section>
     <aside>
-      <h3>Latest points</h3>
-      <div className="card">{feed.map(e => <div key={e.id} className="lrow">
-        <span>{KINDS[e.kind]?.[0]}</span>
-        <div className="grow small"><b>{byId[e.char_id]?.name || who(e.team_user)?.username}</b> {KINDS[e.kind]?.[1].toLowerCase()}<div className="muted">{e.note}</div></div>
-        <b className={e.points < 0 ? 'down' : 'up'}>{pts(e.points)}</b>
-      </div>)}{!feed.length && <div className="pad muted small">Points land as episodes and chapters drop.</div>}</div>
+      <div className="lg-panel lg-feed"><div className="lg-ph"><i className="lg-dot" /> Latest points</div>{feed.map((e, i) => { const c = byId[e.char_id]
+        return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''} ${i === 0 ? 'new' : ''}`} title={e.note || ''}>
+          <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
+          <div><b>{c?.name || who(e.team_user)?.username} · {KINDS[e.kind]?.[1].toLowerCase()}</b><small>{who(e.team_user)?.username}{e.note ? ` · ${e.note}` : ''}</small></div>
+          <em className={e.points < 0 ? 'dn' : 'up'}>{pts(e.points)}</em></div> })}{!feed.length && <div className="pad muted small">Points land as episodes and chapters drop.</div>}</div>
       <h3>Hall of fame</h3>
       <div className="card">{champs.map(c => <div key={c.s} className="lrow"><span>🏆</span><div className="grow">{who(c.u)?.username}<div className="muted small">{seasonLabel(c.s)}</div></div><b>{c.p}</b></div>)}
         {!champs.length && <div className="pad muted small">The first champion is crowned when {S.label} ends.</div>}</div>

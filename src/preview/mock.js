@@ -27,7 +27,7 @@ function q(table) {
 }
 export const sb = {
   from: q,
-  rpc: (fn, a) => Promise.resolve(fn === 'fantasy_char_info' ? { data: chars.map(c => ({ id: c.id, active: !/Naruto|Tokyo Ghoul|Hunter|Attack/.test(c.media_title), show_key: c.media_title })) } : { data: false, error: null }),
+  rpc: (fn, a) => Promise.resolve(fn === 'fantasy_char_info' ? { data: chars.map(c => ({ id: c.id, active: !/Naruto|Tokyo Ghoul|Hunter|Attack/.test(c.media_title), show_key: c.media_title })) } : fn === 'fantasy_in_main' ? { data: true } : { data: false, error: null }),
   channel: () => { const c = { on: () => c, subscribe: () => c }; return c }, removeChannel: () => {},
   auth: { getSession: () => Promise.resolve({ data: {} }), onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }) },
 }
