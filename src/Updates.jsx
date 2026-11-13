@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-23', headline: 'LEAGUE: EARN YOUR CHIPS, STOCKPILE, AND REAL RISK',
+    items: [
+      ['🎴 Earned chips', 'Everyone starts with 1 chip. Finish in the top half of a week 3 times and you earn another. Chips played this week show on the table.', 'League → My team'],
+      ['📦 Stockpile', 'The piggy bank is now the Stockpile, with a meter on the card. Cash out early for half, or hold for the full payout. Cashing out on your captain pays ×1.5.', 'League → My team'],
+      ['📉 Risk', 'The bottom of the daily hype ranking now loses up to 2 points. A character whose show aired but who never appeared loses 4. Captain doubles minus points too.', 'League → Scoring'],
+    ],
+  },
+  {
     id: '2026-11-22', headline: 'HOME, LIST, BROWSE AND SEASON GET A NEW LOOK',
     items: [
       ['🏠 Home', 'A big Next Up banner, an in-progress rail with episode countdowns, and +1 right on the cover.', 'Home'],

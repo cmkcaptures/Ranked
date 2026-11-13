@@ -92,13 +92,13 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
       <div className="lg-ph">The table <div className="lg-seg">{[['season', 'Season'], ['week', 'This week']].map(([k, l]) => <button key={k} className={mode === k ? 'on' : ''} onClick={() => setMode(k)}>{l}</button>)}</div></div>
       <div className="lg-pod">{order.map(i => { const t = pod[i], p = who(t.user)
         return <div key={t.user} className={`lg-pc p${i + 1} ${t.user === me.id ? 'me' : ''}`} onClick={() => setOpen(open === t.user ? null : t.user)}>
-          <div className="lg-art"><span className="lg-num">{i + 1}</span><span className="lg-mv"><Mv n={moved(t, i)} /></span><img src={capImg(t)} alt="" referrerPolicy="origin" /></div>
+          <div className="lg-art"><span className="lg-num">{i + 1}</span>{chipNow(t.user) && <span className="lg-chipb" title={`${CHIPS[chipNow(t.user)][1]} this week`}>{CHIPS[chipNow(t.user)][0]} {CHIPS[chipNow(t.user)][1]}</span>}<span className="lg-mv"><Mv n={moved(t, i)} /></span><img src={capImg(t)} alt="" referrerPolicy="origin" /></div>
           <div className="lg-info"><b className="lg-mgr">{p?.username || '?'}</b>{sub(t)}{tags(t)}
             <div className="lg-row"><strong><CountUp to={val(t)} /></strong>{mode === 'season' && <em className={t.week < 0 ? 'dn' : 'up'}>{sign(t.week)} wk</em>}</div></div>
         </div> })}</div>
       <div className="lg-rest">{rest.map((t, j) => { const i = j + 3, p = who(t.user)
         return <div key={t.user} className={`lg-tr ${t.user === me.id ? 'me' : ''}`} onClick={() => setOpen(open === t.user ? null : t.user)}>
-          <span className="lg-rk">{i + 1}</span><div className="lg-who"><b>{p?.username || '?'} <Mv n={moved(t, i)} /></b>{sub(t)}</div>{tags(t)}
+          <span className="lg-rk">{i + 1}</span><div className="lg-who"><b>{p?.username || '?'} <Mv n={moved(t, i)} />{chipNow(t.user) && <i className="lg-chipi" title={CHIPS[chipNow(t.user)][1]}>{CHIPS[chipNow(t.user)][0]}</i>}</b>{sub(t)}</div>{tags(t)}
           <span className={`lg-wkp ${t.week < 0 ? 'dn' : 'up'}`}>{mode === 'season' ? `${sign(t.week)} wk` : ''}</span><span className="lg-tot"><CountUp to={val(t)} /></span></div> })}</div>
       {sel && <div className="lb-squad lg-open">
         {sel.chars.map(id => { const c = byId[id]; if (!c) return null; const cap = capOf(sel.user), bench = benchOf(sel)
@@ -132,13 +132,14 @@ export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, t
         <div className="sq-top">
           {c.form && <i className="sq-f">{c.form}</i>}
           {tag && <i className={`sq-act ${tag.active ? 'live' : ''}`}>{tag.active ? '📺 Active' : '🏛️ Legacy'}</i>}
-          {vault > 0 && <i className="sq-act vault" title="Stockpile: pays out when big news or their story returns">📦 {vault}</i>}
+
           {streak > 0 && <i className="sq-act streak" title={`Scoring streak: ${streak} week${streak > 1 ? 's' : ''}, pays +${Math.min(2 * streak, 10)} if they score again`}>🔥 {streak}</i>}
           {captain && <i className="sq-crown">👑 {captain}</i>}
           {benched && <i className="sq-bn">🪑 Bench</i>}
           {dead && <i className="sq-bn">💀 Dead</i>}
         </div>
         <div className="sq-bot">
+          {vault > 0 && <div className="sq-stock" title="Stockpile: pays out in full when big news or their story returns"><span>📦 Stockpile</span><i><em style={{ width: `${Math.min(100, vault / 60 * 100)}%` }} /></i><b>{vault}/60</b></div>}
           <b>{c.name}</b>
           <div className="sq-pts"><strong><CountUp to={pts} /></strong><span>pts</span><em className={wk < 0 ? 'dn' : 'up'}>{sign(wk)} this wk</em></div>
           {form}

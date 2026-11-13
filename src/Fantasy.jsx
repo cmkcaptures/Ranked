@@ -25,7 +25,7 @@ const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
   trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Daily hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
   transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['📦', 'Stockpile cashed out'], cup: ['🏆', 'Mid-season Cup champion'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
-  death: ['💀', 'Died'], revive: ['✨', 'Came back'],
+  death: ['💀', 'Died'], noshow: ['👻', 'No-show'], revive: ['✨', 'Came back'],
 }
 const pts = n => (n > 0 ? '+' : '') + n
 
@@ -159,6 +159,11 @@ function FantasyLeague({ me, friends, openProfile }) {
   const myStart = lastRank[me?.id] || 0
   const mercy = teams.length >= 4 && myStart > teams.length - 2 ? (myStart === teams.length ? 'last' : 'second') : false
   const topWeek = teams.length ? Math.max(...teams.map(t => t.week)) : 0
+  const chipsEarned = useMemo(() => { const wk = {}
+    for (const e of cur) if (e.week < S.week && e.team_user) ((wk[e.week] ||= {})[e.team_user] = (wk[e.week][e.team_user] || 0) + e.points)
+    const top = {}; for (const w of Object.values(wk)) { const arr = Object.values(w), n = arr.length
+      for (const [u, p] of Object.entries(w)) if (arr.filter(x => x > p).length + 1 <= Math.ceil(n / 2)) top[u] = (top[u] || 0) + 1 }
+    return u => ({ earned: 1 + Math.floor((top[u] || 0) / 3), toNext: 3 - (top[u] || 0) % 3 }) }, [events, S.week])
   const chipNow = u => chipRows.find(c => c.user_id === u && c.week === S.week)?.chip
 
   if (!sb || !me) return <div className="card pad muted">Sign in to play the Fantasy League.</div>
@@ -199,7 +204,7 @@ function FantasyLeague({ me, friends, openProfile }) {
           events={cur.filter(e => e.team_user === me.id)} swapped={!isDeadline() && swaps.filter(s => s.user_id === me.id && s.week === S.week).length >= (mercy ? 2 : 1)} mercy={mercy} streak={streak}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
-          chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })} />}
+          chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })} earn={chipsEarned(me.id)} onCash={id => run('fantasy_stockpile_cashout', { p_char: id })} />}
         {tab === 'rules' && <Rules />}
         {tab === 'scout' && mine && who(me.id)?.username?.toLowerCase() === SCOUT_USER && <Scout team={mine} chars={chars} byId={byId} takenBy={takenBy} info={info} form={form} week={S.week} charPts={charPts} who={who} teams={teams} me={me} />}
       </>}
@@ -277,7 +282,7 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   </div>
 }
 
-function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, earn = { earned: 1, toNext: 3 }, onCash, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
@@ -286,11 +291,14 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, form,
   const wkTot = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
   return <div className="rank lg-rank lg-team">
     <section>
+      {(() => { const left = Math.max(0, earn.earned - chips.length)
+        return <div className="lg-chipbar"><b>🎴 {left} chip{left === 1 ? '' : 's'} to play</b><span>{earn.toNext} more top-half week{earn.toNext === 1 ? '' : 's'} earns the next one</span>
+          <i>{[0, 1, 2].map(k => <em key={k} className={k < 3 - earn.toNext ? 'on' : ''} />)}</i></div> })()}
       <div className="lb-chiprow">{Object.entries(CHIPS).map(([k, [ic, nm, desc]]) => { const u = chips.find(c => c.chip === k)
-        const live = u && u.week === chipWeek
-        return <ChipCard key={k} ic={ic} name={nm} desc={desc} state={live ? 'live' : u ? 'used' : ''} disabled={!!u || !!usedThisWeek || (k === 'boost' && team.chars.length < 6)}
-          label={live ? 'Active this week' : u ? `Used wk ${u.week}` : k === 'boost' && team.chars.length < 6 ? 'Needs a bench player' : usedThisWeek ? 'One chip per week' : 'Play it'}
-          onClick={() => confirm(`Play ${nm} for week ${chipWeek}? You only get it once a season.`) && onChip(k)} /> })}</div>
+        const live = u && u.week === chipWeek, none = chips.length >= earn.earned
+        return <ChipCard key={k} ic={ic} name={nm} desc={desc} state={live ? 'live' : u ? 'used' : ''} disabled={!!u || !!usedThisWeek || none || (k === 'boost' && team.chars.length < 6)}
+          label={live ? 'Active this week' : u ? `Used wk ${u.week}` : none ? '🔒 Earn a chip first' : k === 'boost' && team.chars.length < 6 ? 'Needs a bench player' : usedThisWeek ? 'One chip per week' : 'Play it'}
+          onClick={() => confirm(`Play ${nm} for week ${chipWeek}?`) && onChip(k)} /> })}</div>
       <div className="fcapbar">
         <b>👑 Captain</b>
         <span>{captain ? <>{byId[captain]?.name} scores <b>{chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'triple' : 'double'}</b> this week</> : 'Pick a captain: their points count double'}</span>
@@ -305,6 +313,7 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, form,
             actions={<>
               {!capLocked && captain !== id && <button className="btn sm primary" onClick={() => onCaptain(id)}>👑 Make captain</button>}
               {(!swapped || wildcard) && <button className="btn sm" onClick={() => setOut(out === id ? null : id)}>{out === id ? 'Cancel swap' : '🔄 Swap out'}</button>}
+              {vault[id] > 0 && <button className="btn sm" onClick={() => confirm(`Cash out ${byId[id]?.name}'s stockpile now for ${Math.floor(vault[id] / 2)} pts (half of ${vault[id]})? Hold it and it pays the full amount when news drops.`) && onCash(id)}>📦 Cash out {Math.floor(vault[id] / 2)}</button>}
             </>} />)}
         {(() => { const mvp = [...team.chars].sort((a, b) => ((form[b] || {})[week] || 0) - ((form[a] || {})[week] || 0))[0]; const wk = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
           return <div className="sq-stat"><small>Week {week}</small><b>{wk > 0 ? '+' : ''}{wk}</b><span>team points this week</span>
@@ -385,11 +394,12 @@ function Vote({ S, teams, byId, name, me, votes, reload, setErr }) {
 function Rules() {
   const story = [['📺', 'Their show airs a new episode', '+10'], ['📖', 'Their manga drops a new chapter', '+8'], ['⚡', 'Transformation or power-up', '+20'], ['🌟', 'New form debut: a transformation shown for the very first time (on top of the +20, outside the weekly cap)', '+30'],
     ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
-  const hype = [['📊', 'Daily hype ranking: every night each drafted character is ranked by how much their hype grew that day', '+5 (1st) → +1 (last) daily'],
-    ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15'], ['🎬', 'New trailer: an official trailer, PV or teaser for a show, film or game they’re in', '+20']]
+  const hype = [['📊', 'Daily hype ranking: every night each drafted character is ranked by how much their hype grew that day. The bottom lose points', '+5 (1st) → −2 (last) daily'],    ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15'], ['🎬', 'New trailer: an official trailer, PV or teaser for a show, film or game they’re in', '+20']]
   const piggy = [['📦', 'Every quiet week (show not airing, manga not releasing) your character’s stockpile fills up, faster the longer you hold them', '5 → 11 → 18 → 27 → 37 → 49 → 60'],
     ['💥', 'Big news, a new trailer, or their story comes back (new season, chapter, fight)? The stockpile cashes out everything at once', 'max 60'],
-    ['🔒', 'Drop them and the stockpile is lost. Captain doesn’t double it, and it’s outside the weekly cap', 'hold to win']]
+    ['🏦', 'Cash out early any time for half. Or hold and hope', '½ now'],
+    ['👑', 'Captain? A stockpile that cashes out on your captain pays ×1.5', '×1.5'],
+    ['🔒', 'Drop them and the stockpile is lost. Outside the weekly cap', 'hold to win']]
   const T = (title, rows, note) => <div className="card pad"><h3>{title}</h3>{note && <p className="muted small">{note}</p>}{rows.map(([i, l, p]) => <div key={l} className="lrow"><span>{i}</span><div className="grow">{l}</div><b>{p}</b></div>)}</div>
   return <div className="frules">
     {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
@@ -398,7 +408,8 @@ function Rules() {
     {T('Captain', [['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
     {T('Bonuses', [['🔥', 'Streak: a character scores story points 2+ weeks in a row', '+5 a week'], ['🔵', 'Catch-up: the bottom 2 teams get +20% of their week and 2 swaps', '+20%']])}
     {T('Bench', [['🪑', 'A free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5']])}
-    {T('🎴 Chips (once a season each, one per week)', Object.values(CHIPS).map(([i, n, d]) => [i, `${n}: ${d}`, '1x']))}
+    {T('📉 Ways to lose points', [['📊', 'Bottom of the daily hype ranking', 'down to −2 a day'], ['👻', 'No-show: their show aired that week but they never appeared', '−4'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20'], ['👑', 'Captain doubles minus points too', '×2']], 'Every pick is a risk: a big name on a quiet arc can cost you.')}
+    {T('🎴 Chips (earned: start with 1, +1 every 3 weeks in the top half)', Object.values(CHIPS).map(([i, n, d]) => [i, `${n}: ${d}`, '1x']))}
     <p className="muted small">One character per show (no stacking two from the same anime). Seasons follow the anime seasons, one swap a week, plus a free swap while your team has two from the same show. Most points when the season ends takes the crown.</p>
   </div>
 }
