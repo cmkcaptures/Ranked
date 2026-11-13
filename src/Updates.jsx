@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-18', headline: 'MARKET REBUILT: A CLEANER TRADING TERMINAL',
+    items: [
+      ['🖥️ New layout', 'Watchlist on the left, the big chart and trade box in the middle, live trades on the right. Less clutter, faster trading.', 'Market'],
+      ['🟩 Sector strip', 'See at a glance which series are pumping or dumping today, sized by how many stocks they have.', 'Market → top strip'],
+      ['📋 Positions table', 'Everything you own sits under the terminal with live P/L and how much of your portfolio each stock is.', 'Market → Your positions'],
+    ],
+  },
+  {
     id: '2026-11-17', headline: 'POINTS EVERY DAY: HYPE NOW PAYS OUT NIGHTLY',
     items: [
       ['📊 Daily hype', 'Instead of one big hype payout a week, every drafted character is now ranked every night by that day’s hype growth: +5 for 1st down to +1 (legacy x1.5). Same weekly total, spread across every day.', 'League → Latest points'],

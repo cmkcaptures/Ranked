@@ -155,7 +155,7 @@ function MarketLive({ me, friends }) {
       <CrashBanner wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} />
       {view === 'market' && <LaunchStrip chars={chars} pre={pre} onPick={setSelId} />}
 
-      {view === 'market' && <Movers chars={chars} live={live} onPick={setSelId} />}
+      {view === 'market' && <Sectors chars={chars} />}
       {view === 'market' && <div className="mterm">
         <section className="mt-left">
           <div className="row gap mfilter">
@@ -173,8 +173,9 @@ function MarketLive({ me, friends }) {
           {limit < list.length && <MoreSentinel onMore={() => setLimit(l => l + 60)} left={list.length - limit} />}</>}
         </section>
         <aside className="mt-mid"><StockPanel lp={sel ? livePrice(sel, live) : 0} lch={sel ? liveChange(sel, live) : 0} c={sel} wallet={wallet} shorts={shorts.filter(s => s.char_id === sel.id)} openShort={openShort} closeShort={closeShort} trade={trade} preorder={preorder} myPre={pre.find(x => x.char_id === sel.id)} /></aside>
-        <aside className="mt-right"><TradeTape friends={friends} byId={byId} onPick={setSelId} /><ShockFeed vertical byId={byId} onPick={setSelId} /></aside>
+        <aside className="mt-right"><TradeTape friends={friends} byId={byId} onPick={setSelId} /></aside>
       </div>}
+      {view === 'market' && <Positions wallet={wallet} byId={byId} live={live} onPick={setSelId} />}
 
       {view === 'portfolio' && <OpenOrders byId={byId} />}
       {view === 'portfolio' && <Portfolio shorts={shorts} closeShort={closeShort} wallet={wallet} byId={byId} onPick={id => { setSelId(id); setView('market') }} reset={reset} trade={trade} pre={pre} />}
@@ -284,14 +285,12 @@ function StockPanel({ lp, lch, c, wallet, shorts = [], openShort, closeShort, tr
       </div>
       <div className="tabs rtabs">{RANGES.map(([l, v]) => <button key={l} className={hours === v ? 'on' : ''} onClick={() => setHours(v)}>{l}</button>)}</div>
       <Chart c={c} hours={hours} />
-      <div className="legend2"><span><i className="lp" />Price</span><span><i className="lt" />Power target (price follows this)</span></div>
       <div className="pstats">
         <div><span>Hype</span><b><HypeMeter h={c.hype} /></b></div>
         <div><span>Power</span><b>⚡{Math.round(c.power).toLocaleString()}</b></div>
         <div><span>Power gap</span><b className={gap >= 0 ? 'up' : 'down'}>{gap >= 0 ? '+' : ''}{(gap * 100).toFixed(1)}%</b></div>
       </div>
-      <WhyPanel c={c} />
-      <OrdersBox c={c} />
+      <details className="more"><summary>Why it moves · limit orders</summary><WhyPanel c={c} /><OrdersBox c={c} /></details>
       {isSoon(c) ? <div className="tradebox preorder">
         <div className="pohead">🚀 IPO launches in <b><Ticker fn={() => fmtLeft(new Date(c.ipo_at) - Date.now())} /></b></div>
         <div className="muted small">Pre-order now at the fixed IPO price of <b>{coins(c.price)}</b>. Your shares land the second it goes live, and you get the 🚀 First buyer badge.</div>
@@ -764,4 +763,24 @@ function TradingCup({ me }) {
       {idle.length > 0 && <div className="muted small tcup-idle">Not trading yet: {idle.map(r => r.username).join(', ')}</div>}</div>
     {wins.length > 0 && <><h3>Past champions</h3><div className="tcup-wins">{wins.map(w => <div key={w.week_key}><small>Week {w.week_key.split('-')[1]}</small><b>{w.profiles?.username || 'Nobody'}</b><em>{w.pct != null ? P(w.pct) : '—'}</em></div>)}</div></>}
   </div>
+}
+
+function Sectors({ chars }) {
+  const g = {}
+  for (const c of chars) { const k = c.media_title || '?'; (g[k] ||= { n: 0, ch: 0 }); g[k].n++; g[k].ch += change24(c) }
+  const top = Object.entries(g).sort((a, b) => b[1].n - a[1].n).slice(0, 10)
+  return <div className="sectors">{top.map(([k, v]) => { const ch = v.ch / v.n
+    return <div key={k} className={`sec ${ch >= 0 ? 'up' : 'dn'}`} style={{ flex: Math.sqrt(v.n) }} title={`${v.n} stocks`}><b>{k}</b><em>{pct(ch)}</em></div> })}</div>
+}
+
+function Positions({ wallet, byId, live, onPick }) {
+  const rows = Object.entries(wallet.holdings || {}).map(([id, h]) => ({ c: byId[id], h })).filter(r => r.c && r.h.qty > 0)
+  if (!rows.length) return null
+  const val = r => (livePrice(r.c, live) || r.c.price) * r.h.qty
+  const total = rows.reduce((a, r) => a + val(r), 0), pl = rows.reduce((a, r) => a + val(r) - r.h.avg * r.h.qty, 0)
+  return <div className="mpos"><div className="mpos-h"><b>Your positions</b><span className={pl >= 0 ? 'up' : 'down'}>{pl >= 0 ? '+' : ''}{coins(pl)} total P/L</span></div>
+    <div className="mpos-t"><div className="mpos-r hd"><span>Character</span><span>Qty</span><span>Avg</span><span>Price</span><span>P/L</span><span>Weight</span></div>
+    {rows.sort((a, b) => val(b) - val(a)).map(({ c, h }) => { const p = livePrice(c, live) || c.price, l = (p - h.avg) * h.qty, w = val({ c, h }) / total
+      return <div key={c.id} className="mpos-r" onClick={() => onPick(c.id)}><span><img src={c.image} alt="" />{c.name}</span><span>{h.qty}</span><span>{coins(h.avg)}</span><span>{coins(p)}</span>
+        <span className={l >= 0 ? 'up' : 'down'}>{l >= 0 ? '+' : ''}{coins(l)}</span><span><i style={{ width: `${w * 100}%` }} /></span></div> })}</div></div>
 }
