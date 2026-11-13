@@ -75,7 +75,7 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
   const Mv = ({ n }) => n ? <i className={`lg-mvi ${n > 0 ? 'up' : 'dn'}`}>{n > 0 ? '▲' : '▼'}{Math.abs(n)}</i> : <i className="lg-mvi">–</i>
   const tags = t => { const cap = capOf(t.user), bench = benchOf(t)
     return <div className="lg-tags">{[...t.chars].sort((a, b) => (b === cap) - (a === cap)).map(id => { const c = byId[id]; if (!c) return null
-      return <span key={id} className={`lg-tag ${id === cap ? 'cp' : ''} ${id === bench ? 'bn' : ''} ${dead[id] ? 'dd' : ''}`} onClick={e => { e.stopPropagation(); openChar(id) }} title={`${c.name}: ${charPts[id] || 0} pts (${sign(weekPts[id] || 0)} this week)`}>
+      return <span key={id} className={`lg-tag ${id === cap ? 'cap' : ''} ${id === bench ? 'bn' : ''} ${dead[id] ? 'dd' : ''}`} onClick={e => { e.stopPropagation(); openChar(id) }} title={`${c.name}: ${charPts[id] || 0} pts (${sign(weekPts[id] || 0)} this week)`}>
         <img src={c.image} alt="" referrerPolicy="origin" /><b>{c.name.split(' ')[0]}</b><em>{charPts[id] || 0}</em></span> })}</div> }
   const capImg = t => byId[capOf(t.user)]?.image || byId[t.chars[0]]?.image
   const sub = t => { const chip = chipNow(t.user), cap = byId[capOf(t.user)]
@@ -106,7 +106,7 @@ export function Race({ teams, who, me, lastRank, topWeek, capOf, benchOf, chipNo
           const big = Object.entries(ev.reduce((m, e) => (m[e.kind] = (m[e.kind] || 0) + e.points, m), {})).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 3)
           return <div key={id} className={`lb-mini ${id === cap ? 'cap' : ''} ${id === bench ? 'bench' : ''} ${dead[id] ? 'dead' : ''}`} onClick={() => openChar(id)}>
             <img src={c.image} alt="" referrerPolicy="origin" />
-            {id === cap && <i className="tag gold">👑 C</i>}{id === bench && <i className="tag">🪑 Bench</i>}{dead[id] && <i className="tag red">💀</i>}{vault[id] > 0 && <i className="tag pig">🐷 {vault[id]}</i>}
+            {id === cap && <i className="tag gold">👑 C</i>}{id === bench && <i className="tag">🪑 Bench</i>}{dead[id] && <i className="tag red">💀</i>}{vault[id] > 0 && <i className="tag pig">📦 {vault[id]}</i>}
             <div className="info"><b>{c.name}</b><span>{charPts[id] || 0} pts · <em className={(weekPts[id] || 0) < 0 ? 'dn' : 'up'}>{sign(weekPts[id] || 0)} wk</em></span>
               <div className="kinds">{big.map(([k, v]) => <span key={k}>{KINDS[k]?.[0]} {sign(v)}</span>)}</div></div>
           </div> })}
@@ -132,7 +132,7 @@ export function SquadCard({ c, pts, wk, events, KINDS, captain, benched, dead, t
         <div className="sq-top">
           {c.form && <i className="sq-f">{c.form}</i>}
           {tag && <i className={`sq-act ${tag.active ? 'live' : ''}`}>{tag.active ? '📺 Active' : '🏛️ Legacy'}</i>}
-          {vault > 0 && <i className="sq-act vault" title="Piggy bank: pays out when big news or their story returns">🐷 {vault}</i>}
+          {vault > 0 && <i className="sq-act vault" title="Stockpile: pays out when big news or their story returns">📦 {vault}</i>}
           {streak > 0 && <i className="sq-act streak" title={`Scoring streak: ${streak} week${streak > 1 ? 's' : ''}, pays +${Math.min(2 * streak, 10)} if they score again`}>🔥 {streak}</i>}
           {captain && <i className="sq-crown">👑 {captain}</i>}
           {benched && <i className="sq-bn">🪑 Bench</i>}

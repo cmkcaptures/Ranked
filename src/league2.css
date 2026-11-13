@@ -88,7 +88,7 @@
 .lg-tag img { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; object-position: 50% 15%; }
 .lg-tag b { font: 700 11px Inter, sans-serif; }
 .lg-tag em { font: 700 10px 'JetBrains Mono', monospace; font-style: normal; color: #8f897c; }
-.lg-tag.cp { border-color: #ffd84a; } .lg-tag.cp b { color: #ffd84a; } .lg-tag.cp b::before { content: "👑 "; font-size: 9px; }
+.lg-tag.cap { border-color: #ffd84a; } .lg-tag.cap b { color: #ffd84a; } .lg-tag.cap b::before { content: "👑 "; font-size: 9px; }
 .lg-tag.bn { opacity: .55; } .lg-tag.dd { border-color: #ff3b4e; } .lg-tag.dd b { text-decoration: line-through; }
 
 /* rows 4+ */
@@ -190,3 +190,17 @@
 .sc-proj.dn { color: #ff3b4e; }
 .sc-kb summary { cursor: pointer; list-style: none; }
 @media (max-width: 900px) { .sc-grid.three { grid-template-columns: 1fr; } }
+
+/* ===== compact podium (v5) ===== */
+.lg-pod { gap: 10px; padding: 12px; }
+.lg-art { height: 92px; }
+.lg-pc.p1 .lg-art { height: 112px; }
+.lg-num { font-size: 46px; left: 8px; top: 2px; -webkit-text-stroke-width: 1.5px; text-shadow: 3px 3px 0 #000; }
+.lg-pc.p1 .lg-num { font-size: 56px; }
+.lg-info { margin-top: -30px; padding: 2px 10px 10px; }
+.lg-mgr { font-size: 21px; }
+.lg-row { margin-top: 6px; }
+.lg-row strong { font-size: 28px; }
+.lg-pod .lg-tags { margin-top: 6px; gap: 3px; }
+.lg-tag { padding: 1px 7px 1px 1px; gap: 4px; }
+.lg-tag img { width: 18px; height: 18px; }

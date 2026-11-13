@@ -367,7 +367,7 @@ function Battles({ me, friends }) {
 
 // ---------- Notifications page: everything, sorted into Market / League / Squad / Achievements ----------
 const CATS = [
-  ['league', '🏆 League', /waiver|trade|offers .* for your|declined your|dropped|swap|draft|chip|captain|fantasy|league|benched|piggy|played (triple|bench|wildcard)/i],
+  ['league', '🏆 League', /waiver|trade|offers .* for your|declined your|dropped|swap|draft|chip|captain|fantasy|league|benched|piggy|stockpile|played (triple|bench|wildcard)/i],
   ['market', '📈 Market', /\$|crash|spike|order|dividend|bet |liquidated|ipo|coins|price/i],
   ['ach', '🎖️ Achievements', /achievement|unlocked|badge|level/i],
   ['squad', '💬 Squad', /hyped your|poll|battle|vote|mention|joined|friend|watch/i],

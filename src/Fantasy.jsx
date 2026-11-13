@@ -24,7 +24,7 @@ const seasonLabel = k => { const [s, y] = k.split('-'); return `${s[0] + s.slice
 const KINDS = {
   episode: ['📺', 'New episode'], chapter: ['📖', 'New chapter'], wiki: ['📈', 'Wikipedia spike'], fans: ['💜', 'New AniList fans'],
   trending: ['🔥', 'Show trending'], break: ['💤', 'On break'], vote: ['🗳️', 'Won the squad vote'], hype: ['📊', 'Daily hype ranking'], bench: ['🪑', 'Benched (lowest of your 6)'], news: ['📰', 'Big news'], trailer: ['🎬', 'New trailer'],
-  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['🐷', 'Piggy bank smashed'], cup: ['🏆', 'Mid-season Cup champion'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
+  transform: ['⚡', 'Transformation / power-up'], debut: ['🌟', 'New form debut'], vault: ['📦', 'Stockpile cashed out'], cup: ['🏆', 'Mid-season Cup champion'], streak: ['🔥', 'Scoring streak'], synergy: ['🤝', 'Team synergy'], underdog: ['🔵', 'Underdog boost'], epbonus: ['📺', 'Episode bonus'], win: ['🏆', 'Won a fight'], appear: ['👀', 'Appeared'], lose: ['💥', 'Lost a fight'],
   death: ['💀', 'Died'], revive: ['✨', 'Came back'],
 }
 const pts = n => (n > 0 ? '+' : '') + n
@@ -150,7 +150,7 @@ function FantasyLeague({ me, friends, openProfile }) {
   const capOf = u => caps.filter(c => c.user_id === u && c.week <= S.week).sort((a, b) => b.week - a.week)[0]?.char_id
   const capLocked = caps.some(c => c.user_id === me?.id && c.week === S.week)
   const takenBy = Object.fromEntries(picks.map(p => [p.char_id, p.user_id]))
-  // 🐷 piggy banks: only count for the owner who saved them up
+  // 📦 stockpiles: only count for the owner who saved them up
   const vault = Object.fromEntries(vaults.filter(v => v.amount > 0 && takenBy[v.char_id] === v.user_id).map(v => [v.char_id, v.amount]))
   // rank movement: where each team stood before this week's points
   const streak = Object.fromEntries(streaks.filter(x => x.streak > 0 && takenBy[x.char_id] === x.user_id).map(x => [x.char_id, x.streak]))
@@ -387,13 +387,13 @@ function Rules() {
     ['🏆', 'Wins a proper fight', '+8'], ['👀', 'Appears in a new episode/chapter', '+3'], ['💥', 'Loses a fight', '−5'], ['💀', 'Dies (then scores 0 until they come back)', '−20']]
   const hype = [['📊', 'Daily hype ranking: every night each drafted character is ranked by how much their hype grew that day', '+5 (1st) → +1 (last) daily'],
     ['🏛️', 'Legacy bonus: show not airing and manga not releasing', 'hype ×1.5'], ['📰', 'Big news: new season/film announced, added to a game, poll win, anniversary', '+15'], ['🎬', 'New trailer: an official trailer, PV or teaser for a show, film or game they’re in', '+20']]
-  const piggy = [['🐷', 'Every quiet week (show not airing, manga not releasing) your character’s piggy bank fills up, faster the longer you hold them', '5 → 11 → 18 → 27 → 37 → 49 → 60'],
-    ['💥', 'Big news, a new trailer, or their story comes back (new season, chapter, fight)? The piggy bank smashes and pays out everything at once', 'max 60'],
-    ['🔒', 'Trade or drop them and the piggy bank is lost. Captain doesn’t double it, and it’s outside the weekly cap', 'hold to win']]
+  const piggy = [['📦', 'Every quiet week (show not airing, manga not releasing) your character’s stockpile fills up, faster the longer you hold them', '5 → 11 → 18 → 27 → 37 → 49 → 60'],
+    ['💥', 'Big news, a new trailer, or their story comes back (new season, chapter, fight)? The stockpile cashes out everything at once', 'max 60'],
+    ['🔒', 'Drop them and the stockpile is lost. Captain doesn’t double it, and it’s outside the weekly cap', 'hold to win']]
   const T = (title, rows, note) => <div className="card pad"><h3>{title}</h3>{note && <p className="muted small">{note}</p>}{rows.map(([i, l, p]) => <div key={l} className="lrow"><span>{i}</span><div className="grow">{l}</div><b>{p}</b></div>)}</div>
   return <div className="frules">
     {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
-    {T('🐷 Piggy bank (for your investments)', piggy, 'Old-show legends don’t score every week, so they save up instead and cash out when big news drops.')}
+    {T('📦 Stockpile (for your investments)', piggy, 'Old-show legends don’t score every week, so they save up instead and cash out when big news drops.')}
     {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
     {T('Captain', [['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
     {T('Bonuses', [['🔥', 'Streak: a character scores story points 2+ weeks in a row', '+5 a week'], ['🔵', 'Catch-up: the bottom 2 teams get +20% of their week and 2 swaps', '+20%']])}
