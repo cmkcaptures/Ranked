@@ -179,3 +179,14 @@
 .sc-proj { font: 400 22px Bangers; letter-spacing: 1px; color: #e9e2d0; text-align: right; flex: none; line-height: 1; }
 .sc-proj small { display: block; font: 700 9px Inter, sans-serif; color: #9a937f; letter-spacing: .5px; }
 .sc-proj.up { color: #2ee68f; } .sc-head em.g { color: #2ee68f; }
+.sc-head { display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.sc-head p + p { margin-top: 4px; }
+.sc-kpis { display: flex; gap: 10px; }
+.sc-kpis > div { border: 3px solid var(--ink); background: #1c1a21; padding: 8px 14px; text-align: center; box-shadow: 4px 4px 0 #000; }
+.sc-kpis b { font: 400 30px Bangers; color: #ffd84a; display: block; line-height: 1; }
+.sc-kpis small { color: #9a937f; font-size: 11px; letter-spacing: 0; }
+.sc-grid.three { grid-template-columns: 1fr 1fr 1.2fr; }
+.sc-sh { color: #7fb2ff !important; }
+.sc-proj.dn { color: #ff3b4e; }
+.sc-kb summary { cursor: pointer; list-style: none; }
+@media (max-width: 900px) { .sc-grid.three { grid-template-columns: 1fr; } }
