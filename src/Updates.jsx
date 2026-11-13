@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-20', headline: 'LEAGUE TRIMMED DOWN: LESS RULES, SAME POINTS',
+    items: [
+      ['✂️ Fewer tabs', 'The League is now just Standings, My team and Scoring.', 'League'],
+      ['🚫 Gone', 'The Mid-season Cup, trades and waivers are gone. Use your weekly swap instead.', 'League'],
+      ['🔥 Simple bonuses', 'Streak is a flat +5 a week. The bottom 2 teams get +20% and 2 swaps to catch up.', 'League → Scoring'],
+    ],
+  },
+  {
     id: '2026-11-19', headline: 'LEAGUE GETS A MAKEOVER: PODIUM, RACE TRACK, BIG CAPTAIN',
     items: [
       ['🎬 New header', 'Your week, points and rank now sit on a big banner with your captain art.', 'League'],

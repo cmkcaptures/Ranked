@@ -158,9 +158,6 @@ function FantasyLeague({ me, friends, openProfile }) {
   const myStart = lastRank[me?.id] || 0
   const mercy = teams.length >= 4 && myStart > teams.length - 2 ? (myStart === teams.length ? 'last' : 'second') : false
   const topWeek = teams.length ? Math.max(...teams.map(t => t.week)) : 0
-  // waivers: dropped in the last 24h -> claims only, lowest in the table wins
-  const waivers = {}
-  for (const w of swaps) { const until = new Date(w.created_at).getTime() + 86400000; if (until > Date.now() && !takenBy[w.out_char]) waivers[w.out_char] = Math.max(waivers[w.out_char] || 0, until) }
   const chipNow = u => chipRows.find(c => c.user_id === u && c.week === S.week)?.chip
 
   if (!sb || !me) return <div className="card pad muted">Sign in to play the Fantasy League.</div>
@@ -192,7 +189,7 @@ function FantasyLeague({ me, friends, openProfile }) {
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
-        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['moments', '⚡ Moments'], ['trades', `🔄 Trades${trades.some(t => t.status === 'pending' && t.to_user === me.id) ? ` (${trades.filter(t => t.status === 'pending' && t.to_user === me.id).length})` : ''}`], ['cup', '🏆 Cup'], ['vote', "🗳️ Who's hyper?"], ['rules', '📜 Scoring']]} />
+        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['rules', '📜 Scoring']]} />
         <Deadline S={S} swaps={swaps} trades={trades} byId={byId} name={name} />
         {tab === 'table' && <button className="pill ghost rp-open" onClick={() => setReplay(true)}>🎬 Draft-day replay</button>}
         {replay && <DraftReplay S={S} draft={draft} chars={chars} charPts={charPts} who={who} onClose={() => setReplay(false)} />}
@@ -201,13 +198,7 @@ function FantasyLeague({ me, friends, openProfile }) {
           events={cur.filter(e => e.team_user === me.id)} swapped={!isDeadline() && swaps.filter(s => s.user_id === me.id && s.week === S.week).length >= (mercy ? 2 : 1)} mercy={mercy} streak={streak}
           captain={capOf(me.id)} capLocked={capLocked} onCaptain={id => run('fantasy_set_captain', { p_char: id })}
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
-          chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })}
-          waivers={waivers} onClaim={(o, i) => run('fantasy_claim', { p_char: i, p_out: o })} myClaims={claims.filter(c => c.user_id === me.id)} onUnclaim={id => run('fantasy_claim_cancel', { p_id: id })}
-          order={[...teams].reverse()} who={who} me={me} />}
-        {tab === 'trades' && <Trades me={me} picks={picks} byId={byId} name={name} trades={trades} run={run} />}
-        {tab === 'moments' && <Moments events={cur.filter(e => e.source === 'bot')} byId={byId} name={name} />}
-        {tab === 'vote' && <Vote S={S} teams={teams} byId={byId} name={name} me={me} votes={votes} reload={reload} setErr={setErr} />}
-        {tab === 'cup' && <Cup S={S} teams={teams} events={cur} who={who} me={me} openProfile={openProfile} />}
+          chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })} />}
         {tab === 'rules' && <Rules />}
       </>}
     </div>
@@ -284,14 +275,12 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   </div>
 }
 
-function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waivers, onClaim, myClaims, onUnclaim, order, who, me, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
+function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, form, week, benched, team, info, byId, chars, takenBy, name, charPts, dead, events, swapped, onSwap, onBench, captain, capLocked, onCaptain }) {
   const [out, setOut] = useState(null)
   const [benchOpen, setBenchOpen] = useState(false)
   const [q, setQ] = useState('')
   const wildcard = chips.some(c => c.chip === 'wildcard' && c.week === chipWeek)
   const usedThisWeek = chips.find(c => c.week === chipWeek)
-  const pending = myClaims.filter(c => c.status === 'pending')
-  const hrs = t => Math.max(1, Math.round((t - Date.now()) / 3600000))
   const wkTot = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
   return <div className="rank lg-rank lg-team">
     <section>
@@ -328,23 +317,17 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waive
         <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
           <CharTile key={c.id} c={c} tag={info[c.id]} onClick={() => confirm(`Add ${c.name} as your bench player?`) && (onBench(c.id), setBenchOpen(false))} />)}</div>
       </div>}
-      {mercy && <div className="fmercy">🔵 <b>Underdog week:</b> you started the week in the bottom 2, so you get <b>+{mercy === 'last' ? 25 : 10}%</b> bonus points and <b>2 swaps</b> this week.</div>}
+      {mercy && <div className="fmercy">🔵 <b>Underdog week:</b> you started the week in the bottom 2, so you get <b>+20%</b> bonus points and <b>2 swaps</b> this week.</div>}
       {swapped && !wildcard && <p className="muted small">You've used this week's swap{mercy ? 's' : ''}.</p>}
       {wildcard && <p className="muted small">🃏 Wildcard on: unlimited swaps this week.</p>}
-      {pending.length > 0 && <div className="card pad"><h3>⏳ Your waiver claims</h3>{pending.map(c => <div key={c.id} className="lrow small">
-        <span>⏳</span><div className="grow"><b>{byId[c.char_id]?.name}</b> for {byId[c.out_char]?.name}<div className="muted">decided in ~{hrs(waivers[c.char_id] || Date.now())}h</div></div>
-        <button className="pill ghost" onClick={() => onUnclaim(c.id)}>Cancel</button></div>)}</div>}
       {out && <div className="card pad">
         <h3>Swap out {byId[out]?.name} for…</h3>
         <input className="search" placeholder="Search…" value={q} onChange={e => setQ(e.target.value)} />
         <div className="fgrid">{chars.filter(c => !takenBy[c.id] && !team.chars.some(x => x !== out && info[x]?.show_key && info[x].show_key === info[c.id]?.show_key) && (!q || norm(c.name + c.media_title).includes(norm(q)))).slice(0, 40).map(c =>
-          <CharTile key={c.id} c={c} sub={waivers[c.id] ? `⏳ waivers · ${hrs(waivers[c.id])}h left` : undefined}
-            onClick={() => { if (waivers[c.id]) { confirm(`${c.name} is on waivers. Put in a claim? Lowest in the table gets them when it ends.`) && onClaim(out, c.id) } else onSwap(out, c.id); setOut(null) }} />)}</div>
-        <p className="muted small">⏳ Dropped in the last 24h = on waivers. Claim them and whoever is lowest in the table gets them.</p>
+          <CharTile key={c.id} c={c} onClick={() => { onSwap(out, c.id); setOut(null) }} />)}</div>
       </div>}
     </section>
     <aside>
-      <div className="lg-panel"><div className="lg-ph">Waiver priority</div>{order.map((t, i) => <div key={t.user} className={`lrow small ${t.user === me.id ? 'meline' : ''}`}><span>{i + 1}</span><div className="grow">{who(t.user)?.username || '?'}</div><b>{t.total}</b></div>)}</div>
       <div className="lg-panel lg-feed"><div className="lg-ph"><i className="lg-dot" /> Your points</div>{events.slice(0, 40).map(e => { const c = byId[e.char_id]
         return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''}`} title={e.note || ''}>
           <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
@@ -410,11 +393,10 @@ function Rules() {
     {T('📺 Story points', story, 'Only for Active characters (anime airing or manga releasing). Found automatically from recaps every night. Capped at 30 per character per week.')}
     {T('🐷 Piggy bank (for your investments)', piggy, 'Old-show legends don’t score every week, so they save up instead and cash out when big news drops.')}
     {T('🔥 Hype points', hype, 'Every character, airing or not. Ranked against their own normal, so a quiet legend only has to beat their own usual week.')}
-    {T('Squad', [['🗳️', "Win your weekly \"who's hyper?\" matchup", '+5'], ['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
-    {T('Catch-up boosts', [['🔥', 'Streak: each week a character scores story points their streak grows. Pays +2, +4, +6, +8, then +10 a week. Miss a week and it resets', 'up to +10'], ['🤝', 'Synergy: 3 or more of your characters score story points in the same week', '+10'], ['📺', 'Episode bonus: every new episode pays an extra +2 (outside the weekly cap)', '+2'], ['🔵', 'Underdog: last place at the start of a week gets +25% of that week’s points, second-last +10%', '+25%'], ['🆘', 'Mercy swap: the bottom 2 teams get 2 swaps a week instead of 1', '2 swaps']])}
-    {T('Bench & trades', [['🪑', 'Bench: a free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5'], ['🔄', 'Trade one of yours for one of a mate\'s (they accept or decline). Points already scored stay where they are', '1 for 1']])}
+    {T('Captain', [['👑', 'Captain scores double all week (pick once a week, carries over)', '×2']])}
+    {T('Bonuses', [['🔥', 'Streak: a character scores story points 2+ weeks in a row', '+5 a week'], ['🔵', 'Catch-up: the bottom 2 teams get +20% of their week and 2 swaps', '+20%']])}
+    {T('Bench', [['🪑', 'A free 6th character. Only your best 5 count each week (lowest is benched automatically)', 'best 5']])}
     {T('🎴 Chips (once a season each, one per week)', Object.values(CHIPS).map(([i, n, d]) => [i, `${n}: ${d}`, '1x']))}
-    {T('⏳ Waivers', [['⏳', 'Anyone dropped goes on waivers for 24 hours. Put in a claim; when it ends the lowest team in the table gets them', 'worst first']])}
     <p className="muted small">One character per show (no stacking two from the same anime). Seasons follow the anime seasons, one swap a week, plus a free swap while your team has two from the same show. Most points when the season ends takes the crown.</p>
   </div>
 }
