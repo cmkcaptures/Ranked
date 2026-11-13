@@ -357,16 +357,16 @@ function HoloCard({ e, i, overall, ratings, openRating, openAnime, setProgress, 
   const move = ev => { const f = ref.current, b = ev.currentTarget.getBoundingClientRect(), x = (ev.clientX - b.left) / b.width, y = (ev.clientY - b.top) / b.height
     f.style.setProperty('--rx', `${(0.5 - y) * 14}deg`); f.style.setProperty('--ry', `${(x - 0.5) * 20}deg`); f.style.setProperty('--mx', `${x * 100}%`); f.style.setProperty('--my', `${y * 100}%`) }
   const leave = () => { ref.current.style.setProperty('--rx', '0deg'); ref.current.style.setProperty('--ry', '0deg') }
-  return <div className={`hc ${sc >= 9 ? 'foil' : ''} ${flip ? 'flip' : ''}`} onMouseMove={move} onMouseLeave={leave} onClick={() => setFlip(!flip)}>
-    <div className="hin" ref={ref}>
-      <div className="hf" style={{ backgroundImage: `url(${big(m)})` }}>
-        <span className="rk">{i + 1}</span>{sc > 0 && <span className="sc">{sc}</span>}<div className="shine" />
+  return <div className={`ho ${sc >= 9 ? 'foil' : ''} ${flip ? 'flip' : ''}`} onMouseMove={move} onMouseLeave={leave} onClick={() => setFlip(!flip)}>
+    <div className="ho-in" ref={ref}>
+      <div className="ho-f" style={{ backgroundImage: `url(${big(m)})` }}>
+        <span className="rk">{i + 1}</span>{sc > 0 && <span className="sc">{sc}</span>}<div className="ho-shine" />
         <div className="cdn">{e.progress} / {m.episodes ?? '?'} eps<div className="pb"><i style={{ width: `${pct}%` }} /></div></div></div>
-      <div className="hb" onClick={ev => ev.target.closest('button,.spick') && ev.stopPropagation()}>
+      <div className="ho-b" onClick={ev => ev.target.closest('button,.spick') && ev.stopPropagation()}>
         <b>{title(m)}</b><small>{m.format?.replace('_', ' ')} · {m.seasonYear ?? '?'}{m.genres?.length ? ` · ${m.genres.slice(0, 2).join(', ')}` : ''}</small>
-        {r ? CATS.map(c => <div key={c} className="hr"><span>{c === 'Peak moments' ? 'Peaks' : c}</span><div><i style={{ width: `${(r[c] ?? 0) * 10}%` }} /></div><em>{r[c] ?? '–'}</em></div>)
-          : <span className="nr">Not rated yet. Rate it to fill this card in.</span>}
-        <div className="hfoot">
+        {r ? CATS.map(c => <div key={c} className="ho-r"><span>{c === 'Peak moments' ? 'Peaks' : c}</span><div><i style={{ width: `${(r[c] ?? 0) * 10}%` }} /></div><em>{r[c] ?? '–'}</em></div>)
+          : <span className="ho-nr">Not rated yet. Rate it to fill this card in.</span>}
+        <div className="ho-foot">
           <button className="gold" onClick={() => openRating(m)}>{overall(m.id) ? `★ ${overall(m.id)}` : 'Rate'}</button>
           {e.status === 'CURRENT' && <button onClick={() => setProgress(m, e.progress + 1)}>+1</button>}
           <button onClick={() => openAnime(m.id)}>Open</button>
