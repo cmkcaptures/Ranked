@@ -6,12 +6,6 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
-    id: '2026-11-21', headline: 'LEAGUE: PROJECTED POINTS',
-    items: [
-      ['📈 Projections', 'Characters now show roughly how many points they should score over the next 4 weeks.', 'League'],
-    ],
-  },
-  {
     id: '2026-11-20', headline: 'LEAGUE TRIMMED DOWN: LESS RULES, SAME POINTS',
     items: [
       ['✂️ Fewer tabs', 'The League is now just Standings, My team and Scoring.', 'League'],
