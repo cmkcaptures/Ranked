@@ -9,6 +9,7 @@ import Fantasy, { fantasySeason, setLeague } from './Fantasy.jsx'
 import CharProfile from './CharProfile.jsx'
 import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
+import './pages2.css'
 import Wrapped from './Wrapped.jsx'
 import ShockAlert from './Shock.jsx'
 import Times from './Times.jsx'
@@ -307,79 +308,99 @@ function UserBox({ user, onChange }) {
   )
 }
 
-function Home({ activity, list, rankings, media, openWrapped }) {
-  const progress = list.filter(e => e.status === 'CURRENT')
+const cd2 = s => s < 86400 ? `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m` : `${Math.floor(s / 86400)}d ${Math.floor((s % 86400) / 3600)}h`
+const big = m => m?.coverImage?.extraLarge || m?.coverImage?.large || m?.coverImage?.medium
+
+function Home({ activity, list, rankings, media, openWrapped, openAnime, setProgress, me, user, openRating }) {
+  const [f, setF] = useState('all')
+  const watching = list.filter(e => e.status === 'CURRENT').sort((a, b) => (a.media.nextAiringEpisode?.timeUntilAiring ?? 9e9) - (b.media.nextAiringEpisode?.timeUntilAiring ?? 9e9))
+  const behind = e => e.media.nextAiringEpisode && e.progress < e.media.nextAiringEpisode.episode - 1
+  const shown = watching.filter(e => f === 'all' || (f === 'today' ? (e.media.nextAiringEpisode?.timeUntilAiring ?? 9e9) < 86400 : behind(e)))
+  const next = [...watching].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))[0]
   const top = rankings[10].slice(0, 5).map(id => media[id]).filter(Boolean)
-  return (
-    <div className="home">
-      <section>
-        <button className="wr-launch" onClick={openWrapped}><div><b>Your {currentSeason().season[0] + currentSeason().season.slice(1).toLowerCase()} Wrapped is here</b><br /><span>Episodes, genres, league, market and your anime personality</span></div><i>ドン!</i></button>
-        <h3>Activity</h3>
-        {activity.map(a => (
-          <div key={a.id} className="card act">
-            <img src={a.media.coverImage.medium} alt="" />
-            <div className="body">
-              <div className="row"><span className="blue">{verb(a)}</span><span className="time">{timeAgo(a.createdAt)}</span></div>
-              <div><span className="blue">{a.media.title.romaji}</span></div>
-            </div>
-          </div>
-        ))}
-        {!activity.length && <div className="card muted pad">No recent activity.</div>}
-      </section>
-      <aside>
-        <h3>In Progress</h3>
-        <div className="card grid4">
-          {progress.map(e => (
-            <div key={e.media.id} className="cover" style={{ backgroundImage: `url(${e.media.coverImage.large})` }}>
-              {e.media.nextAiringEpisode && <div className="air">Ep {e.media.nextAiringEpisode.episode}<br />{countdown(e.media.nextAiringEpisode.timeUntilAiring)}</div>}
-              <div className="bar" style={{ width: e.media.episodes ? `${(e.progress / e.media.episodes) * 100}%` : '30%' }} />
-            </div>
-          ))}
-        </div>
-        <h3>Your Top 5</h3>
-        <div className="card pad">
-          {top.length ? top.map((m, i) => (
-            <div key={m.id} className="mini"><b className={`r r${i + 1}`}>#{i + 1}</b><img src={m.coverImage.medium} alt="" />{title(m)}</div>
-          )) : <span className="muted">Build your Top 10 on the Rankings page.</span>}
-        </div>
-      </aside>
+  const name = me?.username || user?.name || 'friend'
+  const today = watching.filter(e => (e.media.nextAiringEpisode?.timeUntilAiring ?? 9e9) < 86400).length
+  return <div className="pg2">
+    <div className="shead"><h1>Welcome back <b>{name}</b></h1><div className="info">{watching.length} watching{today ? ` · ${today} new episode${today > 1 ? 's' : ''} today` : ''}</div></div>
+    {next && <div className="hero"><div className="bg" style={{ backgroundImage: `url(${big(next.media)})` }} /><div className="jp">続き</div>
+      <div className="in"><div className="kick"><b>NEXT UP</b> CONTINUE WATCHING</div>
+        <h1 className="ol" onClick={() => openAnime(next.media.id)}>{title(next.media)}</h1>
+        <div className="meta">Episode {next.progress} of {next.media.episodes ?? '?'}{next.media.genres?.length ? ` · ${next.media.genres.slice(0, 3).join(' · ')}` : ''}</div>
+        <div className="row"><button className="btn" onClick={() => setProgress(next.media, next.progress + 1)}>+1 Episode</button>
+          <button className="btn ghost" onClick={() => openRating(next.media)}>Rate</button>
+          {next.media.nextAiringEpisode && <span className="kick">EP {next.media.nextAiringEpisode.episode} IN {cd2(next.media.nextAiringEpisode.timeUntilAiring)}</span>}</div></div></div>}
+    <h2 className="sec">In progress <small>countdown to the next episode · hover for +1</small></h2>
+    <div className="chips">{[['all', 'All'], ['today', 'Airing today'], ['behind', 'Behind']].map(([k, l]) => <button key={k} className={`chip ${f === k ? 'on' : ''}`} onClick={() => setF(k)}>{l}</button>)}</div>
+    {shown.length ? <div className="rail">{shown.map(e => { const m = e.media, pct = m.episodes ? Math.min(100, e.progress / m.episodes * 100) : 30
+      return <div key={m.id} className="pc" onClick={() => openAnime(m.id)}><div className="cv" style={{ backgroundImage: `url(${m.coverImage.large})` }}>
+        <div className="cdn">{m.nextAiringEpisode ? <>EP {m.nextAiringEpisode.episode} in <b>{cd2(m.nextAiringEpisode.timeUntilAiring)}</b></> : `${e.progress} / ${m.episodes ?? '?'} eps`}<div className="pb"><i style={{ width: `${pct}%` }} /></div></div>
+        <button className="add hov" onClick={ev => { ev.stopPropagation(); setProgress(m, e.progress + 1) }}>+1</button></div>
+        <div className="t">{title(m)}</div><div className="m">{e.progress} / {m.episodes ?? '?'} eps</div></div> })}</div>
+      : <div className="panel empty">Nothing here.</div>}
+    <div className="pg-cols3">
+      <div className="panel"><div className="ph">Activity <small>RECENT</small></div>
+        {activity.map(a => <div key={a.id} className="fi"><img src={a.media.coverImage.large || a.media.coverImage.medium} alt="" />
+          <div><span className="v">{verb(a)}</span> <b className="linkish" onClick={() => openAnime(a.media.id)}>{a.media.title.romaji}</b><small>{timeAgo(a.createdAt)}</small></div></div>)}
+        {!activity.length && <div className="empty">No recent activity.</div>}</div>
+      <div className="panel nl"><div className="ph">Your top 5</div>
+        {top.length ? top.map((m, i) => <div key={m.id} className="r" onClick={() => openAnime(m.id)}><span className="n">{i + 1}</span><img src={m.coverImage.medium} alt="" /><span>{title(m)}</span></div>)
+          : <div className="empty">Build your Top 10 on the Rankings page.</div>}</div>
+      <button className="pg-wr" onClick={openWrapped}><b>Your {currentSeason().season[0] + currentSeason().season.slice(1).toLowerCase()} Wrapped is here ドン!</b><small>Episodes, genres, league, market and your anime personality</small></button>
     </div>
-  )
+  </div>
 }
 
-function ListPage({ list, overall, openRating, setStatus, setProgress, openAnime }) {
+const LTABS = [['CURRENT', 'Watching'], ['COMPLETED', 'Completed'], ['PAUSED', 'Paused'], ['DROPPED', 'Dropped'], ['PLANNING', 'Planning']]
+function HoloCard({ e, i, overall, ratings, openRating, openAnime, setProgress, setStatus }) {
+  const ref = useRef(null), [flip, setFlip] = useState(false), m = e.media
+  const sc = e.score || 0, r = ratings[m.id], pct = m.episodes ? Math.min(100, e.progress / m.episodes * 100) : 0
+  const move = ev => { const f = ref.current, b = ev.currentTarget.getBoundingClientRect(), x = (ev.clientX - b.left) / b.width, y = (ev.clientY - b.top) / b.height
+    f.style.setProperty('--rx', `${(0.5 - y) * 14}deg`); f.style.setProperty('--ry', `${(x - 0.5) * 20}deg`); f.style.setProperty('--mx', `${x * 100}%`); f.style.setProperty('--my', `${y * 100}%`) }
+  const leave = () => { ref.current.style.setProperty('--rx', '0deg'); ref.current.style.setProperty('--ry', '0deg') }
+  return <div className={`hc ${sc >= 9 ? 'foil' : ''} ${flip ? 'flip' : ''}`} onMouseMove={move} onMouseLeave={leave} onClick={() => setFlip(!flip)}>
+    <div className="hin" ref={ref}>
+      <div className="hf" style={{ backgroundImage: `url(${big(m)})` }}>
+        <span className="rk">{i + 1}</span>{sc > 0 && <span className="sc">{sc}</span>}<div className="shine" />
+        <div className="cdn">{e.progress} / {m.episodes ?? '?'} eps<div className="pb"><i style={{ width: `${pct}%` }} /></div></div></div>
+      <div className="hb" onClick={ev => ev.target.closest('button,.spick') && ev.stopPropagation()}>
+        <b>{title(m)}</b><small>{m.format?.replace('_', ' ')} · {m.seasonYear ?? '?'}{m.genres?.length ? ` · ${m.genres.slice(0, 2).join(', ')}` : ''}</small>
+        {r ? CATS.map(c => <div key={c} className="hr"><span>{c === 'Peak moments' ? 'Peaks' : c}</span><div><i style={{ width: `${(r[c] ?? 0) * 10}%` }} /></div><em>{r[c] ?? '–'}</em></div>)
+          : <span className="nr">Not rated yet. Rate it to fill this card in.</span>}
+        <div className="hfoot">
+          <button className="gold" onClick={() => openRating(m)}>{overall(m.id) ? `★ ${overall(m.id)}` : 'Rate'}</button>
+          {e.status === 'CURRENT' && <button onClick={() => setProgress(m, e.progress + 1)}>+1</button>}
+          <button onClick={() => openAnime(m.id)}>Open</button>
+          <StatusPicker m={m} status={e.status} setStatus={setStatus} />
+        </div></div>
+    </div>
+    <div className="t">{title(m)}</div><div className="m">{m.format?.replace('_', ' ')} · {m.seasonYear ?? '?'}</div>
+  </div>
+}
+
+function ListPage({ list, overall, ratings, openRating, setStatus, setProgress, openAnime }) {
   const [tab, setTab] = useState('COMPLETED')
-  const tabs = ['CURRENT', 'COMPLETED', 'PAUSED', 'DROPPED', 'PLANNING']
-  const shown = list.filter(e => e.status === tab).sort((a, b) => b.score - a.score)
-  return (
-    <>
-      <AniListLink />
-      <div className="tabs">{tabs.map(t => <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>
-        {t.charAt(0) + t.slice(1).toLowerCase()} <small>{list.filter(e => e.status === t).length}</small></button>)}</div>
-      <div className="roster">
-        {shown.map(e => {
-          const t = tier(e.score)
-          const pct = e.media.episodes ? Math.min(100, (e.progress / e.media.episodes) * 100) : 0
-          return (
-            <div key={e.media.id} className={`rrow t-${t}`}>
-              <div className="rcover linkish" onClick={() => openAnime(e.media.id)} style={{ backgroundImage: `url(${e.media.coverImage.large})` }} />
-              <div className="rinfo">
-                <div className="rtitle linkish" onClick={() => openAnime(e.media.id)}>{title(e.media)}</div>
-                <div className="rmeta"><span className={`rtier ${t}`}>{TIER_NAME[t]}</span>{e.media.format?.replace('_', ' ')} · {e.media.seasonYear ?? '?'}</div>
-                <div className="rprog"><div style={{ width: `${pct}%` }} /></div>
-              </div>
-              <div className="reps"><b>{e.progress}</b>/{e.media.episodes ?? '?'}<span>EPS</span>
-                {e.status === 'CURRENT' && <button className="plus1" title="Watched another episode" onClick={() => setProgress(e.media, e.progress + 1)}>+1</button>}</div>
-              <div className={`rscore ${t}`}>{e.score || '–'}</div>
-              <button className="pill" onClick={() => openRating(e.media)}>{overall(e.media.id) ? `★ ${overall(e.media.id)}` : 'Rate'}</button>
-              <StatusPicker m={e.media} status={e.status} setStatus={setStatus} />
-            </div>
-          )
-        })}
-        {!shown.length && <div className="card pad muted">Nothing here.</div>}
-      </div>
-    </>
-  )
+  const [sort, setSort] = useState('score')
+  const ti = LTABS.findIndex(t => t[0] === tab)
+  const inTab = list.filter(e => e.status === tab)
+  const shown = [...inTab].sort(sort === 'score' ? (a, b) => b.score - a.score : sort === 'az' ? (a, b) => title(a.media).localeCompare(title(b.media)) : (a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+  const eps = inTab.reduce((n, e) => n + (e.progress || 0), 0), scored = inTab.filter(e => e.score), avg = scored.length ? (scored.reduce((n, e) => n + e.score, 0) / scored.length).toFixed(1) : '–'
+  const spread = [[10, '10'], [9, '9'], [8, '8'], [7, '7'], [6, '6'], [0, '5 or less']].map(([k, l]) => [l, scored.filter(e => k ? Math.floor(e.score) === k : e.score < 6).length])
+  const gc = {}; inTab.forEach(e => (e.media.genres || []).forEach(g => gc[g] = (gc[g] || 0) + 1))
+  const genres = Object.entries(gc).sort((a, b) => b[1] - a[1]).slice(0, 6)
+  const Bars = ({ rows }) => { const mx = Math.max(1, ...rows.map(r => r[1])); return rows.map(([k, v]) => <div key={k} className="r"><small>{k}</small><div className="pgb"><i style={{ width: `${v / mx * 100}%` }} /></div><b>{v}</b></div>) }
+  return <div className="pg2">
+    <AniListLink />
+    <div className="shead"><button className="arrow" onClick={() => setTab(LTABS[(ti + 4) % 5][0])}>‹</button><h1>{LTABS[ti][1]} <b>{inTab.length}</b></h1>
+      <button className="arrow" onClick={() => setTab(LTABS[(ti + 1) % 5][0])}>›</button><div className="info">{eps.toLocaleString()} episodes · avg {avg}<br />tap a card to flip it</div></div>
+    <div className="chips">{LTABS.map(([k, l]) => <button key={k} className={`chip ${tab === k ? 'on' : ''}`} onClick={() => setTab(k)}>{l} {list.filter(e => e.status === k).length}</button>)}
+      <button className="chip r" onClick={() => setSort(sort === 'score' ? 'az' : sort === 'az' ? 'recent' : 'score')}>Sort: {sort === 'az' ? 'A–Z' : sort}</button></div>
+    <div className="pg-cols">
+      {shown.length ? <div className="sgrid holo-grid">{shown.map((e, i) => <HoloCard key={e.media.id} e={e} i={i} overall={overall} ratings={ratings} openRating={openRating} openAnime={openAnime} setProgress={setProgress} setStatus={setStatus} />)}</div>
+        : <div className="panel empty">Nothing here.</div>}
+      <div><div className="panel pg-bars"><div className="ph">Score spread</div><Bars rows={spread} /></div>
+        {genres.length > 0 && <div className="panel pg-bars" style={{ marginTop: 16 }}><div className="ph">Top genres</div><Bars rows={genres} /></div>}</div>
+    </div>
+  </div>
 }
 
 function Rankings(props) {
@@ -539,35 +560,43 @@ function AnimeH2H({ list, elo, setElo }) {
   )
 }
 
+const BCHIPS = [['trend', 'Trending'], ['Action', 'Action'], ['Romance', 'Romance'], ['Comedy', 'Comedy'], ['Fantasy', 'Fantasy'], ['Sports', 'Sports'], ['Drama', 'Drama']]
 function Browse({ openRating, list, setStatus, openAnime }) {
   const statusOf = Object.fromEntries(list.map(e => [e.media.id, e.status]))
   const [q, setQ] = useState('')
+  const [g, setG] = useState('trend')
   const [res, setRes] = useState([])
   useEffect(() => {
     const t = setTimeout(() => (q ? searchAnime(q) : trending()).then(setRes).catch(() => {}), 350)
     return () => clearTimeout(t)
   }, [q])
-  return (
-    <>
-      <AniListLink />
-      <input className="search big" placeholder="Search anime…" value={q} onChange={e => setQ(e.target.value)} />
-      <h3>{q ? 'Results' : 'Trending now'}</h3>
-      <div className="browse">
-        {res.map(m => (
-          <div key={m.id} className={`shop t-${tier(m.averageScore / 10)}`} onClick={() => openAnime(m.id)}>
-            <div className="shopimg" style={{ backgroundImage: `url(${m.coverImage.large})` }}>
-              {m.averageScore && <span className="score">{m.averageScore}%</span>}
-            </div>
-            <div className="shopband">
-              <div className="bt">{title(m)}</div>
-              <div className="shopmeta">{m.format?.replace('_', ' ')} · {m.seasonYear ?? '?'}</div>
-              <StatusPicker m={m} status={statusOf[m.id]} setStatus={setStatus} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  )
+  const shown = g === 'trend' ? res : res.filter(m => m.genres?.includes(g))
+  const f = !q && shown[0], rest = f ? shown.slice(1) : shown
+  const gc = {}; res.forEach(m => (m.genres || []).forEach(x => gc[x] = (gc[x] || 0) + 1))
+  const hot = Object.entries(gc).sort((a, b) => b[1] - a[1]).slice(0, 6), mx = Math.max(1, ...hot.map(h => h[1]))
+  return <div className="pg2">
+    <AniListLink />
+    <div className="shead"><h1>Browse <b>anime</b></h1><div className="info">{q ? `${res.length} results` : 'trending right now'}<br />tap a cover to open it</div></div>
+    <div className="sbar"><input placeholder="SEARCH ANIME…" value={q} onChange={e => setQ(e.target.value)} /></div>
+    <div className="chips">{BCHIPS.map(([k, l]) => <button key={k} className={`chip ${g === k ? 'on' : ''}`} onClick={() => setG(k)}>{l}</button>)}</div>
+    {f && <div className="panel feat"><div className="num">#1</div><div className="cv" onClick={() => openAnime(f.id)} style={{ backgroundImage: `url(${big(f)})` }} />
+      <div><div className="kick"><b>#1 {g === 'trend' ? 'TRENDING' : g.toUpperCase()}</b> {f.averageScore ? `${f.averageScore}%` : ''} · {f.format?.replace('_', ' ')} · {f.seasonYear ?? ''}</div>
+        <h3 className="ol">{title(f)}</h3><div className="g">{(f.genres || []).map(x => <span key={x}>{x}</span>)}</div>
+        {f.episodes && <div className="m">{f.episodes} episodes</div>}
+        <div className="acts"><StatusPicker m={f} status={statusOf[f.id]} setStatus={setStatus} /><button className="btn ghost" onClick={() => openAnime(f.id)}>Open</button><button className="btn ghost" onClick={() => openRating(f)}>Rate</button></div></div></div>}
+    <div className="pg-cols">
+      <div className="sgrid">{rest.map(m => <div key={m.id} className="pc" onClick={() => openAnime(m.id)}>
+        <div className="cv" style={{ backgroundImage: `url(${m.coverImage.large})` }}>{m.averageScore && <span className="sc">{m.averageScore}</span>}
+          {m.nextAiringEpisode && <div className="cdn">EP {m.nextAiringEpisode.episode} in <b>{cd2(m.nextAiringEpisode.timeUntilAiring)}</b></div>}</div>
+        <div className="t">{title(m)}</div><div className="m">{m.format?.replace('_', ' ')} · {m.seasonYear ?? '?'}</div>
+        <div onClick={e => e.stopPropagation()} style={{ marginTop: 6 }}><StatusPicker m={m} status={statusOf[m.id]} setStatus={setStatus} /></div></div>)}
+        {!rest.length && !f && <div className="panel empty">Nothing found.</div>}</div>
+      <div><div className="panel nl"><div className="ph">Top this week <small>BY TRENDING</small></div>
+        {res.slice(0, 6).map((m, i) => <div key={m.id} className="r" onClick={() => openAnime(m.id)}><span className="n">{i + 1}</span><img src={m.coverImage.medium || m.coverImage.large} alt="" /><span>{title(m)}</span><i>{m.averageScore || ''}</i></div>)}</div>
+        <div className="panel pg-bars" style={{ marginTop: 16 }}><div className="ph">Hot genres</div>
+          {hot.map(([k, v]) => <div key={k} className="r" onClick={() => setG(k)} style={{ cursor: 'pointer' }}><small>{k}</small><div className="pgb"><i style={{ width: `${v / mx * 100}%` }} /></div><b>{v}</b></div>)}</div></div>
+    </div>
+  </div>
 }
 
 function RatingModal({ m, value, onClose, onSave }) {

@@ -50,7 +50,7 @@ async function fetchListLive(name) {
 
 export async function fetchActivity(userId) {
   const d = await gql(`query($id:Int){ Page(perPage:12){ activities(userId:$id, sort:ID_DESC){
-    ... on ListActivity { id status progress createdAt media { id title { romaji } coverImage { medium } } } } } }`, { id: userId })
+    ... on ListActivity { id status progress createdAt media { id title { romaji } coverImage { medium large } } } } } }`, { id: userId })
   return d.Page.activities.filter(a => a.media)
 }
 

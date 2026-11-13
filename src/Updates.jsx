@@ -6,6 +6,15 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-22', headline: 'HOME, LIST, BROWSE AND SEASON GET A NEW LOOK',
+    items: [
+      ['🏠 Home', 'A big Next Up banner, an in-progress rail with episode countdowns, and +1 right on the cover.', 'Home'],
+      ['🃏 Holo cards', 'Your anime list is now a wall of holo cards. Hover to tilt them, 9+ shows shine in foil, and tapping one flips it to your ratings.', 'Anime list'],
+      ['🔎 Browse', 'A featured #1 show, genre chips, and a top-this-week chart.', 'Browse'],
+      ['📅 Season', 'A new look, filters, and you can drag to reorder your season ranking.', 'Season'],
+    ],
+  },
+  {
     id: '2026-11-20', headline: 'LEAGUE TRIMMED DOWN: LESS RULES, SAME POINTS',
     items: [
       ['✂️ Fewer tabs', 'The League is now just Standings, My team and Scoring.', 'League'],
