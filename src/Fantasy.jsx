@@ -292,7 +292,8 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waive
   const usedThisWeek = chips.find(c => c.week === chipWeek)
   const pending = myClaims.filter(c => c.status === 'pending')
   const hrs = t => Math.max(1, Math.round((t - Date.now()) / 3600000))
-  return <div className="rank">
+  const wkTot = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
+  return <div className="rank lg-rank lg-team">
     <section>
       <div className="lb-chiprow">{Object.entries(CHIPS).map(([k, [ic, nm, desc]]) => { const u = chips.find(c => c.chip === k)
         const live = u && u.week === chipWeek
@@ -304,6 +305,7 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waive
         <span>{captain ? <>{byId[captain]?.name} scores <b>{chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'triple' : 'double'}</b> this week</> : 'Pick a captain: their points count double'}</span>
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
+      <div className="lg-panel"><div className="lg-ph">Your squad <span className={`lg-phr ${wkTot < 0 ? 'dn' : 'up'}`}>{wkTot > 0 ? '+' : ''}{wkTot} this week</span></div>
       <div className={`sq-grid n${team.chars.length}`}>
         {[...team.chars].sort((a, b) => (b === captain) - (a === captain) || (charPts[b] || 0) - (charPts[a] || 0)).map((id, i) =>
           <SquadCard key={id} delay={i * 80} c={byId[id]} pts={charPts[id] || 0} wk={(form[id] || {})[week] || 0} events={events.filter(e => e.char_id === id)} KINDS={KINDS}
@@ -316,7 +318,7 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waive
         {(() => { const mvp = [...team.chars].sort((a, b) => ((form[b] || {})[week] || 0) - ((form[a] || {})[week] || 0))[0]; const wk = team.chars.reduce((n, id) => n + ((form[id] || {})[week] || 0), 0)
           return <div className="sq-stat"><small>Week {week}</small><b>{wk > 0 ? '+' : ''}{wk}</b><span>team points this week</span>
             {byId[mvp] && <div className="mvp" onClick={() => openChar(mvp)}><img src={byId[mvp].image} alt="" referrerPolicy="origin" /><div><small>⭐ MVP</small><b>{byId[mvp].name}</b></div></div>}</div> })()}
-      </div>
+      </div></div>
       {team.chars.length < 6 ? <div className="fbench" onClick={() => setBenchOpen(o => !o)}>
         <b>🪑 Add your bench player</b><span>A free 6th character. Each week only your best 5 count: your lowest scorer is benched automatically, so the bench covers anyone who goes quiet or dies.</span>
       </div> : <p className="muted small">🪑 6 characters: each week your lowest scorer is benched automatically, and your best 5 count.</p>}
@@ -342,12 +344,12 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, waive
       </div>}
     </section>
     <aside>
-      <h3>Waiver priority</h3>
-      <div className="card">{order.map((t, i) => <div key={t.user} className={`lrow small ${t.user === me.id ? 'meline' : ''}`}><span>{i + 1}</span><div className="grow">{who(t.user)?.username || '?'}</div><b>{t.total}</b></div>)}</div>
-      <h3>Your points log</h3>
-      <div className="card">{events.slice(0, 40).map(e => <div key={e.id} className="lrow">
-        <span>{KINDS[e.kind]?.[0]}</span><div className="grow small"><b>{byId[e.char_id]?.name || 'Team'}</b> {KINDS[e.kind]?.[1].toLowerCase()}<div className="muted">wk {e.week} · {e.note}</div></div>
-        <b className={e.points < 0 ? 'down' : 'up'}>{pts(e.points)}</b></div>)}
+      <div className="lg-panel"><div className="lg-ph">Waiver priority</div>{order.map((t, i) => <div key={t.user} className={`lrow small ${t.user === me.id ? 'meline' : ''}`}><span>{i + 1}</span><div className="grow">{who(t.user)?.username || '?'}</div><b>{t.total}</b></div>)}</div>
+      <div className="lg-panel lg-feed"><div className="lg-ph"><i className="lg-dot" /> Your points</div>{events.slice(0, 40).map(e => { const c = byId[e.char_id]
+        return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''}`} title={e.note || ''}>
+          <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
+          <div><b>{c?.name || 'Team'} · {KINDS[e.kind]?.[1].toLowerCase()}</b><small>Week {e.week}{e.note ? ` · ${e.note}` : ''}</small></div>
+          <em className={e.points < 0 ? 'dn' : 'up'}>{pts(e.points)}</em></div> })}
         {!events.length && <div className="pad muted small">Nothing yet. Points come in as your characters' shows air.</div>}</div>
     </aside>
   </div>

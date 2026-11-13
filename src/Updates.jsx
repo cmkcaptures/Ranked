@@ -10,6 +10,7 @@ export const UPDATES = [
     items: [
       ['🎬 New header', 'Your week, points and rank now sit on a big banner with your captain art.', 'League'],
       ['🏁 Race track', 'Every team races across the top, led by its captain, so you can see the gap at a glance.', 'League → Standings'],
+      ['🃏 My team refresh', 'Squad cards, chips, captain bar and your points log all match the new look.', 'League → My team'],
       ['🥇 Podium + full squads', 'Top 3 get podium cards and every team shows its whole squad with each character’s points. Tap a team to open the full breakdown.', 'League → Standings'],
     ],
   },
