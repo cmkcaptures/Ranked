@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Scout, SCOUT_USER } from './Scout.jsx'
 import { sb, fetchAll, logActivity } from './cloud.js'
 import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
@@ -189,7 +190,7 @@ function FantasyLeague({ me, friends, openProfile }) {
       : !mine ? <Picker chars={chars} info={info} takenBy={takenBy} name={name} onLock={ids => run('fantasy_pick', { p_chars: ids }, () =>
         logActivity('fantasy_team', { season: S.label, names: ids.map(i => byId[i]?.name), cover: byId[ids[0]]?.image }))} /> : <>
         <Commish me={me} friends={friends} reload={reload} />
-        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ['rules', '📜 Scoring']]} />
+        <SlideTabs tab={tab} setTab={setTab} tabs={[['table', '🏆 Standings'], ['team', '⚽ My team'], ...(who(me.id)?.username?.toLowerCase() === SCOUT_USER ? [['scout', '🔭 Scout']] : []), ['rules', '📜 Scoring']]} />
         <Deadline S={S} swaps={swaps} trades={trades} byId={byId} name={name} />
         {tab === 'table' && <button className="pill ghost rp-open" onClick={() => setReplay(true)}>🎬 Draft-day replay</button>}
         {replay && <DraftReplay S={S} draft={draft} chars={chars} charPts={charPts} who={who} onClose={() => setReplay(false)} />}
@@ -200,6 +201,7 @@ function FantasyLeague({ me, friends, openProfile }) {
           onSwap={(o, i) => run('fantasy_swap', { p_out: o, p_in: i })} onBench={id => run('fantasy_add_bench', { p_char: id })}
           chips={chipRows.filter(c => c.user_id === me.id)} chipWeek={S.week} onChip={c => run('fantasy_play_chip', { p_chip: c })} />}
         {tab === 'rules' && <Rules />}
+        {tab === 'scout' && mine && who(me.id)?.username?.toLowerCase() === SCOUT_USER && <Scout team={mine} chars={chars} byId={byId} takenBy={takenBy} info={info} form={form} week={S.week} charPts={charPts} who={who} teams={teams} me={me} />}
       </>}
     </div>
   )
