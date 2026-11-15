@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-25', headline: 'THE LEAGUE GETS A MANGA MAKEOVER',
+    items: [
+      ['📋 Everyone on one screen', 'Standings is now one board: every manager's full team, their points and form, without scrolling.', 'League → Standings'],
+      ['💥 Manga panels', 'Inked panels, speed lines on the leader, a TARGET stamp on whoever is above you, and BAM! pop-ups when points land.', 'League'],
+      ['🔥 MVP and form', 'The week's top scorer gets an MVP tag, and each team shows W/L boxes for its last 4 weeks.', 'League → Standings'],
+    ],
+  },
+  {
     id: '2026-11-24', headline: 'BLIND TASTE TEST, RANKED RADIO AND MANGA ALERTS',
     items: [
       ['🎭 Blind Taste Test', 'A mystery anime with the title hidden. Guess what it is and its AniList score for up to 100 points. Keep your streak going.', 'Play → Blind Test'],

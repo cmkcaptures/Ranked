@@ -162,3 +162,68 @@ export function ChipCard({ ic, name, desc, state, label, disabled, onClick }) {
     <i className="shine" /><b>{ic}</b><strong>{name}</strong><span>{desc}</span><em>{label}</em>
   </button>
 }
+
+// ===== Standings v5: manga board, everyone's team on one screen =====
+const SFX = p => p >= 20 ? 'DOKAN!' : p >= 10 ? 'BAM!' : p >= 5 ? 'ZING!' : p > 0 ? 'TA!' : p <= -5 ? 'GAKK!' : 'ZUN…'
+export function Board({ teams, who, me, lastRank, capOf, benchOf, chipNow, CHIPS, byId, charPts, weekPts, dead, vault = {}, events, openProfile, S }) {
+  const [open, setOpen] = useState(null)
+  const [pops, setPops] = useState({})
+  const first = useRef(events[0]?.id)
+  // a new point lands: pop it on that character's card
+  useEffect(() => {
+    const top = events[0]; if (!top || top.id === first.current) return
+    const fresh = []; for (const e of events) { if (e.id === first.current) break; if (e.char_id) fresh.push(e) }
+    first.current = top.id
+    for (const e of fresh.slice(0, 4)) { const k = `${e.team_user}:${e.char_id}`
+      setPops(p => ({ ...p, [k]: e.points })); setTimeout(() => setPops(p => { const q = { ...p }; delete q[k]; return q }), 1600) }
+  }, [events])
+  // form: last 4 finished weeks, top half = W
+  const wk = {}; for (const e of events) if (e.week < S.week && e.team_user) ((wk[e.week] ||= {})[e.team_user] = (wk[e.week][e.team_user] || 0) + e.points)
+  const formOf = u => Object.keys(wk).map(Number).sort((a, b) => a - b).slice(-4).map(w => { const arr = Object.values(wk[w]), p = wk[w][u]
+    return p == null ? null : arr.filter(x => x > p).length + 1 <= Math.ceil(arr.length / 2) }).filter(x => x != null)
+  const mvp = Object.entries(weekPts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])[0]?.[0]
+  const list = [...teams].sort((a, b) => b.total - a.total)
+  const myI = list.findIndex(t => t.user === me.id)
+  return <div className="mb-teams">{list.map((t, i) => { const p = who(t.user), cap = capOf(t.user), bench = benchOf(t), mv = (lastRank[t.user] || i + 1) - (i + 1), chip = chipNow(t.user)
+    const ids = [...t.chars].sort((a, b) => (b === cap) - (a === cap) || (a === bench) - (b === bench) || (charPts[b] || 0) - (charPts[a] || 0))
+    const f = formOf(t.user)
+    return <div key={t.user}>
+      {i > 0 && <div className="mb-gap"><span>{list[i - 1].total - t.total} pts</span></div>}
+      <div className={`mb-row ${t.user === me.id ? 'me' : ''} ${i === 0 ? 'lead' : ''}`} style={{ '--rot': `${i % 2 ? .35 : -.35}deg`, animationDelay: `${i * 60}ms` }} onClick={() => setOpen(open === t.user ? null : t.user)}>
+        {i === 0 && <><div className="mb-speed" /><div className="mb-menace">ゴ<br />ゴ<br />ゴ</div></>}
+        <div className="mb-pos">{i + 1}</div>
+        <div className="mb-who">
+          <img className="mb-av" src={p?.avatar || byId[cap]?.image} alt="" referrerPolicy="origin" />
+          <b onClick={e => { e.stopPropagation(); openProfile(t.user) }}>{t.user === me.id ? 'You' : p?.username || '?'}</b>
+          {chip && <span className="mb-chip">{CHIPS[chip][0]} {CHIPS[chip][1]}</span>}
+          <small className={mv > 0 ? 'up' : mv < 0 ? 'dn' : ''}>{mv > 0 ? `▲${mv}` : mv < 0 ? `▼${-mv}` : '–'} · {sign(t.week)} this wk</small>
+          {i === myI - 1 && <i className="mb-target">TARGET</i>}
+          {t.user === me.id && i > 0 && <div className="mb-bubble">{list[i - 1].total - t.total} to catch {who(list[i - 1].user)?.username || 'them'}!</div>}
+        </div>
+        <div className="mb-six">{ids.map(id => { const c = byId[id]; if (!c) return <div key={id} className="mb-c" />
+          const pop = pops[`${t.user}:${id}`]
+          return <div key={id} className={`mb-c ${id === cap ? 'cap' : ''} ${id === bench ? 'bench' : ''} ${dead[id] ? 'dead' : ''} ${String(id) === mvp ? 'mvp' : ''} ${pop != null ? (pop < 0 ? 'hurt' : 'hit') : ''}`}
+            style={{ backgroundImage: `url(${c.image})` }} onClick={e => { e.stopPropagation(); openChar(id) }} title={`${c.name}: ${charPts[id] || 0} pts (${sign(weekPts[id] || 0)} this week)`}>
+            {id === cap && <em>C</em>}{String(id) === mvp && <em className="mv">MVP</em>}{dead[id] && <em className="dd">💀</em>}
+            {vault[id] > 0 && <div className="mb-stock" title={`📦 Stockpile ${vault[id]}/60`}><i style={{ width: `${Math.min(100, vault[id] / 60 * 100)}%` }} /></div>}
+            {pop != null && <div className={`mb-pop ${pop < 0 ? 'dn' : ''}`}><small>{SFX(pop)}</small>{sign(pop)}</div>}
+            <span>{c.name.split(' ')[0]}<b>{charPts[id] || 0}</b></span></div> })}</div>
+        <div className="mb-tot"><b><CountUp to={t.total} /></b><small>{i ? `−${list[0].total - t.total} off 1st` : 'leader'}</small>
+          <div className="mb-form">{f.map((w, k) => <i key={k} className={w ? 'w' : 'l'}>{w ? 'W' : 'L'}</i>)}</div></div>
+      </div>
+      {open === t.user && <div className="mb-open">{ids.map(id => { const c = byId[id]; if (!c) return null
+        const ev = events.filter(e => e.char_id === id && e.team_user === t.user && e.week === S.week)
+        return <div key={id}><b>{c.name}</b> <em className={(weekPts[id] || 0) < 0 ? 'dn' : 'up'}>{sign(weekPts[id] || 0)}</em><small>{ev.slice(0, 3).map(e => e.note || e.kind).join(' · ') || 'quiet week'}</small></div> })}</div>}
+    </div> })}
+    {!teams.length && <div className="card pad muted">No teams yet.</div>}
+  </div>
+}
+
+export function WeekClock({ S }) {
+  const [, tick] = useState(0)
+  useEffect(() => { const t = setInterval(() => tick(x => x + 1), 1000); return () => clearInterval(t) }, [])
+  const d = new Date(), q = Math.floor(d.getUTCMonth() / 3)
+  const left = Math.max(0, Math.floor((Date.UTC(d.getUTCFullYear(), q * 3, 1) + S.week * 604800000 - Date.now()) / 1000))
+  const p = n => String(n).padStart(2, '0')
+  return <div className="mb-clock">{Math.floor(left / 86400)}d {p(Math.floor(left % 86400 / 3600))}:{p(Math.floor(left % 3600 / 60))}:{p(left % 60)}</div>
+}

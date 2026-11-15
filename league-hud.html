@@ -1,0 +1,165 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>League board</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#e9e2d0;--pan:#2b2830;--deep:#151418;--red:#e8202f;--y:#ffd84a;--g:#2ee68f;--mut:#9a937f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--deep);color:var(--ink);font:500 14px Inter,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+.pn{background:var(--pan);border:3px solid var(--ink);box-shadow:5px 5px 0 #000}
+.up{color:var(--g)}.dn{color:var(--red)}.y{color:var(--y)}.mut{color:var(--mut)}
+/* header */
+.top{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;margin-bottom:16px}
+.core{width:96px;height:96px;position:relative;display:grid;place-items:center}
+.core i{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:var(--y);border-right-color:var(--y);animation:spin 6s linear infinite}
+.core i+i{inset:10px;border:2px dashed #e9e2d055;animation-duration:18s;animation-direction:reverse}
+.core b{font:400 40px/.85 Bangers;color:var(--y);text-align:center}.core b small{display:block;font:800 9px Inter;letter-spacing:1px;color:var(--mut)}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{margin:0;font:400 46px/1 Bangers;letter-spacing:2px}
+.sub{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.stats{display:flex;gap:10px}.st{min-width:104px;text-align:center;padding:8px 10px}.st b{display:block;font:400 30px Bangers;color:var(--y)}.st span{font:800 10px Inter;letter-spacing:1px;color:var(--mut)}
+/* board */
+.main{display:grid;grid-template-columns:1fr 280px;gap:16px}
+.ph{font:400 22px Bangers;letter-spacing:1.5px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.teams{display:grid;gap:12px}
+.tm{display:grid;grid-template-columns:50px 150px 1fr 104px;gap:12px;align-items:center;padding:10px 12px;opacity:0;animation:in .5s forwards}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1}}
+.tm.me{border-color:var(--y);box-shadow:5px 5px 0 var(--red)}
+.pos{font:400 46px/1 Bangers;color:#e9e2d044;text-align:center}.tm:first-child .pos{color:var(--y)}
+.who b{display:block;font-weight:800;font-size:15px}.who small{font-size:11px;font-weight:700}
+.av{width:36px;height:36px;border-radius:50%;background:center/cover,linear-gradient(135deg,#4a3f52,#1c1a21);border:2px solid var(--ink);float:left;margin-right:8px}
+.six{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.cc{position:relative;aspect-ratio:3/4;background:center/cover,linear-gradient(160deg,#3d3646,#1c1a21);border:2px solid #000;overflow:hidden}
+.cc.cap{border-color:var(--y)}.cc.bench{filter:grayscale(.7) brightness(.65)}
+.cc span{position:absolute;left:0;right:0;bottom:0;padding:14px 4px 3px;background:linear-gradient(transparent,#000e);font:700 10px Inter;display:flex;justify-content:space-between;z-index:1}
+.cc span b{font:400 15px Bangers;color:var(--y)}
+.cc em{position:absolute;top:3px;left:3px;font:400 12px Bangers;background:var(--y);color:#111;padding:0 5px;font-style:normal;z-index:1;border:1.5px solid #000}
+.cc .pop{position:absolute;top:28%;left:50%;font:400 24px Bangers;z-index:2;animation:pop 1.5s forwards;-webkit-text-stroke:1px #000}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,8px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-26px)}}
+.cc.hit{animation:hit .7s}@keyframes hit{30%{box-shadow:inset 0 0 0 3px var(--g)}}
+.cc.hurt{animation:hurt .7s}@keyframes hurt{30%{box-shadow:inset 0 0 0 3px var(--red)}}
+.tot{text-align:right}.tot b{display:block;font:400 40px/1 Bangers}.tm.me .tot b{color:var(--y)}.tot small{font-size:11px;font-weight:700;color:var(--mut)}
+.spark{width:100%;height:20px;margin-top:4px}
+/* side */
+.side{display:grid;gap:16px;align-content:start}.side .pn{padding:12px 14px}
+.clock{font:400 34px Bangers;letter-spacing:2px;color:var(--y);text-align:center}
+.feed{height:230px;overflow:hidden;mask:linear-gradient(#000 75%,transparent)}
+.feed div{font-size:12px;padding:7px 0;border-bottom:1px solid #e9e2d018;animation:fin .4s}
+@keyframes fin{from{opacity:0;transform:translateY(-8px)}}
+.feed time{color:var(--mut);margin-right:6px;font-size:11px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{font:400 17px Bangers;letter-spacing:1px;padding:8px;background:var(--y);color:#111;border:2px solid #000;box-shadow:3px 3px 0 #000;cursor:pointer;transition:transform .1s}
+.btn.g{background:var(--deep);color:var(--ink);border-color:var(--ink)}.btn:hover{transform:translate(-1px,-1px)}
+.hero{position:relative;height:210px;border:3px solid var(--ink);box-shadow:7px 7px 0 #000;overflow:hidden;margin-bottom:14px;background:radial-gradient(circle at 70% 40%,#e8202f55,transparent 55%),repeating-conic-gradient(from 0deg at 70% 45%,#ffffff07 0 4deg,transparent 4deg 9deg),linear-gradient(120deg,#17151d 0 55%,#2a0d12)}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(#ffffff10 1px,transparent 1.4px) 0 0/7px 7px;mask:linear-gradient(90deg,transparent 30%,#000);pointer-events:none}
+.jp{position:absolute;right:300px;top:-10px;font:900 140px/1 sans-serif;color:#ffffff08;writing-mode:vertical-rl}
+.hl{position:relative;z-index:1;padding:18px 24px;display:grid;grid-template-columns:auto auto;justify-content:start;gap:6px 34px;align-items:end}
+.kick{grid-column:1/-1;display:flex;gap:8px;align-items:center;font:800 11px Inter;letter-spacing:2px;text-transform:uppercase;color:#8f897c}
+.kick b{background:var(--red);color:#fff;padding:2px 8px;transform:skewX(-10deg)}
+.wk small,.big small{display:block;font:800 10px Inter;letter-spacing:2px;color:#8f897c;text-transform:uppercase}
+.wk b{font:400 90px/.85 Bangers;color:transparent;-webkit-text-stroke:2px var(--ink)}
+.big b{font:400 88px/.85 Bangers;color:var(--y);text-shadow:5px 5px 0 #000,0 0 30px #ffd84a44}
+.big em{display:inline-block;margin-left:10px;font:800 13px Inter;font-style:normal;background:var(--g);color:#062;padding:3px 8px;transform:rotate(-3deg) translateY(-30px)}
+.hchips{grid-column:1/-1;display:flex;gap:8px;margin-top:6px}.hchips span{padding:5px 12px;border:2px solid var(--y);color:var(--y);background:#000a;font:800 12px Inter;transform:skewX(-10deg);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 14px #ffd84a66}}
+.stamp{position:absolute;left:52%;top:22px;z-index:2;width:92px;height:92px;border-radius:50%;border:4px solid var(--red);color:var(--red);display:grid;place-items:center;transform:rotate(-14deg);font:400 42px/1 Bangers;background:#0008;animation:stampin .5s cubic-bezier(.2,1.6,.4,1) both .3s}
+.stamp small{position:absolute;bottom:12px;font:800 9px Inter;letter-spacing:2px}@keyframes stampin{from{transform:rotate(-14deg) scale(2.4);opacity:0}}
+.capart{position:absolute;right:0;top:0;bottom:0;width:320px;clip-path:polygon(22% 0,100% 0,100% 100%,0 100%);border-left:3px solid var(--ink)}
+.cap-img{position:absolute;inset:0;background:linear-gradient(160deg,#4a3f52,#1c1a21);display:grid;place-items:center;font:400 70px Bangers;color:#ffffff14}
+.capart::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#2a0d12,transparent 35%),linear-gradient(0deg,#000a,transparent 40%)}
+.captag{position:absolute;right:16px;bottom:14px;z-index:2;text-align:right}.captag small{font:800 10px Inter;letter-spacing:2px;color:var(--y)}.captag b{display:block;font:400 30px/1 Bangers;text-shadow:3px 3px 0 #000}
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}.tabs button{font:400 18px Bangers;letter-spacing:1px;padding:7px 18px;color:#8f897c;background:var(--pan);border:2px solid #ffffff22;transform:skewX(-12deg);cursor:pointer}
+.tabs button.on{color:#111;background:var(--ink);border-color:var(--ink);box-shadow:4px 4px 0 var(--red)}
+.track{background:var(--pan);border:3px solid var(--ink);padding:10px 14px;display:grid;gap:7px;margin-bottom:16px}
+.lane{display:grid;grid-template-columns:110px 1fr 54px;gap:12px;align-items:center}.lane>span{font:800 12px Inter}.lane.me>span{color:var(--y)}
+.bar{position:relative;height:16px;background:repeating-linear-gradient(90deg,#ffffff08 0 2px,transparent 2px 22px),#0c0b0f}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ffffff18,#ffffff55);transform-origin:left;animation:grow 1.2s cubic-bezier(.2,1,.3,1) both}
+.lane.me .bar i{background:linear-gradient(90deg,#ffd84a33,var(--y))}.lane.p1 .bar i{background:linear-gradient(90deg,#e8202f33,var(--red))}
+@keyframes grow{from{transform:scaleX(0)}}.lane>b{font:400 22px Bangers;text-align:right}
+.chipb{display:inline-block;margin-left:6px;background:var(--y);color:#111;border:1.5px solid #000;font:400 12px Bangers;letter-spacing:1px;padding:0 6px;transform:rotate(-3deg)}
+.stock{position:absolute;left:3px;right:3px;top:3px;height:5px;background:#000c;border:1px solid #ffd84a66;z-index:1}.stock i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--y) 0 4px,#e8b800 4px 8px)}
+/* ===== manga layer ===== */
+body{background:radial-gradient(#ffffff09 1px,transparent 1.3px) 0 0/6px 6px,var(--deep)}
+.tm{position:relative;transform:rotate(var(--rot));border-width:4px;border-color:#000;outline:2px solid var(--ink);outline-offset:-7px;background:radial-gradient(#ffffff0a 1px,transparent 1.4px) 0 0/5px 5px,var(--pan);overflow:visible}
+.tm.me{outline-color:var(--y)}
+.tm.lead{background:repeating-conic-gradient(from 0deg at 8% 50%,#ffffff0c 0 3deg,transparent 3deg 8deg),var(--pan)}
+.speed{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 40px,#ffffff10 40px 42px);animation:speed .6s linear infinite;mask:linear-gradient(90deg,#000,transparent 50%)}
+@keyframes speed{to{background-position:42px 0}}
+.menace{position:absolute;right:120px;top:4px;font:900 22px/1 sans-serif;color:#e9e2d044;transform:rotate(8deg);animation:shake 2s infinite}
+@keyframes shake{25%{transform:rotate(8deg) translate(1px,-1px)}75%{transform:rotate(8deg) translate(-1px,1px)}}
+.pos{-webkit-text-stroke:2px #000;paint-order:stroke}
+.six{grid-template-columns:2fr repeat(5,1fr)}.cc.cap{aspect-ratio:auto}
+.cc.mvp{box-shadow:0 0 0 2px var(--red),0 0 14px #e8202f88}.cc em.mv{left:auto;right:3px;background:var(--red);color:#fff}
+.cc .pop{text-align:center;line-height:1;background:#fff;color:#111;padding:6px 8px;-webkit-text-stroke:0;clip-path:polygon(50% 0,61% 18%,85% 8%,78% 32%,100% 42%,80% 56%,92% 82%,66% 72%,55% 100%,42% 76%,15% 90%,22% 64%,0 52%,20% 38%,8% 12%,36% 22%)}
+.cc .pop small{display:block;font:400 11px Bangers;color:var(--red)}.cc .pop.dn{background:#111;color:#fff}.cc .pop.dn small{color:#9a937f}
+.target{position:absolute;right:-6px;top:-12px;font:400 15px Bangers;letter-spacing:2px;color:var(--red);border:3px solid var(--red);padding:0 6px;transform:rotate(-8deg);background:#000c;font-style:normal;animation:stampin .4s both .6s}
+.who{position:relative}
+.bubble{position:absolute;left:0;top:-46px;background:#fff;color:#111;font:400 15px Bangers;letter-spacing:.5px;padding:4px 10px;border:2px solid #000;border-radius:14px;white-space:nowrap;z-index:3;animation:bob 2.4s ease-in-out infinite}
+.bubble::after{content:'';position:absolute;left:18px;bottom:-9px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}
+@keyframes bob{50%{transform:translateY(-3px)}}
+.gap{height:0;position:relative;z-index:4}.gap span{position:absolute;right:24px;top:-12px;font:400 13px Bangers;letter-spacing:1px;background:var(--deep);color:#9a937f;border:2px solid #9a937f;padding:0 8px;transform:skewX(-12deg)}
+.form{display:flex;gap:3px;justify-content:flex-end;margin-top:6px}.form i{font:800 9px Inter;font-style:normal;width:16px;height:16px;display:grid;place-items:center;border:1.5px solid #000}
+.form .w{background:var(--g);color:#062}.form .l{background:#3a3640;color:#9a937f}
+.teams{gap:20px}
+@media(max-width:860px){.menace{display:none}.six{grid-template-columns:repeat(6,1fr)}.capart,.jp{display:none}.stamp{left:auto;right:16px}.wk b,.big b{font-size:64px}.main{grid-template-columns:1fr}.top{grid-template-columns:auto 1fr}.stats{grid-column:1/-1}.tm{grid-template-columns:38px 1fr 80px}.six{grid-column:1/-1;order:5}.pos{font-size:34px}}
+</style></head><body>
+<div class="wrap">
+ <div class="hero">
+  <div class="jp">週間</div>
+  <div class="hl"><div class="kick"><b>LIVE</b> Week 4 · ends <span id="clk2"></span></div>
+   <div class="wk"><small>WEEK</small><b>4</b></div>
+   <div class="big"><small>Your points</small><b id="cTot">0</b><em>+46 this week</em></div>
+   <div class="hchips"><span>🎴 1 chip ready</span><span>📦 Frieren 40/60</span></div></div>
+  <div class="stamp">3<small>RD</small></div>
+  <div class="capart"><div class="cap-img">ASTA</div><div class="captag"><small>YOUR CAPTAIN ×2</small><b>Asta</b></div></div>
+ </div>
+ <div class="tabs"><button class="on">Standings</button><button>My team</button><button>🔭 Scout</button><button>Scoring</button></div>
+
+ <div class="main">
+  <div><div class="ph">Everyone's teams</div><div class="teams" id="teams"></div></div>
+  <div class="side">
+   <div class="pn"><div class="ph">Week ends in</div><div class="clock" id="clock"></div></div>
+   <div class="pn"><div class="ph"><span class="dot"></span> Live</div><div class="feed" id="feed"></div></div>
+   <div class="pn"><div class="ph">My team</div><div class="btns"><button class="btn">🔄 Swap</button><button class="btn g">👑 Captain</button><button class="btn g">🎴 Chip</button><button class="btn g">? Rules</button></div></div>
+  </div>
+ </div>
+</div>
+<script>
+const T=[['Emily',430,[18,22,30,34]],['Samara',421,[25,20,28,31]],['AspextPro',412,[14,26,30,46],1],['Nessa',380,[30,22,19,24]],['Jay',344,[12,16,22,18]]]
+const N=[['Asta','Yami','Noelle','Luck','Zenon','Vanica'],['Gojo','Sukuna','Yuji','Megumi','Nobara','Toji'],['Asta','Noelle','Frieren','Garou','Yami','Shin'],['Luffy','Zoro','Sanji','Nami','Law','Kid'],['Denji','Power','Makima','Aki','Reze','Kobeni']]
+const spark=a=>{const mx=Math.max(...a),w=100/(a.length-1);return `<svg class="spark" viewBox="0 0 100 20" preserveAspectRatio="none"><polyline fill="none" stroke="#ffd84a" stroke-width="2" points="${a.map((v,i)=>`${i*w},${18-v/mx*16}`).join(' ')}"/></svg>`}
+const SFX={'+20':'DOKAN!','+10':'BAM!','+5':'ZING!','+3':'TA!','−4':'ZUN…','−5':'GAKK!'}
+teams.innerHTML=T.map((t,i)=>`${i&&T[i-1]?`<div class="gap"><span>${T[i-1][1]-t[1]} pts</span></div>`:''}<div class="pn tm ${t[3]?'me':''} ${i==0?'lead':''}" style="animation-delay:${i*.08}s;--rot:${i%2?.4:-.4}deg">
+${i==0?'<div class="speed"></div><div class="menace">ゴ<br>ゴ<br>ゴ</div>':''}
+<div class="pos">${i+1}</div>
+<div class="who"><div class="av"></div><b>${t[0]}${i==0?'<span class="chipb">🎴 Triple C</span>':''}</b><small class="${i%2?'dn':'up'}">${i%2?'▼1':'▲1'} · +${t[2][3]} this wk</small>
+ ${T[i+1]&&T[i+1][3]?'<i class="target">TARGET</i>':''}${t[3]?`<div class="bubble">${T[i-1][1]-t[1]} to catch ${T[i-1][0]}!</div>`:''}</div>
+<div class="six">${N[i].map((n,k)=>`<div class="cc ${k?'':'cap'} ${k==5?'bench':''} ${i==2&&k==3?'mvp':''}" id="c${i}${k}">${k?'':'<em>C</em>'}${i==2&&k==3?'<em class="mv">MVP</em>':''}${i==2&&k==2?'<div class="stock"><i style="width:66%"></i></div>':''}<span>${n}<b>${60-k*9-i*2}</b></span></div>`).join('')}</div>
+<div class="tot"><b data-v="${t[1]}">0</b><small>${i?`−${T[0][1]-t[1]} off 1st`:'leader'}</small><div class="form">${t[2].map(v=>`<i class="${v>=25?'w':'l'}">${v>=25?'W':'L'}</i>`).join('')}</div></div></div>`).join('')
+const count=(el,v)=>{const st=performance.now();const f=n=>{const p=Math.min(1,(n-st)/900);el.textContent=Math.round(v*(1-(1-p)**3));p<1&&requestAnimationFrame(f)};requestAnimationFrame(f)}
+document.querySelectorAll('.tot b').forEach(b=>count(b,+b.dataset.v));count(cTot,412)
+
+setInterval(()=>{clk2.textContent=clock.textContent},1000)
+let left=2*86400+4*3600+12*60;const tickc=()=>{left--;const d=Math.floor(left/86400),h=Math.floor(left%86400/3600),m=Math.floor(left%3600/60),s=left%60;clock.textContent=`${d}d ${String(h).padStart(2,0)}:${String(m).padStart(2,0)}:${String(s).padStart(2,0)}`};tickc();setInterval(tickc,1000)
+const EV=[['+5','up','top of daily hype'],['+10','up','won a fight'],['−4','dn','no-show'],['+20','up','transformed'],['−5','dn','lost a fight'],['+3','up','appeared']]
+const fire=()=>{const i=Math.floor(Math.random()*5),k=Math.floor(Math.random()*5),e=EV[Math.floor(Math.random()*EV.length)],c=document.getElementById('c'+i+k)
+ c.classList.remove('hit','hurt');void c.offsetWidth;c.classList.add(e[1]=='up'?'hit':'hurt')
+ const p=document.createElement('div');p.className='pop '+e[1];p.innerHTML=`<small>${SFX[e[0]]||'BAM!'}</small>${e[0]}`;c.appendChild(p);setTimeout(()=>p.remove(),1500)
+ const row=document.createElement('div');row.innerHTML=`<time>${new Date().toTimeString().slice(0,5)}</time><b>${N[i][k]}</b> ${e[2]} <b class="${e[1]}">${e[0]}</b> <span class="mut">· ${T[i][0]}</span>`
+ feed.prepend(row);if(feed.children.length>12)feed.lastChild.remove()}
+for(let n=0;n<5;n++)fire();setInterval(fire,6000)
+</script></body></html>
+<style>
+/* compact: whole league fits one screen */
+.hero{height:118px}.hl{padding:10px 20px;gap:2px 26px}.wk b{font-size:58px}.big b{font-size:56px}.big em{transform:rotate(-3deg) translateY(-18px)}
+.hchips{display:none}.stamp{width:70px;height:70px;font-size:32px;top:20px}.stamp small{bottom:8px}.jp{font-size:90px}.capart{width:240px}.captag b{font-size:24px}
+.tabs{margin-bottom:10px}.tabs button{padding:4px 14px;font-size:16px}
+.teams{gap:12px}.tm{padding:6px 10px;grid-template-columns:42px 140px 1fr 96px}
+.cc{aspect-ratio:auto;height:62px;background-position:50% 20%}.cc span{padding:10px 3px 2px}
+.pos{font-size:36px}.tot b{font-size:32px}.form i{width:13px;height:13px;font-size:8px}
+.bubble{top:-30px;font-size:13px;padding:2px 8px}.menace{font-size:16px}
+.side{gap:10px}.side .pn{padding:8px 12px}.ph{font-size:18px;margin-bottom:6px}.clock{font-size:26px}.feed{height:150px}
+.wrap{padding-top:10px}
+</style>

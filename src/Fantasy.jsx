@@ -5,7 +5,7 @@ import { openChar } from './CharProfile.jsx'
 import Draft, { ResetDraft, Commish } from './Draft.jsx'
 import { sfx } from './sfx.js'
 import DraftReplay from './DraftReplay.jsx'
-import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard } from './LeagueUI.jsx'
+import { Scoreboard, SlideTabs, Race, SquadCard, ChipCard, Board, WeekClock } from './LeagueUI.jsx'
 
 // Fantasy League: pick 5 characters per anime season, score points from real-world hype + squad-logged moments.
 const SEASONS = ['WINTER', 'SPRING', 'SUMMER', 'FALL']
@@ -266,11 +266,13 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
   const feed = events.filter(e => e.season === S.key).slice(0, 25)
   return <div className="rank lg-rank">
     <section>
-      <Race teams={teams} who={who} me={me} lastRank={lastRank} topWeek={topWeek} capOf={capOf} benchOf={benchOf} chipNow={chipNow} CHIPS={CHIPS}
-        byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} vault={vault} events={events.filter(e => e.season === S.key)} openProfile={openProfile} KINDS={KINDS} />
+      <div className="mb-h">Everyone's teams</div>
+      <Board teams={teams} who={who} me={me} lastRank={lastRank} capOf={capOf} benchOf={benchOf} chipNow={chipNow} CHIPS={CHIPS}
+        byId={byId} charPts={charPts} weekPts={weekPts} dead={dead} vault={vault} events={events.filter(e => e.season === S.key)} openProfile={openProfile} S={S} />
     </section>
     <aside>
-      <div className="lg-panel lg-feed"><div className="lg-ph"><i className="lg-dot" /> Latest points</div>{feed.map((e, i) => { const c = byId[e.char_id]
+      <div className="lg-panel"><div className="lg-ph">Week {S.week} ends in</div><WeekClock S={S} /></div>
+      <div className="lg-panel lg-feed mb-feed"><div className="lg-ph"><i className="lg-dot" /> Latest points</div>{feed.map((e, i) => { const c = byId[e.char_id]
         return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''} ${i === 0 ? 'new' : ''}`} title={e.note || ''}>
           <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
           <div><b>{c?.name || who(e.team_user)?.username} · {KINDS[e.kind]?.[1].toLowerCase()}</b><small>{who(e.team_user)?.username}{e.note ? ` · ${e.note}` : ''}</small></div>
