@@ -3,7 +3,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms))
 
 // AniList sometimes answers with an HTML error page or 429 when it's overloaded/rate limiting.
 // Retry a few times with backoff, and turn non-JSON replies into a readable error.
-async function gql(query, variables, tries = 3) {
+export async function gql(query, variables, tries = 3) {
   for (let i = 0; ; i++) {
     let res, text
     try {

@@ -1,0 +1,156 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Market mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+JP:wght@900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121116;--pan:#1c1a21;--pan2:#25222b;--ink:#e9e2d0;--mute:#8f897c;--line:#ffffff14;--up:#2ee68f;--dn:#ff3b4e;--gold:#ffd84a;--red:#e8202f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 Inter,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.side{background:#0c0b0f;border-right:3px solid var(--ink);padding:18px 14px;font:400 17px Bangers;letter-spacing:1px;color:#bdb6a6}
+.side div{padding:6px 10px}.side .on{background:var(--ink);color:#111;box-shadow:4px 4px 0 var(--red);transform:rotate(-1.5deg)}
+.main{padding:14px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+/* index bar */
+.ibar{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:18px;align-items:center;padding:10px 16px;background:var(--pan);border:2px solid var(--ink);box-shadow:5px 5px 0 #000}
+.idx b{display:block;font:400 30px/1 Bangers;letter-spacing:1px}.idx small{font:800 10px Inter;letter-spacing:2px;color:var(--mute);text-transform:uppercase}
+.idx em{font-style:normal;font-weight:800}
+.ispark{height:42px}.ispark svg{width:100%;height:100%}
+.stat small{display:block;font:800 10px Inter;letter-spacing:1.5px;color:var(--mute);text-transform:uppercase}.stat b{font:700 18px 'JetBrains Mono'}
+.live{display:flex;align-items:center;gap:6px;font:800 11px Inter;letter-spacing:2px;color:var(--up)}.live i{width:8px;height:8px;border-radius:50%;background:var(--up);box-shadow:0 0 8px var(--up);animation:b 1s infinite}@keyframes b{50%{opacity:.3}}
+.tape{overflow:hidden;white-space:nowrap;border-block:2px solid var(--ink);background:#0c0b0f;padding:5px 0;font:700 12px 'JetBrains Mono'}
+.tape div{display:inline-flex;gap:28px;animation:t 40s linear infinite}@keyframes t{to{transform:translateX(-50%)}}
+/* terminal */
+.term{display:grid;grid-template-columns:270px minmax(0,1fr) 300px;gap:12px;min-height:640px}
+.panel{background:var(--pan);border:2px solid var(--ink);display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:2px solid var(--line);font:400 18px Bangers;letter-spacing:1.5px}
+.ph .sp{margin-left:auto}
+.tabs2{display:flex;gap:2px;padding:6px 8px;border-bottom:1px solid var(--line)}.tabs2 span{flex:1;text-align:center;padding:5px 0;font:800 10px Inter;letter-spacing:1px;text-transform:uppercase;color:var(--mute);cursor:pointer}
+.tabs2 .on{background:var(--ink);color:#111}
+.wl{overflow:auto}.wr{display:grid;grid-template-columns:30px 1fr 54px 64px;gap:8px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer}
+.wr:hover,.wr.sel{background:var(--pan2)}.wr.sel{box-shadow:inset 3px 0 0 var(--gold)}
+.wr img{width:30px;height:30px;object-fit:cover;object-position:50% 15%;border:1.5px solid var(--ink)}
+.wr b{display:block;font:700 12px 'JetBrains Mono'}.wr small{color:var(--mute);font-size:10px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr svg{width:54px;height:22px}.wr .px{text-align:right}.wr .px b{font-size:12px}.wr .px em{font-style:normal;font-size:11px;font-weight:800}
+.chip{display:inline-block;font:400 11px Bangers;letter-spacing:.5px;padding:0 5px;margin-left:4px;transform:rotate(-3deg)}.chip.ipo{background:var(--gold);color:#111}.chip.hot{background:var(--red);color:#fff}
+/* center */
+.chead{display:grid;grid-template-columns:86px 1fr auto;gap:14px;align-items:center;padding:12px 14px;border-bottom:2px solid var(--line)}
+.chead img{width:86px;height:86px;object-fit:cover;object-position:50% 15%;border:2px solid var(--ink);box-shadow:4px 4px 0 var(--red)}
+.chead h2{margin:0;font:400 34px/1 Bangers;letter-spacing:1px}.chead small{color:var(--mute);font-weight:700}
+.bigpx{text-align:right}.bigpx b{display:block;font:700 34px/1 'JetBrains Mono'}.bigpx em{font-style:normal;font-weight:800;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--line)}.kpis div{padding:8px 12px;border-right:1px solid var(--line)}
+.kpis small{display:block;font:800 9px Inter;letter-spacing:1.5px;color:var(--mute);text-transform:uppercase}.kpis b{font:700 14px 'JetBrains Mono'}
+.chart{position:relative;flex:1;min-height:280px;padding:10px 14px}
+.rng{position:absolute;right:14px;top:10px;display:flex;gap:2px;z-index:2}.rng span{padding:3px 8px;font:800 10px Inter;color:var(--mute);border:1px solid var(--line)}.rng .on{background:var(--ink);color:#111}
+.chart svg{width:100%;height:100%}
+.evpin{font:400 12px Bangers;letter-spacing:.5px}
+/* order ticket */
+.ticket{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 14px;border-top:2px solid var(--line)}
+.side3{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--ink)}.side3 span{text-align:center;padding:8px;font:400 18px Bangers;letter-spacing:1px;cursor:pointer}
+.side3 .buy{background:var(--up);color:#062}.side3 span:not(.buy){color:var(--mute)}
+.qty{display:flex;align-items:center;gap:8px;margin-top:10px}.qty input{flex:1;accent-color:var(--gold)}.qty b{font:700 18px 'JetBrains Mono';width:44px;text-align:right}
+.quick{display:flex;gap:4px;margin-top:6px}.quick span{flex:1;text-align:center;padding:3px;border:1px solid var(--line);font:800 10px Inter;color:var(--mute)}
+.summ div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line);font-size:12px}.summ b{font-family:'JetBrains Mono'}
+.go{margin-top:10px;width:100%;padding:10px;background:var(--up);color:#062;border:2px solid var(--ink);box-shadow:4px 4px 0 #000;font:400 22px Bangers;letter-spacing:1.5px}
+/* right */
+.feed{overflow:auto;flex:1}.fi{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--line);font-size:12px}
+.fi img{width:26px;height:26px;object-fit:cover;object-position:50% 15%}.fi b{font-weight:800}.fi time{color:var(--mute);font-size:10px}
+.fi.big{background:#ff3b4e14;box-shadow:inset 3px 0 0 var(--dn)}
+.mood{padding:10px 12px;border-bottom:2px solid var(--line)}.mood small{font:800 10px Inter;letter-spacing:1.5px;color:var(--mute);text-transform:uppercase}
+.gauge{height:10px;margin-top:6px;background:linear-gradient(90deg,var(--dn),#ffb020,var(--up));position:relative}.gauge i{position:absolute;top:-4px;width:4px;height:18px;background:#fff;left:68%;box-shadow:0 0 6px #fff}
+.mood b{font:400 20px Bangers;letter-spacing:1px;color:var(--up)}
+/* bottom */
+.bottom{display:grid;grid-template-columns:1fr 330px;gap:12px}
+.ptable .tr{display:grid;grid-template-columns:34px 1.4fr 70px 80px 90px 100px 120px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono';font-size:12px}
+.ptable .th{font:800 10px Inter;letter-spacing:1px;color:var(--mute);text-transform:uppercase}
+.ptable img{width:30px;height:30px;object-fit:cover;object-position:50% 15%}.ptable .n{font:700 13px Inter}
+.bar{height:6px;background:var(--pan2)}.bar i{display:block;height:100%}
+.alloc{display:flex;gap:14px;align-items:center;padding:12px}
+.alloc svg{width:120px;height:120px}.leg div{display:flex;gap:6px;align-items:center;font-size:12px;margin-bottom:4px}.leg i{width:10px;height:10px}
+.cupc{padding:12px;border-top:2px solid var(--line)}.cupc b{font:400 22px Bangers;letter-spacing:1px}.cupc em{font-style:normal;color:var(--up);font:700 16px 'JetBrains Mono'}
+</style></head><body>
+<div class="app">
+<div class="side"><div>Home</div><div>VS Arena</div><div>League</div><div class="on">Market</div><div>The Times</div></div>
+<div class="main">
+  <div class="ibar">
+    <div class="idx"><small>Anime 500 index</small><b class="mono">1,284.6</b><em class="up">▲ +2.31% today</em></div>
+    <div class="ispark"><svg viewBox="0 0 300 42" preserveAspectRatio="none"><polyline points="0,30 20,28 40,32 60,25 80,27 100,20 120,22 140,15 160,18 180,12 200,16 220,9 240,11 260,6 280,8 300,4" fill="none" stroke="#2ee68f" stroke-width="2"/></svg></div>
+    <div class="stat"><small>Your net worth</small><b>14,820</b> <span class="up mono">+3.1%</span></div>
+    <div class="stat"><small>Cash</small><b>2,410</b></div>
+    <div class="live"><i></i>MARKET OPEN · next tick 2:14</div>
+  </div>
+  <div class="tape"><div><span class="up">▲ $LOKI 61.20 +25.0%</span><span class="dn">▼ $GOJO 41.08 −4.2%</span><span class="up">▲ $GOKU 88.10 +3.4%</span><span class="dn">▼ $REM 22.40 −6.1%</span><span class="up">▲ $ASTA 35.70 +1.9%</span><span class="up">▲ $DENJI 29.10 +8.8%</span><span class="dn">▼ $ZORO 54.00 −2.2%</span><span class="up">▲ $LOKI 61.20 +25.0%</span><span class="dn">▼ $GOJO 41.08 −4.2%</span><span class="up">▲ $GOKU 88.10 +3.4%</span><span class="dn">▼ $REM 22.40 −6.1%</span><span class="up">▲ $ASTA 35.70 +1.9%</span><span class="up">▲ $DENJI 29.10 +8.8%</span><span class="dn">▼ $ZORO 54.00 −2.2%</span></div></div>
+
+  <div class="term">
+    <div class="panel">
+      <div class="ph">Watchlist <span class="sp mono" style="font-size:11px;color:var(--mute)">3,356</span></div>
+      <div class="tabs2"><span class="on">★ Mine</span><span>Hot</span><span>Gainers</span><span>Losers</span><span>IPOs</span></div>
+      <div class="wl">
+        <div class="wr sel"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div><b>$LOKI <span class="chip hot">HOT</span></b><small>One Piece</small></div><svg viewBox="0 0 54 22"><polyline points="0,18 10,17 20,16 30,15 40,8 54,2" fill="none" stroke="#2ee68f" stroke-width="1.5"/></svg><div class="px"><b class="mono">61.20</b><em class="up">+25.0%</em></div></div>
+        <div class="wr"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div><b>$GOKU</b><small>Dragon Ball</small></div><svg viewBox="0 0 54 22"><polyline points="0,14 10,12 20,13 30,9 40,10 54,6" fill="none" stroke="#2ee68f" stroke-width="1.5"/></svg><div class="px"><b class="mono">88.10</b><em class="up">+3.4%</em></div></div>
+        <div class="wr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>$GOJO</b><small>Jujutsu Kaisen</small></div><svg viewBox="0 0 54 22"><polyline points="0,6 10,8 20,7 30,11 40,13 54,15" fill="none" stroke="#ff3b4e" stroke-width="1.5"/></svg><div class="px"><b class="mono">41.08</b><em class="dn">−4.2%</em></div></div>
+        <div class="wr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div><b>$REM</b><small>Re:Zero</small></div><svg viewBox="0 0 54 22"><polyline points="0,5 10,7 20,9 30,10 40,14 54,18" fill="none" stroke="#ff3b4e" stroke-width="1.5"/></svg><div class="px"><b class="mono">22.40</b><em class="dn">−6.1%</em></div></div>
+        <div class="wr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><div><b>$DENJI</b><small>Chainsaw Man</small></div><svg viewBox="0 0 54 22"><polyline points="0,16 10,15 20,12 30,12 40,9 54,5" fill="none" stroke="#2ee68f" stroke-width="1.5"/></svg><div class="px"><b class="mono">29.10</b><em class="up">+8.8%</em></div></div>
+        <div class="wr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><div><b>$ASTA</b><small>Black Clover</small></div><svg viewBox="0 0 54 22"><polyline points="0,12 10,13 20,11 30,10 40,11 54,9" fill="none" stroke="#2ee68f" stroke-width="1.5"/></svg><div class="px"><b class="mono">35.70</b><em class="up">+1.9%</em></div></div>
+        <div class="wr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><div><b>$MOMO <span class="chip ipo">IPO</span></b><small>Dandadan</small></div><svg viewBox="0 0 54 22"><polyline points="0,15 18,13 36,10 54,8" fill="none" stroke="#2ee68f" stroke-width="1.5"/></svg><div class="px"><b class="mono">30.00</b><em class="up">+0.0%</em></div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="chead"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png">
+        <div><h2>Loki <span class="chip hot">ドドド</span></h2><small>$LOKI · One Piece · 🔥 Hype 82 · Power gap +6%</small></div>
+        <div class="bigpx"><b>61.20</b><em class="up">▲ +12.24 (+25.0%) 24h</em></div></div>
+      <div class="kpis"><div><small>Open</small><b>48.96</b></div><div><small>High</small><b class="up">62.10</b></div><div><small>Low</small><b class="dn">47.80</b></div><div><small>Holders</small><b>4</b></div><div><small>Shorted</small><b class="dn">120</b></div></div>
+      <div class="chart">
+        <div class="rng"><span>6H</span><span class="on">24H</span><span>3D</span><span>7D</span><span>ALL</span></div>
+        <svg viewBox="0 0 600 260" preserveAspectRatio="none">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2ee68f" stop-opacity=".35"/><stop offset="1" stop-color="#2ee68f" stop-opacity="0"/></linearGradient></defs>
+          <g stroke="#ffffff10"><line x1="0" y1="65" x2="600" y2="65"/><line x1="0" y1="130" x2="600" y2="130"/><line x1="0" y1="195" x2="600" y2="195"/></g>
+          <polygon points="0,200 40,196 80,203 120,190 160,194 200,185 240,188 280,182 320,186 360,178 380,150 400,90 420,70 460,75 500,60 540,55 600,40 600,260 0,260" fill="url(#g)"/>
+          <polyline points="0,200 40,196 80,203 120,190 160,194 200,185 240,188 280,182 320,186 360,178 380,150 400,90 420,70 460,75 500,60 540,55 600,40" fill="none" stroke="#2ee68f" stroke-width="2.5"/>
+          <polyline points="0,150 600,60" fill="none" stroke="#ffd84a" stroke-width="1.5" stroke-dasharray="5 5" opacity=".6"/>
+          <line x1="390" y1="20" x2="390" y2="260" stroke="#ffd84a" stroke-dasharray="3 3"/>
+          <rect x="300" y="8" width="180" height="24" fill="#ffd84a"/><text x="390" y="25" text-anchor="middle" font-family="Bangers" font-size="15" fill="#111">⚡ CH 1198: NEW FORM DEBUT</text>
+          <circle cx="600" cy="40" r="5" fill="#2ee68f"/>
+        </svg>
+      </div>
+      <div class="ticket">
+        <div><div class="side3"><span class="buy">BUY</span><span>SELL</span><span>SHORT</span></div>
+          <div class="qty"><input type="range" min="1" max="39" value="10"><b>10</b></div>
+          <div class="quick"><span>1</span><span>5</span><span>25%</span><span>50%</span><span>MAX</span></div></div>
+        <div class="summ"><div><span>Cost</span><b>612.00</b></div><div><span>Cash after</span><b>1,798.00</b></div><div><span>You own</span><b>14 @ 44.10</b></div><div><span>Unrealised P/L</span><b class="up">+239.40</b></div>
+          <button class="go">BUY 10 $LOKI</button></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="mood"><small>Market mood</small><div class="gauge"><i></i></div><b>GREED · 68</b></div>
+      <div class="ph"><i style="width:8px;height:8px;border-radius:50%;background:var(--dn);display:inline-block"></i>Live tape <span class="sp" style="font-size:12px;color:var(--mute)">squad</span></div>
+      <div class="feed">
+        <div class="fi big"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div><b>🚀 $LOKI +25%</b><br><span style="color:var(--mute)">new form debut, ch 1198</span></div><time>2m</time></div>
+        <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div><b>Dayn</b> bought <b class="up">20 $LOKI</b></div><time>3m</time></div>
+        <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>Wanderer</b> sold <b class="dn">8 $GOJO</b> <span class="up">+42</span></div><time>9m</time></div>
+        <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div><b>ROla</b> shorted <b style="color:#b06bff">15 $REM</b></div><time>14m</time></div>
+        <div class="fi"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><div><b>MeliQw</b> bought <b class="up">5 $GOKU</b></div><time>21m</time></div>
+        <div class="fi big"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div><b>📉 $REM −6%</b><br><span style="color:var(--mute)">lost a fight, ep 5</span></div><time>1h</time></div>
+        <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><div><b>October10</b> bought <b class="up">40 $DENJI</b></div><time>1h</time></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="panel ptable">
+      <div class="ph">Your positions <span class="sp" style="font-size:13px;color:var(--up)" class="mono">+412.80 total P/L</span></div>
+      <div class="tr th"><span></span><span>Character</span><span>Qty</span><span>Avg</span><span>Price</span><span>P/L</span><span>Weight</span></div>
+      <div class="tr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><span class="n">Loki</span><span>14</span><span>44.10</span><span>61.20</span><span class="up">+239.40</span><div class="bar"><i style="width:58%;background:var(--up)"></i></div></div>
+      <div class="tr"><img src="https://cmkcaptures.github.io/Ranked/forms/246.jpg"><span class="n">Goku</span><span>6</span><span>80.00</span><span>88.10</span><span class="up">+48.60</span><div class="bar"><i style="width:36%;background:var(--up)"></i></div></div>
+      <div class="tr"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><span class="n">Rem <span class="chip" style="background:#b06bff;color:#fff">SHORT</span></span><span>10</span><span>26.00</span><span>22.40</span><span class="up">+36.00</span><div class="bar"><i style="width:16%;background:#b06bff"></i></div></div>
+    </div>
+    <div class="panel">
+      <div class="ph">Allocation</div>
+      <div class="alloc"><svg viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9" fill="none" stroke="#25222b" stroke-width="6"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#2ee68f" stroke-width="6" stroke-dasharray="48 52" stroke-dashoffset="25"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#ffd84a" stroke-width="6" stroke-dasharray="30 70" stroke-dashoffset="77"/><circle cx="21" cy="21" r="15.9" fill="none" stroke="#b06bff" stroke-width="6" stroke-dasharray="6 94" stroke-dashoffset="47"/></svg>
+        <div class="leg"><div><i style="background:#2ee68f"></i>Loki 48%</div><div><i style="background:#ffd84a"></i>Goku 30%</div><div><i style="background:#b06bff"></i>Shorts 6%</div><div><i style="background:#25222b"></i>Cash 16%</div></div></div>
+      <div class="cupc">🏆 <b>Trading Cup</b> · you're <b>#2</b> <em>+3.10%</em><br><small style="color:var(--mute)">ends in 3d 14h · leader +4.8%</small></div>
+    </div>
+  </div>
+</div></div>
+</body></html>

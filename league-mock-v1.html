@@ -1,0 +1,134 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>League mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121116;--pan:#1c1a21;--pan2:#25222b;--ink:#e9e2d0;--mute:#8f897c;--line:#ffffff14;--up:#2ee68f;--dn:#ff3b4e;--gold:#ffd84a;--red:#e8202f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 Inter,sans-serif}
+.mono{font-family:'JetBrains Mono',monospace}.up{color:var(--up)}.dn{color:var(--dn)}
+.app{display:grid;grid-template-columns:200px 1fr;min-height:100vh}
+.side{background:#0c0b0f;border-right:3px solid var(--ink);padding:18px 14px;font:400 17px Bangers;letter-spacing:1px;color:#bdb6a6}
+.side div{padding:6px 10px}.side .on{background:var(--ink);color:#111;box-shadow:4px 4px 0 var(--red);transform:rotate(-1.5deg)}
+.main{padding:14px 18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+small.k{display:block;font:800 10px Inter;letter-spacing:1.6px;color:var(--mute);text-transform:uppercase}
+/* status bar */
+.sbar{display:grid;grid-template-columns:auto auto 1fr auto auto auto;gap:22px;align-items:center;padding:10px 16px;background:var(--pan);border:2px solid var(--ink);box-shadow:5px 5px 0 #000}
+.wk{display:flex;align-items:center;gap:10px}.ring{width:46px;height:46px}.wk b{font:400 30px/1 Bangers}
+.pts b{display:block;font:400 34px/1 Bangers;letter-spacing:1px}.pts em{font-style:normal;font-weight:800}
+.race{display:flex;gap:4px;align-items:flex-end;height:42px;max-width:200px}.race i{flex:none;width:24px}.race i{flex:1;background:var(--pan2);position:relative}.race i.me{background:var(--gold)}
+.stat b{font:700 18px 'JetBrains Mono'}
+.dl{font:800 11px Inter;letter-spacing:1.5px;color:var(--gold);border:2px solid var(--gold);padding:6px 10px}
+.tape{overflow:hidden;white-space:nowrap;border-block:2px solid var(--ink);background:#0c0b0f;padding:5px 0;font:700 12px 'JetBrains Mono'}
+.tape div{display:inline-flex;gap:28px;animation:t 40s linear infinite}@keyframes t{to{transform:translateX(-50%)}}
+/* tabs */
+.nav{display:flex;gap:2px;border-bottom:2px solid var(--ink)}
+.nav span{padding:8px 16px;font:400 17px Bangers;letter-spacing:1px;color:var(--mute);cursor:pointer;border:2px solid transparent;border-bottom:0;margin-bottom:-2px}
+.nav .on{color:var(--ink);background:var(--pan);border-color:var(--ink)}.nav .n{background:var(--red);color:#fff;font:800 10px Inter;padding:0 5px;margin-left:4px}
+.nav .sp{margin-left:auto;font:700 12px Inter;color:var(--mute);align-self:center;border:0}
+/* grid */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px}
+.panel{background:var(--pan);border:2px solid var(--ink);min-width:0}
+.ph{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:2px solid var(--line);font:400 18px Bangers;letter-spacing:1.5px}
+.ph .sp{margin-left:auto}.seg{display:flex;border:1.5px solid var(--ink)}.seg span{padding:2px 9px;font:800 10px Inter;letter-spacing:1px;color:var(--mute)}.seg .on{background:var(--ink);color:#111}
+/* standings */
+.tr{display:grid;grid-template-columns:34px 22px minmax(0,1.3fr) 170px 64px 70px 80px;gap:10px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.tr:hover{background:var(--pan2)}.tr.me{box-shadow:inset 3px 0 0 var(--gold);background:#ffd84a0a}
+.tr.hd{font:800 10px Inter;letter-spacing:1.5px;text-transform:uppercase;color:var(--mute);cursor:default;padding:6px 12px}.tr.hd:hover{background:none}
+.rk{font:400 24px Bangers;text-align:center}.tr:nth-child(2) .rk{color:var(--gold)}
+.mv{font:800 11px Inter}.mgr b{display:block;font-weight:800;font-size:14px}.mgr small{color:var(--mute)}
+.sq{display:flex}.sq img{width:30px;height:30px;object-fit:cover;object-position:50% 15%;border:1.5px solid #000;margin-left:-6px}.sq img:first-child{margin-left:0;outline:2px solid var(--gold);z-index:1}
+.form{display:flex;gap:2px}.form i{width:9px;height:18px;background:var(--pan2)}.form i.w{background:var(--up)}.form i.l{background:var(--dn)}
+.wkp{font:700 13px 'JetBrains Mono';text-align:right}.tot{font:400 26px Bangers;text-align:right}
+/* feed */
+.fi{display:grid;grid-template-columns:30px 1fr auto;gap:9px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.fi img{width:30px;height:30px;object-fit:cover;object-position:50% 15%;border:1.5px solid var(--ink)}
+.fi b{display:block;font-size:12px;font-weight:800}.fi small{color:var(--mute);font-size:11px}.fi em{font:700 13px 'JetBrains Mono';font-style:normal}
+.fi.new{animation:fin .6s}@keyframes fin{from{background:#ffffff22;transform:translateX(20px)}}
+/* my team */
+.squad{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:12px}
+.card{position:relative;border:2px solid var(--ink);background:var(--pan2);overflow:hidden;cursor:pointer;transition:transform .15s}
+.card:hover{transform:translateY(-3px);box-shadow:4px 4px 0 var(--red)}
+.card img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:50% 15%;display:block}
+.card .cap{position:absolute;top:6px;left:6px;background:var(--gold);color:#111;font:400 13px Bangers;padding:1px 6px;transform:rotate(-4deg)}
+.card .bd{padding:7px 9px;border-top:2px solid var(--ink)}.card .bd b{display:block;font:400 17px/1.1 Bangers;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .bd small{color:var(--mute);font-size:11px}.card .row{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
+.card .row span{font:700 15px 'JetBrains Mono'}.card .row em{font:800 11px Inter;font-style:normal}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 12px 12px}
+.act{border:2px solid var(--line);padding:10px 12px}.act b{display:block;font:400 17px Bangers;letter-spacing:1px}.act span{color:var(--mute);font-size:12px}
+.act.go{border-color:var(--gold)}.act.go b{color:var(--gold)}
+.hide{display:none}
+</style></head><body>
+<div class="app">
+<div class="side"><div>Home</div><div>Browse</div><div>Rankings</div><div>VS Arena</div><div class="on">League</div><div>Squad</div><div>Market</div><div>The Times</div></div>
+<div class="main">
+
+  <div class="sbar">
+    <div class="wk"><svg class="ring" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="#ffffff18" stroke-width="5"/><circle cx="23" cy="23" r="19" fill="none" stroke="#ffd84a" stroke-width="5" stroke-dasharray="119" stroke-dashoffset="34" transform="rotate(-90 23 23)"/></svg><div><small class="k">Week</small><b>7</b></div></div>
+    <div class="pts"><small class="k">Your points</small><b>414</b><em class="up">+38 this week</em></div>
+    <div><small class="k">The race</small><div class="race"><i style="height:100%"></i><i class="me" style="height:88%"></i><i style="height:74%"></i><i style="height:61%"></i><i style="height:55%"></i><i style="height:40%"></i></div></div>
+    <div class="stat"><small class="k">Rank</small><b>#2 <span style="font-size:12px;color:var(--mute)">of 6</span></b></div>
+    <div class="stat"><small class="k">Gap to 1st</small><b class="dn">−22</b></div>
+    <div class="dl">⏳ SWAP DEADLINE 2D 4H</div>
+  </div>
+  <div class="tape"><div>
+    <span class="up">⚡ RUDEUS +20 power-up</span><span class="up">📺 GOJO +10 new episode</span><span class="dn">💀 REM −15 died</span><span class="up">📊 LOKI +25 daily hype #1</span><span class="up">📖 DENJI +8 new chapter</span><span class="up">⚔️ JOHNNY +15 won a fight</span>
+    <span class="up">⚡ RUDEUS +20 power-up</span><span class="up">📺 GOJO +10 new episode</span><span class="dn">💀 REM −15 died</span><span class="up">📊 LOKI +25 daily hype #1</span><span class="up">📖 DENJI +8 new chapter</span><span class="up">⚔️ JOHNNY +15 won a fight</span>
+  </div></div>
+
+  <div class="nav">
+    <span class="on" data-t="table">Standings</span><span data-t="team">My team</span><span>Moments</span><span>Trades <i class="n">1</i></span><span>Cup</span><span>Who's hyper?</span><span>Scoring</span>
+    <span class="sp">🎬 Draft replay</span>
+  </div>
+
+  <div class="grid" id="table">
+    <div class="panel">
+      <div class="ph">The table <span class="sp seg"><span class="on">SEASON</span><span>THIS WEEK</span></span></div>
+      <div class="tr hd"><span>#</span><span></span><span>Manager</span><span>Squad</span><span>Form</span><span style="text-align:right">Week</span><span style="text-align:right">Total</span></div>
+      <div class="tr"><span class="rk">1</span><span class="mv up">▲1</span><div class="mgr"><b>Dayn</b><small>👑 Gojo · 🃏 Triple captain</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"></div><div class="form"><i class="w"></i><i class="w"></i><i class="l"></i><i class="w"></i><i class="w"></i></div><span class="wkp up">+61</span><span class="tot">436</span></div>
+      <div class="tr me"><span class="rk">2</span><span class="mv dn">▼1</span><div class="mgr"><b>AspextPro (you)</b><small>👑 Johnny Joestar</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"></div><div class="form"><i class="w"></i><i class="l"></i><i class="w"></i><i class="w"></i><i class="l"></i></div><span class="wkp up">+38</span><span class="tot">414</span></div>
+      <div class="tr"><span class="rk">3</span><span class="mv">–</span><div class="mgr"><b>MeliQw</b><small>👑 Luffy</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"></div><div class="form"><i class="l"></i><i class="w"></i><i class="w"></i><i class="l"></i><i class="w"></i></div><span class="wkp up">+22</span><span class="tot">350</span></div>
+      <div class="tr"><span class="rk">4</span><span class="mv up">▲2</span><div class="mgr"><b>Wanderer</b><small>👑 Denji</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"></div><div class="form"><i class="w"></i><i class="w"></i><i class="w"></i><i class="l"></i><i class="l"></i></div><span class="wkp up">+70</span><span class="tot">289</span></div>
+      <div class="tr"><span class="rk">5</span><span class="mv dn">▼1</span><div class="mgr"><b>ROla</b><small>👑 Rem</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"></div><div class="form"><i class="l"></i><i class="l"></i><i class="w"></i><i class="l"></i><i class="w"></i></div><span class="wkp dn">−4</span><span class="tot">262</span></div>
+      <div class="tr"><span class="rk">6</span><span class="mv dn">▼1</span><div class="mgr"><b>October10</b><small>🛟 Underdog boost +25%</small></div><div class="sq"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"></div><div class="form"><i class="l"></i><i class="w"></i><i class="l"></i><i class="l"></i><i class="w"></i></div><span class="wkp up">+12</span><span class="tot">201</span></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><i style="width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red)"></i> Latest points</div>
+      <div class="fi new"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div><b>Johnny · daily hype #1</b><small>You · 2m</small></div><em class="up">+25</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>Gojo · new episode</b><small>Dayn · 1h</small></div><em class="up">+10</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div><b>Rem · died</b><small>ROla · 3h</small></div><em class="dn">−15</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><div><b>Denji · power-up</b><small>Wanderer · 5h</small></div><em class="up">+20</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b222594-24Jn7qlI5spH.png"><div><b>Luffy · new chapter</b><small>MeliQw · 9h</small></div><em class="up">+8</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><div><b>Loki · won a fight</b><small>October10 · 12h</small></div><em class="up">+15</em></div>
+    </div>
+  </div>
+
+  <div class="grid hide" id="team">
+    <div class="panel">
+      <div class="ph">Your squad <span class="sp" style="font:700 12px Inter;color:var(--mute)">+38 this week</span></div>
+      <div class="squad">
+        <div class="card"><span class="cap">CAPTAIN ×2</span><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div class="bd"><b>Johnny Joestar</b><small>JoJo</small><div class="row"><span>142</span><em class="up">+25 wk</em></div></div></div>
+        <div class="card"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div class="bd"><b>Rudeus</b><small>Mushoku Tensei</small><div class="row"><span>96</span><em class="up">+20 wk</em></div></div></div>
+        <div class="card"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><div class="bd"><b>Mash</b><small>Mashle</small><div class="row"><span>71</span><em class="up">+8 wk</em></div></div></div>
+        <div class="card"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div class="bd"><b>Loki</b><small>One Piece</small><div class="row"><span>63</span><em class="dn">−15 wk</em></div></div></div>
+        <div class="card"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b123285-tKijiuQErDS0.png"><div class="bd"><b>Yuno</b><small>Black Clover</small><div class="row"><span>42</span><em>0 wk</em></div></div></div>
+      </div>
+      <div class="acts">
+        <div class="act go"><b>🔄 Swap a character</b><span>1 free swap left this week</span></div>
+        <div class="act"><b>🃏 Play a chip</b><span>Triple captain · Bench boost</span></div>
+        <div class="act"><b>🪑 Bench</b><span>Empty: add a 6th</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph">Your points this week</div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b348142-r9kiSatCqKTC.png"><div><b>Johnny · daily hype #1</b><small>Captain ×2</small></div><em class="up">+25</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b88575-Ayu8UPDA8NS6.png"><div><b>Rudeus · power-up</b><small>Thu</small></div><em class="up">+20</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b130102-FO1VHNnEnLlB.png"><div><b>Mash · new chapter</b><small>Wed</small></div><em class="up">+8</em></div>
+      <div class="fi"><img src="https://s4.anilist.co/file/anilistcdn/character/large/b127691-9zqh1xpIubn7.png"><div><b>Loki · lost a fight</b><small>Tue</small></div><em class="dn">−15</em></div>
+    </div>
+  </div>
+
+</div></div>
+<script>
+document.querySelectorAll('.nav [data-t]').forEach(t=>t.onclick=()=>{document.querySelectorAll('.nav span').forEach(x=>x.classList.remove('on'));t.classList.add('on');
+['table','team'].forEach(id=>document.getElementById(id).classList.toggle('hide',id!==t.dataset.t))})
+</script>
+</body></html>

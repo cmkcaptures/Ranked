@@ -3,12 +3,14 @@ import { sb } from './cloud.js'
 import { fantasySeason } from './Fantasy.jsx'
 import { openChar } from './CharProfile.jsx'
 import './times.css'
+import { RadioPlayer } from './Extras.jsx'
 
 // The Ranked Times: an automatic weekly front page built from last week's league + market data.
 export default function Times({ me, friends, openProfile }) {
   const S = fantasySeason()
   const wk = Math.max(1, S.week - 1)          // the last finished week
   const [d, setD] = useState(null)
+  const [radio, setRadio] = useState(false)
   const since = new Date(Date.now() - 7 * 864e5).toISOString()
   const name = id => friends.find(f => f.id === id)?.username || 'Someone'
 
@@ -53,7 +55,20 @@ export default function Times({ me, friends, openProfile }) {
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const [topU, topP] = d.tw[0] || [], [flopU, flopP] = d.tw[d.tw.length - 1] || []
   const headline = topU ? `${name(topU).toUpperCase()} RUNS RIOT WITH ${topP} IN WEEK ${wk}` : `WEEK ${wk}: A QUIET ONE`
+  const slides = [
+    { seg: 'INTRO', head: `Week ${wk} on Ranked Radio`, body: 'Your weekly round-up of the league and the market. Let us get into it.' },
+    topU && { seg: 'LEAGUE', head: `${name(topU)} wins the week with ${topP}`, body: flopU !== topU ? `Bottom of the pile: ${name(flopU)} on ${flopP}.` : '' },
+    d.table[0] && { seg: 'TABLE', head: `${name(d.table[0][0])} leads the league`, body: d.table.slice(0, 3).map(([u, p], i) => `${i + 1}. ${name(u)}, ${p}`).join('. ') + (d.climber?.moved > 0 ? `. Biggest climber: ${name(d.climber.u)}, up ${d.climber.moved}.` : '') },
+    d.moment?.c && { seg: 'MOMENT OF THE WEEK', img: d.moment.c.image, head: `${d.moment.c.name}: ${d.moment.points > 0 ? 'plus' : 'minus'} ${Math.abs(d.moment.points)}`, body: `${d.moment.note}. For ${name(d.moment.team_user)}.` },
+    d.crash?.c && { seg: 'MARKETS', img: d.crash.c.image, head: `${d.crash.c.name} crashes ${Math.round(Math.abs(d.crash.pct) * 100)}%`, body: d.crash.note },
+    d.spike?.c && { seg: 'MARKETS', img: d.spike.c.image, head: `${d.spike.c.name} rockets ${Math.round(d.spike.pct * 100)}%`, body: 'To the moon.' },
+    d.best && { seg: 'TRADE OF THE WEEK', head: `${name(d.best.user_id)} banks ${Math.round(d.best.payload.pnl)}`, body: `Selling ${d.best.payload.sym} at the perfect time.` },
+    d.worst && d.worst.payload.pnl < 0 && { seg: 'PANIC SELL', head: `${name(d.worst.user_id)} loses ${Math.abs(Math.round(d.worst.payload.pnl))}`, body: `Dumped ${d.worst.payload.sym}. Ouch.` },
+    d.streak?.c && { seg: 'FORM', img: d.streak.c.image, head: `${d.streak.c.name} is on fire`, body: `${d.streak.streak} weeks scoring in a row for ${name(d.streak.user_id)}.` },
+  ].filter(Boolean)
   return <article className="times">
+    <div className="x-radiobtn"><button className="btn" onClick={() => setRadio(true)}>📻 Play Ranked Radio</button></div>
+    {radio && <RadioPlayer slides={slides} onClose={() => { speechSynthesis?.cancel(); setRadio(false) }} />}
     <header className="t-mast">
       <div className="t-ears"><span>Vol. {S.label}</span><span>No. {wk}</span><span>Price: 1 coin</span></div>
       <h1>The Ranked Times</h1>

@@ -1,0 +1,50 @@
+/* Extras: head-to-head, blind test, manga alerts, radio. All classes x- prefixed (old global styles clash) */
+.x-conf { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; margin: 0 0 16px; font-size: 12px; font-weight: 800; }
+.x-conf i { height: 10px; background: #000; border: 2px solid var(--ink, #222); overflow: hidden; }
+.x-conf em { display: block; height: 100%; background: linear-gradient(90deg, #ff3b3b, #ffd84a); transition: width .4s; }
+.x-conf b { font: 400 20px Bangers; color: #ffd84a; } .x-conf small { color: #9a937f; }
+.x-arena { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 12px; }
+.x-side { background: #1c1a21; border: 3px solid #000; box-shadow: 5px 5px 0 #000; padding: 10px; cursor: pointer; color: inherit; text-align: left; transition: transform .15s, opacity .25s; }
+.x-side:hover { transform: translateY(-4px) rotate(-.5deg); }
+.x-side.win { transform: scale(1.04); border-color: #ffd84a; } .x-side.lose { opacity: .3; transform: scale(.95); }
+.x-cv { aspect-ratio: 2/3; background: center/cover; position: relative; border: 2px solid #000; }
+.x-cv span { position: absolute; top: 6px; left: 6px; background: #ffd84a; color: #111; font: 400 18px Bangers; padding: 0 8px; border: 2px solid #000; }
+.x-side b { display: block; margin-top: 8px; font-size: 15px; } .x-side small { color: #9a937f; font-weight: 800; }
+.x-vs { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) rotate(-8deg); background: #ff3b3b; color: #fff; font: 400 34px Bangers; padding: 4px 14px; border: 3px solid #000; box-shadow: 4px 4px 0 #000; pointer-events: none; }
+.x-gut { margin-top: 16px; } .x-gut p { margin: 8px 0; font-size: 13px; line-height: 1.5; }
+
+.x-card { display: grid; grid-template-columns: 180px 1fr; gap: 18px; align-items: start; }
+.x-mystery { aspect-ratio: 2/3; background: repeating-linear-gradient(45deg, #111 0 10px, #1c1a21 10px 20px) center/cover; border: 3px solid #000; display: grid; place-items: center; font: 400 90px Bangers; color: #ffd84a; transition: filter .5s; }
+.x-mystery.open { animation: xreveal .6s ease-out; } @keyframes xreveal { from { filter: blur(14px) brightness(2); } }
+.x-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; } .x-tags i { font-style: normal; font-size: 11px; padding: 2px 7px; border: 1px solid #ffffff33; color: #c9c2ad; }
+.x-syn { font-size: 13px; line-height: 1.6; color: #d8d2c0; white-space: pre-line; }
+.x-opts { display: grid; gap: 8px; } .x-opts button { text-align: left; padding: 10px 12px; background: #111; color: inherit; border: 2px solid #ffffff22; font-weight: 700; cursor: pointer; }
+.x-opts button.on { border-color: #ffd84a; background: #2a2510; } .x-opts button.right { border-color: #3bdc7a; background: #10301c; } .x-opts button.wrong { border-color: #ff3b3b; background: #3a1010; }
+.x-guess { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; } .x-guess b { font: 400 34px Bangers; color: #ffd84a; min-width: 70px; } .x-guess input { flex: 1; accent-color: #ffd84a; }
+.x-res h3 { margin: 4px 0; } .x-res p { font-size: 13px; }
+@media (max-width: 640px) { .x-card { grid-template-columns: 1fr; } .x-mystery { max-width: 160px; } }
+
+.x-alerts { margin: 18px 0; } .x-new { background: #ff3b3b; color: #fff; font-size: 11px; padding: 1px 7px; margin-left: 6px; }
+.x-alerts .ph small button { background: none; border: 0; color: #ffd84a; cursor: pointer; font-size: 11px; }
+.x-al { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.x-a { display: grid; grid-template-columns: 54px 1fr; gap: 10px; padding: 8px; background: #111; border: 2px solid #ffffff14; cursor: pointer; }
+.x-a.new { border-color: #ffd84a; } .x-a.airing { border-left: 5px solid #ff3b3b; } .x-a.announced { border-left: 5px solid #ffd84a; } .x-a.manga { border-left: 5px solid #5aa9ff; }
+.x-a img { width: 54px; height: 76px; object-fit: cover; } .x-a b { display: block; font-size: 13px; } .x-a small { display: block; color: #c9c2ad; font-size: 11px; margin-top: 3px; } .x-a em { display: block; color: #7d776a; font-size: 10px; margin-top: 4px; }
+
+.x-radio { position: fixed; inset: 0; z-index: 9999; background: #0b0a0e; color: #fff; display: flex; flex-direction: column; }
+.x-bars { display: flex; gap: 4px; padding: 12px 16px 0; } .x-bars i { flex: 1; height: 4px; background: #ffffff22; }
+.x-bars i.done { background: #ffd84a; } .x-bars i.now { background: linear-gradient(90deg, #ffd84a 50%, #ffffff22 50%) right/200% 100%; animation: xbar linear forwards; }
+@keyframes xbar { to { background-position: left; } }
+.x-rs { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 32px 24px 40px; overflow: hidden; cursor: pointer; animation: xin .5s ease-out; }
+@keyframes xin { from { opacity: 0; transform: translateY(20px); } }
+.x-rs.end { justify-content: center; text-align: center; }
+.x-rimg { position: absolute; inset: 0; background: center/cover; opacity: .45; animation: xzoom 8s linear forwards; } .x-rimg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 20%, #0b0a0e 85%); }
+@keyframes xzoom { to { transform: scale(1.12); } }
+.x-onair { position: relative; font: 400 18px Bangers; letter-spacing: 2px; color: #ff3b3b; display: flex; align-items: center; gap: 8px; }
+.x-onair .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff3b3b; animation: xpulse 1s infinite; } @keyframes xpulse { 50% { opacity: .2; } }
+.x-rs h2 { position: relative; font: 400 clamp(32px, 7vw, 64px)/1 Bangers; letter-spacing: 1px; margin: 10px 0; color: #ffd84a; }
+.x-rs p { position: relative; font-size: 17px; max-width: 640px; color: #e8e2cf; line-height: 1.5; }
+.x-rctl { display: flex; gap: 8px; justify-content: center; padding: 14px; flex-wrap: wrap; }
+.x-rctl button { background: #1c1a21; color: #fff; border: 2px solid #000; box-shadow: 3px 3px 0 #000; padding: 8px 14px; font-weight: 800; cursor: pointer; }
+.x-rctl button.on { background: #ffd84a; color: #111; }
+.x-radiobtn { position: sticky; top: 8px; z-index: 5; display: flex; justify-content: center; margin-bottom: 12px; }

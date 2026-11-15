@@ -1,0 +1,253 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranked pages mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141217;--p:#1c1a21;--p2:#25222b;--ink:#2e2a35;--tx:#e9e2d0;--mu:#9a937f;--gold:#ffd84a;--red:#e8202f;--grn:#2ee68f;--blue:#4aa8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px Inter,sans-serif}
+img{display:block}
+.B{font-family:Bangers;letter-spacing:1px;font-weight:400}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.nav{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.nav button{background:var(--p);color:var(--tx);border:3px solid var(--ink);font:400 18px Bangers;letter-spacing:1px;padding:6px 18px;transform:skew(-10deg);cursor:pointer}
+.nav button.on{background:var(--red);border-color:#000;box-shadow:4px 4px 0 #000}
+.panel{background:var(--p);border:3px solid var(--ink);box-shadow:5px 5px 0 #000}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;font:400 20px Bangers;letter-spacing:1px;border-bottom:3px solid var(--ink)}
+.ph small{margin-left:auto;font:700 11px Inter;color:var(--mu);letter-spacing:.5px}
+.page{display:none}.page.on{display:block}
+.grid2{display:grid;grid-template-columns:1fr 330px;gap:16px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.chip{border:2px solid var(--ink);background:var(--p2);color:var(--tx);padding:4px 12px;font:700 12px Inter;cursor:pointer}
+.chip.on{background:var(--gold);color:#111;border-color:#000}
+/* hero */
+.hero{position:relative;height:300px;overflow:hidden;border:3px solid #000;box-shadow:6px 6px 0 #000;margin-bottom:18px}
+.hero .bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.2)}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0e0d10 25%,#0e0d10cc 50%,transparent)}
+.hero .in{position:relative;z-index:2;padding:26px 30px;max-width:560px;height:100%;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.kick{font:800 11px Inter;letter-spacing:2px;color:var(--gold)}.kick b{background:var(--red);color:#fff;padding:2px 6px;margin-right:6px}
+.hero h1{margin:0;font:400 52px/0.95 Bangers;letter-spacing:1px;text-shadow:4px 4px 0 #000}
+.hero .meta{color:#cfc8b8}
+.hero .cd{display:inline-flex;gap:8px;align-items:center}
+.btn{background:var(--gold);color:#111;border:3px solid #000;box-shadow:4px 4px 0 #000;font:400 20px Bangers;letter-spacing:1px;padding:6px 18px;cursor:pointer}
+.btn.ghost{background:var(--p2);color:var(--tx)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--red)}
+.hero .jp{position:absolute;right:20px;bottom:-30px;font:400 180px Bangers;color:#ffffff10;z-index:1}
+/* rails */
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:150px;gap:14px;overflow-x:auto;padding:4px 4px 14px}
+.pc{position:relative;cursor:pointer;transition:.15s}
+.pc .cv{aspect-ratio:2/3;background-size:cover;background-position:center;border:3px solid #000;box-shadow:4px 4px 0 #000;position:relative}
+.pc:hover{transform:translate(-2px,-3px) rotate(-1deg)}.pc:hover .cv{box-shadow:6px 6px 0 var(--red)}
+.pc .t{font-weight:800;font-size:13px;margin-top:8px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc .m{color:var(--mu);font-size:11px;margin-top:2px}
+.pc .prog{position:absolute;left:0;right:0;bottom:0;height:6px;background:#000a}.pc .prog i{display:block;height:100%;background:var(--gold)}
+.pc .ep{position:absolute;top:6px;left:-4px;background:var(--red);color:#fff;font:400 14px Bangers;letter-spacing:1px;padding:2px 8px;box-shadow:2px 2px 0 #000}
+.pc .sc,.hc .sc{position:absolute;top:-8px;right:-8px;width:42px;height:42px;border-radius:50%;background:var(--gold);color:#111;border:3px solid #000;display:grid;place-items:center;font:400 18px Bangers}
+.pc .plus{position:absolute;right:6px;bottom:12px;background:#000c;color:var(--gold);border:2px solid var(--gold);font:400 16px Bangers;padding:0 8px;opacity:0;transition:.15s}
+.pc:hover .plus{opacity:1}
+h2.sec{font:400 28px Bangers;letter-spacing:1px;margin:6px 0 10px;display:flex;align-items:baseline;gap:10px;text-shadow:3px 3px 0 #000}
+h2.sec small{font:700 12px Inter;color:var(--mu);letter-spacing:0;text-shadow:none}
+/* feed */
+.fi{display:flex;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid #ffffff10}
+.fi img{width:36px;height:50px;object-fit:cover;border:2px solid #000}
+.fi b{font-weight:800}.fi small{display:block;color:var(--mu);font-size:11px}
+.fi .v{color:var(--blue);font-weight:700}
+.top5 .r{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #ffffff10}
+.top5 .n{font:400 30px Bangers;width:30px;text-align:center;color:var(--mu)}
+.top5 .r:nth-child(2) .n{color:var(--gold)}.top5 .r:nth-child(3) .n{color:#cfd6e0}.top5 .r:nth-child(4) .n{color:#d08a4a}
+.top5 img{width:40px;height:56px;object-fit:cover;border:2px solid #000}
+.wr{display:block;padding:16px;background:repeating-linear-gradient(-45deg,#ffffff06 0 8px,transparent 8px 16px),linear-gradient(135deg,#e8202f,#7a0d18);border:3px solid #000;box-shadow:5px 5px 0 #000;margin-bottom:16px;cursor:pointer}
+.wr b{font:400 26px Bangers;letter-spacing:1px;display:block;text-shadow:3px 3px 0 #000}.wr small{color:#ffd9dc}
+/* list */
+.lhead{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:var(--p);border:3px solid var(--ink);padding:8px 16px;box-shadow:4px 4px 0 #000;text-align:center}
+.stat b{font:400 32px Bangers;color:var(--gold);display:block;line-height:1}.stat small{color:var(--mu);font-size:11px}
+.stabs{display:flex;gap:0;margin-bottom:14px;border:3px solid #000;width:max-content;max-width:100%;overflow-x:auto;box-shadow:4px 4px 0 #000}
+.stabs button{background:var(--p);color:var(--tx);border:0;border-right:2px solid #000;padding:8px 16px;font:400 18px Bangers;letter-spacing:1px;cursor:pointer;white-space:nowrap}
+.stabs button small{font:800 11px Inter;color:var(--mu);margin-left:4px}
+.stabs button.on{background:var(--gold);color:#111}.stabs button.on small{color:#111}
+.tier{display:grid;grid-template-columns:70px 1fr;margin-bottom:12px;border:3px solid #000;box-shadow:5px 5px 0 #000;background:var(--p)}
+.tier .tl{display:grid;place-items:center;font:400 46px Bangers;color:#111;border-right:3px solid #000}
+.tier.S .tl{background:var(--gold)}.tier.A .tl{background:#ff7a3c}.tier.B .tl{background:#4aa8ff}.tier.C .tl{background:#8ad06a}
+.tier .rows{min-width:0}
+.lr{display:grid;grid-template-columns:44px 1fr 120px 60px 44px;gap:12px;align-items:center;padding:8px 12px;border-bottom:1px solid #ffffff10}
+.lr:last-child{border-bottom:0}
+.lr img{width:44px;height:62px;object-fit:cover;border:2px solid #000}
+.lr .tt b{display:block;font-weight:800}.lr .tt small{color:var(--mu);font-size:11px}
+.lr .pb{height:8px;background:#000;border:1px solid #ffffff22}.lr .pb i{display:block;height:100%;background:var(--gold)}
+.lr .ps{font-size:11px;color:var(--mu);margin-top:3px}
+.lr .s{font:400 30px Bangers;text-align:center;text-shadow:2px 2px 0 #000}
+.lr .p1{background:var(--p2);border:2px solid var(--gold);color:var(--gold);font:400 16px Bangers;cursor:pointer;height:32px}
+@media(max-width:640px){.lr{grid-template-columns:40px 1fr 50px}.lr .pg,.lr .p1{display:none}}
+/* browse */
+.sbar{display:flex;gap:10px;margin-bottom:12px}
+.sbar input{flex:1;background:var(--p);border:3px solid #000;box-shadow:4px 4px 0 #000;color:var(--tx);font:400 26px Bangers;letter-spacing:1px;padding:10px 16px;outline:none}
+.sbar input:focus{box-shadow:5px 5px 0 var(--red)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 16px}
+.feat{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:16px;margin-bottom:20px;position:relative;overflow:hidden}
+.feat .cv{aspect-ratio:2/3;background-size:cover;border:3px solid #000;box-shadow:5px 5px 0 #000}
+.feat h3{margin:4px 0;font:400 40px/1 Bangers;letter-spacing:1px;text-shadow:3px 3px 0 #000}
+.feat .g{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.feat .g span{border:2px solid var(--ink);padding:2px 8px;font-size:11px;font-weight:700}
+.feat p{color:#cfc8b8;line-height:1.45;max-height:88px;overflow:hidden}
+.feat .num{position:absolute;right:16px;top:-10px;font:400 140px Bangers;color:#ffffff0c}
+@media(max-width:640px){.feat{grid-template-columns:110px 1fr}.feat h3{font-size:28px}}
+.stbtn{display:flex;gap:4px;margin-top:6px}
+.stbtn button{flex:1;background:var(--p2);border:2px solid var(--ink);color:var(--tx);font:700 10px Inter;padding:4px 0;cursor:pointer}
+.stbtn button.on{background:var(--grn);color:#111;border-color:#000}
+/* season */
+.shead{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.shead .arrow{width:44px;height:44px;background:var(--p);border:3px solid #000;box-shadow:3px 3px 0 #000;color:var(--tx);font:400 26px Bangers;cursor:pointer}
+.shead h1{margin:0;font:400 64px/1 Bangers;letter-spacing:2px;color:transparent;-webkit-text-stroke:2px var(--tx);text-shadow:5px 5px 0 var(--red)}
+.shead h1 b{color:var(--gold);-webkit-text-stroke:0;font-weight:400}
+.shead .info{margin-left:auto;color:var(--mu);font-size:12px;text-align:right}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:20px 14px}
+.pc .add{position:absolute;bottom:8px;right:8px;width:34px;height:34px;background:var(--gold);color:#111;border:3px solid #000;font:400 22px Bangers;cursor:pointer;box-shadow:2px 2px 0 #000}
+.pc .add.in{background:var(--red);color:#fff}
+.pc .rk,.hc .rk{position:absolute;top:-10px;left:-10px;width:40px;height:40px;background:var(--red);color:#fff;border:3px solid #000;display:grid;place-items:center;font:400 20px Bangers;transform:rotate(-8deg)}
+.cdn{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,#000e,transparent);padding:16px 8px 6px;font:700 11px Inter}
+.cdn b{color:var(--gold);font:400 15px Bangers;letter-spacing:1px}
+.my .r{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #ffffff10;cursor:grab}
+.my .r .n{font:400 24px Bangers;width:26px;color:var(--gold)}
+.my .r img{width:34px;height:48px;object-fit:cover;border:2px solid #000}
+.my .r span{flex:1;font-weight:700;font-size:13px}
+.my .r i{color:var(--mu);font-style:normal}
+.sq .r{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #ffffff10}
+.sq .bar{flex:1;height:8px;background:#000}.sq .bar i{display:block;height:100%;background:var(--red)}
+.sq .r small{width:150px;font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdn .pb{height:5px;background:#000;margin-top:4px}.cdn .pb i{display:block;height:100%;background:var(--gold)}
+.pc .add{font-size:16px;width:auto;min-width:34px;padding:0 6px}
+.rk.tS{background:var(--gold)!important;color:#111!important}.rk.tA{background:#ff7a3c!important}.rk.tB{background:#4aa8ff!important}.rk.tC{background:#8ad06a!important;color:#111!important}
+.sbar{margin-bottom:12px}
+.ol{color:transparent!important;-webkit-text-stroke:1.5px var(--tx);text-shadow:4px 4px 0 var(--red)!important}
+.grid3{display:grid;grid-template-columns:1.3fr 1fr .8fr;gap:16px;margin-top:10px;align-items:start}
+@media(max-width:860px){.grid3{grid-template-columns:1fr}}
+.tierband{display:grid;grid-template-columns:64px 1fr;margin-bottom:14px;border:3px solid #000;box-shadow:5px 5px 0 #000;background:var(--p)}
+.tierband .tl{display:grid;place-items:center;font:400 48px Bangers;color:#111;border-right:3px solid #000}
+.tierband.tS .tl{background:var(--gold)}.tierband.tA .tl{background:#ff7a3c}.tierband.tB .tl{background:#4aa8ff}.tierband.tC .tl{background:#8ad06a}
+.tierband .rail{grid-auto-columns:120px;padding:14px}
+.lrow2{display:grid;grid-template-columns:56px 50px 1fr 60px 64px;gap:14px;align-items:center;padding:10px 14px;border-bottom:1px solid #ffffff10;cursor:pointer;transition:.12s}
+.lrow2:hover{background:#ffffff06;box-shadow:inset 4px 0 0 var(--red)}
+.lrow2 .no{font:400 38px Bangers;color:transparent;-webkit-text-stroke:1.5px var(--mu)}
+.lrow2:nth-child(-n+3) .no{-webkit-text-stroke-color:var(--gold)}
+.lrow2 img{width:50px;height:70px;object-fit:cover;border:2px solid #000;box-shadow:3px 3px 0 #000}
+.lrow2 .tt b{display:block;font-weight:800}.lrow2 .tt small{color:var(--mu);font-size:11px}
+.lrow2 .pb{height:5px;background:#000;margin-top:6px;max-width:260px}.lrow2 .pb i{display:block;height:100%;background:var(--gold)}
+.lrow2 .eps{font:400 22px Bangers;text-align:center;line-height:1}.lrow2 .eps small{display:block;font:700 9px Inter;color:var(--mu)}
+.lrow2 .sc2{width:54px;height:54px;border-radius:50%;background:var(--gold);color:#111;border:3px solid #000;box-shadow:3px 3px 0 #000;display:grid;place-items:center;font:400 24px Bangers}
+@media(max-width:640px){.lrow2{grid-template-columns:36px 44px 1fr 50px}.lrow2 .eps{display:none}}
+.shelf{display:flex;align-items:flex-end;gap:4px;padding:18px 14px 0;border-bottom:14px solid #3a2a20;box-shadow:0 8px 0 #000,inset 0 -2px 0 #000;margin-bottom:34px;background:linear-gradient(#0000 85%,#00000060);overflow-x:auto;overflow-y:visible;min-height:290px}
+.spine{position:relative;flex:none;width:46px;height:var(--h,250px);background:linear-gradient(90deg,#0006,#0000 30%,#fff1 50%,#0000 70%,#0006),var(--c);border:2px solid #000;cursor:pointer;transition:width .25s,transform .2s;overflow:hidden;display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.spine:nth-child(3n){--h:270px}.spine:nth-child(4n){--h:236px}.spine:nth-child(5n+1){--h:258px}
+.spine .sn{font:400 20px Bangers;color:#fff;text-shadow:2px 2px 0 #000}
+.spine .st{flex:1;writing-mode:vertical-rl;font:400 18px Bangers;letter-spacing:1px;color:#fff;text-shadow:2px 2px 0 #000;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:6px 0}
+.spine .ss{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#111;border:2px solid #000;display:grid;place-items:center;font:400 16px Bangers}
+.spine .sface{position:absolute;inset:0;background:linear-gradient(0deg,#000e 10%,#0000 60%),var(--img) center/cover;opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+.spine .sface b{font-weight:800;font-size:13px;line-height:1.2}.spine .sface small{color:#cfc8b8;font-size:11px}
+.spine .sface em{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;background:var(--gold);color:#111;border:3px solid #000;display:grid;place-items:center;font:400 20px Bangers;font-style:normal}
+.spine:hover{width:180px;transform:translateY(-10px);box-shadow:6px 6px 0 var(--red)}.spine:hover .sface{opacity:1}
+.holo-grid{perspective:900px}
+.hc{cursor:pointer}
+.hc .hin{position:relative;aspect-ratio:2/3;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1);transform:rotateX(var(--rx,0deg)) rotateY(calc(var(--ry,0deg) + var(--fl,0deg)))}
+.hc:hover .hin{transition:transform .08s}
+.hc.flip .hin{--fl:180deg;transition:transform .5s}
+.hc .hf,.hc .hb{position:absolute;inset:0;backface-visibility:hidden;border:3px solid #000;box-shadow:5px 5px 0 #000}
+.hc .hf{background-size:cover;background-position:center;overflow:visible}
+.hc .shine{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,30%),#ffffff55,#fff0 45%);mix-blend-mode:overlay;opacity:0;transition:opacity .2s;pointer-events:none}
+.hc:hover .shine{opacity:1}
+.hc.foil .hf::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,#0000 20%,#ff5ad744 35%,#5ae2ff44 45%,#ffe95a44 55%,#0000 70%);background-size:250% 250%;background-position:var(--mx,50%) var(--my,50%);mix-blend-mode:color-dodge;pointer-events:none}
+.hc.foil .hf{box-shadow:5px 5px 0 #000,0 0 22px #ffd84a55}
+.hc .hf .rk{z-index:2}.hc .hf .sc{z-index:2}
+.hc .hb{transform:rotateY(180deg);background:repeating-linear-gradient(-45deg,#ffffff05 0 6px,transparent 6px 12px),linear-gradient(160deg,#2a2630,#141217);padding:10px;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.hc .hb b{font:400 17px/1.05 Bangers;letter-spacing:1px;color:var(--gold)}.hc .hb small{color:var(--mu);font-size:10px}
+.hc .hr{display:grid;grid-template-columns:62px 1fr 26px;gap:5px;align-items:center;font-size:10px;font-weight:700}
+.hc .hr div{height:6px;background:#000}.hc .hr i{display:block;height:100%;background:var(--red)}
+.hc .hr em{font:400 13px Bangers;font-style:normal;color:var(--gold)}
+.hc .hfoot{margin-top:auto;font-size:10px;color:var(--mu);border-top:1px solid #ffffff1a;padding-top:5px}
+.note{color:var(--mu);font-size:12px;margin-top:20px}
+</style></head><body><div class="wrap">
+<div class="nav"><button class="on" data-p="home">Home</button><button data-p="list">Anime list</button><button data-p="browse">Browse</button><button data-p="season">Season</button></div>
+
+<!-- HOME -->
+<div class="page on" id="home">
+  <div class="shead"><h1>WELCOME BACK <b>ASPEXT</b></h1><div class="info">6 watching · 3 new episodes today</div></div>
+  <div class="hero"><div class="bg" id="hbg"></div><div class="jp">続き</div>
+    <div class="in"><div class="kick"><b>NEXT UP</b> CONTINUE WATCHING</div><h1 class="ol" id="htitle">…</h1>
+      <div class="meta" id="hmeta"></div><div class="cd"><button class="btn">+1 Episode</button><span class="kick" id="hcd"></span></div></div></div>
+  <h2 class="sec">In progress <small>countdown to the next episode</small></h2>
+  <div class="rail" id="hgrid"></div>
+  <div class="grid3">
+    <div class="panel"><div class="ph">Activity <small>YOU + MATES</small></div><div id="feed"></div></div>
+    <div class="panel my"><div class="ph">Your top 5</div><div id="top5"></div></div>
+    <div class="wr"><b>Your Fall Wrapped is here ドン!</b><small>Episodes, genres, league, market and your anime personality</small></div>
+  </div>
+</div>
+
+<!-- LIST -->
+<div class="page" id="list">
+  <div class="shead"><button class="arrow">‹</button><h1>COMPLETED <b>214</b></h1><button class="arrow">›</button><div class="info">3,108 episodes · avg 8.2<br>arrows switch list</div></div>
+  <div class="chips"><span class="chip">Watching 6</span><span class="chip on">Completed 214</span><span class="chip">Paused 4</span><span class="chip">Dropped 9</span><span class="chip">Planning 31</span><span class="chip" style="margin-left:auto">Sort: score</span></div>
+  <div class="grid2"><div id="lgrid"></div>
+    <div><div class="panel sq"><div class="ph">Score spread</div><div id="tiers"></div></div>
+      <div class="panel sq" style="margin-top:16px"><div class="ph">Top genres</div><div id="genres"></div></div></div></div>
+</div>
+
+<!-- BROWSE -->
+<div class="page" id="browse">
+  <div class="shead"><h1>BROWSE <b>ANIME</b></h1><div class="info">trending right now<br>tap + to add to your list</div></div>
+  <div class="sbar"><input placeholder="SEARCH ANIME…"></div>
+  <div class="chips"><span class="chip on">Trending</span><span class="chip">Top rated</span><span class="chip">Airing</span><span class="chip">Action</span><span class="chip">Romance</span><span class="chip">Comedy</span><span class="chip">Fantasy</span></div>
+  <div class="panel feat" id="feat"></div>
+  <div class="grid2"><div class="sgrid" id="bgrid"></div>
+    <div><div class="panel my"><div class="ph">Top this week <small>BY TRENDING</small></div><div id="btop"></div></div>
+      <div class="panel sq" style="margin-top:16px"><div class="ph">Hot genres</div><div id="bgen"></div></div></div></div>
+</div>
+
+<!-- SEASON -->
+<div class="page" id="season">
+  <div class="shead"><button class="arrow">‹</button><h1>FALL <b>2026</b></h1><button class="arrow">›</button><div class="info">40 shows · 23 airing now<br>tap + to rank a show</div></div>
+  <div class="chips"><span class="chip on">All</span><span class="chip">Airing</span><span class="chip">On my list</span><span class="chip">Sequels</span></div>
+  <div class="grid2"><div class="sgrid" id="sgrid"></div>
+    <div><div class="panel my"><div class="ph">Your ranking <small>DRAG TO REORDER</small></div><div id="my"></div></div>
+      <div class="panel sq" style="margin-top:16px"><div class="ph">Squad ranking</div><div id="sq"></div></div></div></div>
+</div>
+<p class="note">Mockup only, with live AniList data. Fonts, colours and hard shadows match the new League and Market.</p>
+</div>
+<script>
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button,.page').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById(b.dataset.p).classList.add('on')})
+const T=m=>m.title.english||m.title.romaji
+const q=`query{ t:Page(perPage:24){media(sort:TRENDING_DESC,type:ANIME,isAdult:false){id title{romaji english} coverImage{extraLarge large color} bannerImage episodes averageScore genres format seasonYear description(asHtml:false) nextAiringEpisode{episode timeUntilAiring}}}
+ s:Page(perPage:30){media(season:FALL,seasonYear:2026,type:ANIME,isAdult:false,sort:POPULARITY_DESC){id title{romaji english} coverImage{large} averageScore status nextAiringEpisode{episode timeUntilAiring}}}}`
+const cd=s=>s<86400?`${Math.floor(s/3600)}h ${Math.floor(s%3600/60)}m`:`${Math.floor(s/86400)}d ${Math.floor(s%86400/3600)}h`
+fetch('https://graphql.anilist.co',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})}).then(r=>r.json()).then(({data})=>{
+ const t=data.t.media,s=data.s.media.length?data.s.media:t
+ const airing=t.filter(m=>m.nextAiringEpisode)
+ const card=(m,{rk,badge,cdn,add,meta})=>`<div class="pc"><div class="cv" style="background-image:url(${m.coverImage.large})">${rk?`<span class="rk">${rk}</span>`:''}${badge?`<span class="sc">${badge}</span>`:''}${cdn?`<div class="cdn">${cdn}</div>`:''}<button class="add ${add==='−'?'in':''}">${add||'+'}</button></div><div class="t">${T(m)}</div><div class="m">${meta||''}</div></div>`
+ const h=airing[0]||t[0]; hbg.style.backgroundImage=`url(${h.bannerImage||h.coverImage.extraLarge})`; htitle.textContent=T(h)
+ hmeta.textContent=`Episode 7 of ${h.episodes||'?'} · ${h.genres.slice(0,3).join(' · ')}`; if(h.nextAiringEpisode) hcd.textContent=`EP ${h.nextAiringEpisode.episode} IN ${cd(h.nextAiringEpisode.timeUntilAiring)}`
+ hgrid.innerHTML=airing.slice(1,12).map((m,i)=>card(m,{cdn:`EP ${m.nextAiringEpisode.episode} in <b>${cd(m.nextAiringEpisode.timeUntilAiring)}</b><div class="pb"><i style="width:${30+i*6}%"></i></div>`,add:'+1',meta:`${3+i} / ${m.episodes||'?'} eps`})).join('')
+ const verbs=['watched ep 5 of','completed','rated 9/10','planning','watched ep 12 of'], who=['You','Dayn','Wanderer','You','October10','MeliQw']
+ feed.innerHTML=t.slice(0,6).map((m,i)=>`<div class="fi"><img src="${m.coverImage.large}"><div><b>${who[i%6]}</b> <span class="v">${verbs[i%5]}</span> <b>${T(m)}</b><small>${i+1}h ago</small></div></div>`).join('')
+ top5.innerHTML=t.slice(2,7).map((m,i)=>`<div class="r"><span class="n">${i+1}</span><img src="${m.coverImage.large}"><span>${T(m)}</span><i>⠿</i></div>`).join('')
+ lgrid.className='sgrid holo-grid'; lgrid.innerHTML=t.slice(0,20).map((m,i)=>{const sc=+(10-i*0.2).toFixed(1),cats=[['Story',sc],['Animation',Math.min(10,sc+.5)],['Characters',sc-.3],['Music',sc-.6],['Rewatch',sc-1]]
+  return `<div class="hc ${sc>=9?'foil':''}"><div class="hin"><div class="hf" style="background-image:url(${m.coverImage.extraLarge||m.coverImage.large})"><span class="rk">${i+1}</span><span class="sc">${sc}</span><div class="shine"></div><div class="cdn">${m.episodes||12} / ${m.episodes||12} eps<div class="pb"><i style="width:100%"></i></div></div></div>
+  <div class="hb"><b>${T(m)}</b><small>${m.format||'TV'} · ${m.seasonYear||''} · ${m.genres.slice(0,2).join(', ')}</small>${cats.map(([k,v])=>`<div class="hr"><span>${k}</span><div><i style="width:${v*10}%"></i></div><em>${v.toFixed(1)}</em></div>`).join('')}<div class="hfoot">Finished ${['Mar','Jun','Aug','Oct'][i%4]} 2026 · rewatched ${i%3}×</div></div></div>
+  <div class="t">${T(m)}</div><div class="m">${m.format||'TV'} · ${m.seasonYear||''}</div></div>`}).join('')
+ lgrid.querySelectorAll('.hc').forEach(c=>{const f=c.querySelector('.hin')
+  c.onmousemove=e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.width*0.66;f.style.setProperty('--rx',`${(0.5-y)*18}deg`);f.style.setProperty('--ry',`${(x-0.5)*22}deg`);f.style.setProperty('--mx',`${x*100}%`);f.style.setProperty('--my',`${y*100}%`)}
+  c.onmouseleave=()=>{f.style.setProperty('--rx','0deg');f.style.setProperty('--ry','0deg')}
+  c.onclick=()=>c.classList.toggle('flip')})
+ const bars=(el,rows,col)=>el.innerHTML=rows.map(([k,v],i)=>`<div class="r"><small>${k}</small><div class="bar"><i style="width:${v/Math.max(...rows.map(r=>r[1]))*100}%;${col?`background:${col[i]}`:''}"></i></div><b class="B">${v}</b></div>`).join('')
+ bars(tiers,[['10',22],['9',41],['8',63],['7',48],['6',25],['5 or less',15]])
+ bars(genres,[['Action',120],['Fantasy',88],['Drama',61],['Comedy',57],['Romance',30]])
+ bgrid.innerHTML=t.slice(1,19).map((m,i)=>card(m,{badge:m.averageScore,cdn:m.nextAiringEpisode?`EP ${m.nextAiringEpisode.episode} in <b>${cd(m.nextAiringEpisode.timeUntilAiring)}</b>`:'',add:i%5==0?'−':'+',meta:`${m.format||''} · ${m.seasonYear||''}`})).join('')
+ const f=t[0];feat.innerHTML=`<div class="num">#1</div><div class="cv" style="background-image:url(${f.coverImage.extraLarge})"></div><div><div class="kick"><b>#1 TRENDING</b> ${f.averageScore||'?'}% · ${f.format||''}</div><h3 class="ol">${T(f)}</h3><div class="g">${f.genres.map(g=>`<span>${g}</span>`).join('')}</div><p>${(f.description||'').replace(/<[^>]+>/g,'')}</p><button class="btn">+ Add to list</button></div>`
+ bgrid.innerHTML=bgrid.innerHTML.replace(/^<div class="pc">[\s\S]*?<\/div><\/div><\/div>/,'')
+ btop.innerHTML=t.slice(0,6).map((m,i)=>`<div class="r"><span class="n">${i+1}</span><img src="${m.coverImage.large}"><span>${T(m)}</span><i>${m.averageScore||''}</i></div>`).join('')
+ const gc={};t.forEach(m=>m.genres.forEach(g=>gc[g]=(gc[g]||0)+1));bars(bgen,Object.entries(gc).sort((a,b)=>b[1]-a[1]).slice(0,6))
+ const mine=s.slice(0,5)
+ sgrid.innerHTML=s.map((m,i)=>{const r=mine.indexOf(m);return `<div class="pc"><div class="cv" style="background-image:url(${m.coverImage.large})">${r>=0?`<span class="rk">${r+1}</span>`:''}${m.nextAiringEpisode?`<div class="cdn">EP ${m.nextAiringEpisode.episode} in <b>${cd(m.nextAiringEpisode.timeUntilAiring)}</b></div>`:''}<button class="add ${r>=0?'in':''}">${r>=0?'−':'+'}</button></div><div class="t">${T(m)}</div><div class="m">${m.averageScore?m.averageScore+'% · ':''}${m.status==='RELEASING'?'airing':m.status.toLowerCase().replace(/_/g,' ')}</div></div>`}).join('')
+ my.innerHTML=mine.map((m,i)=>`<div class="r"><span class="n">${i+1}</span><img src="${m.coverImage.large}"><span>${T(m)}</span><i>⠿</i></div>`).join('')
+ sq.innerHTML=s.slice(0,6).map((m,i)=>`<div class="r"><small>${i+1}. ${T(m)}</small><div class="bar"><i style="width:${100-i*14}%"></i></div><b class="B">${48-i*7}</b></div>`).join('')
+})
+</script></body></html>

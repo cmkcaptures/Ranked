@@ -10,6 +10,7 @@ import CharProfile from './CharProfile.jsx'
 import { EpisodeModal } from './Episodes.jsx'
 import Season, { currentSeason } from './Season.jsx'
 import './pages2.css'
+import { AnimeH2H, BlindTest, MangaAlerts } from './Extras.jsx'
 import Wrapped from './Wrapped.jsx'
 import ShockAlert from './Shock.jsx'
 import Times from './Times.jsx'
@@ -73,14 +74,14 @@ export default function App() {
 // pages live in the URL hash (#/league, #/profile/<id>, #/anime/<id>) so browser back/forward, phone swipe-back,
 // refresh and shared links all work
 const NAV = [['Anime', [['home', 'Home', 'home'], ['browse', 'Browse', 'search'], ['list', 'Anime List', 'list'], ['rank', 'Rankings', 'podium'], ['h2h', 'Head-to-Head', 'swords'], ['season', 'Season', 'cal'], ['vs', 'VS Arena', 'bolt']]],
-  ['Play', [['league', 'League', 'trophy'], ['squad', 'Squad', 'users'], ['stats', 'Stats', 'bars'], ['market', 'Market', 'chart'], ['times', 'The Times', 'paper']]]]
+  ['Play', [['league', 'League', 'trophy'], ['squad', 'Squad', 'users'], ['stats', 'Stats', 'bars'], ['market', 'Market', 'chart'], ['blind', 'Blind Test', 'search'], ['times', 'The Times', 'paper']]]]
 const ICONS = { home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z', search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', podium: 'M9 21V9h6v12M3 21v-7h6M15 21v-5h6v5M2 21h20',
   swords: 'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M9.5 17.5 21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4', cal: 'M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM16 3v4M8 3v4M3 10h18',
   trophy: 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3', users: 'M9 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM2 20a7 7 0 0 1 14 0M16 4.5a3.5 3.5 0 0 1 0 7M18 13.5a6 6 0 0 1 4 6',
   bars: 'M5 20V12M10 20V6M15 20v-9M20 20V3', bolt: 'M13 2 4 14h7l-1 8 9-12h-7z', paper: 'M4 4h13v15a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2zM17 8h3v11a2 2 0 0 1-2 2M8 8h5M8 12h5M8 16h3', chart: 'M3 3v18h18M7 15l4-4 3 3 6-7' }
 const Icon = ({ n }) => <svg className="nicon" viewBox="0 0 24 24"><path d={ICONS[n]} /></svg>
-const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime', 'inbox', 'times', 'vs', 'admin']
+const PAGES = ['home', 'browse', 'list', 'rank', 'h2h', 'season', 'league', 'mates', 'squad', 'stats', 'market', 'profile', 'anime', 'inbox', 'times', 'blind', 'vs', 'admin']
 function readHash() {
   const [, pg, id] = (location.hash.match(/^#\/([a-z0-9]+)(?:\/([^/?#]+))?/) || [])
   return PAGES.includes(pg) ? { page: pg, id: id || null } : { page: 'home', id: null }
@@ -275,6 +276,7 @@ function Main({ me, setMe }) {
           {page === 'inbox' && <Inbox me={me} />}
           {page === 'vs' && <VsArena />}
           {page === 'admin' && me?.username === 'AspextPro' && <SiteStats />}
+          {page === 'blind' && <BlindTest {...ctx} />}
           {page === 'times' && <Times me={me} friends={friends} openProfile={openProfile} />}
           {page === 'anime' && animeId && <Detail key={animeId} id={animeId} {...ctx} />}
         </>}
@@ -329,6 +331,7 @@ function Home({ activity, list, rankings, media, openWrapped, openAnime, setProg
         <div className="row"><button className="btn" onClick={() => setProgress(next.media, next.progress + 1)}>+1 Episode</button>
           <button className="btn ghost" onClick={() => openRating(next.media)}>Rate</button>
           {next.media.nextAiringEpisode && <span className="kick">EP {next.media.nextAiringEpisode.episode} IN {cd2(next.media.nextAiringEpisode.timeUntilAiring)}</span>}</div></div></div>}
+    <MangaAlerts list={list} openAnime={openAnime} />
     <h2 className="sec">In progress <small>countdown to the next episode · hover for +1</small></h2>
     <div className="chips">{[['all', 'All'], ['today', 'Airing today'], ['behind', 'Behind']].map(([k, l]) => <button key={k} className={`chip ${f === k ? 'on' : ''}`} onClick={() => setF(k)}>{l}</button>)}</div>
     {shown.length ? <div className="rail">{shown.map(e => { const m = e.media, pct = m.episodes ? Math.min(100, e.progress / m.episodes * 100) : 30
@@ -503,61 +506,6 @@ function HeadToHead(props) {
     </div>
     {mode === 'hype' ? <HypeBracket key="moment" me={props.me} friends={props.friends} /> : mode === 'song' ? <HypeBracket key="song" mode="song" me={props.me} friends={props.friends} /> : <AnimeH2H {...props} />}
   </>
-}
-
-function AnimeH2H({ list, elo, setElo }) {
-  const pool = list.filter(e => e.status === 'COMPLETED' || e.status === 'CURRENT').map(e => e.media)
-  const pick = () => {
-    if (pool.length < 2) return []
-    const a = Math.floor(Math.random() * pool.length)
-    let b = Math.floor(Math.random() * (pool.length - 1)); if (b >= a) b++
-    return [pool[a], pool[b]]
-  }
-  const [pair, setPair] = useState(pick)
-  useEffect(() => { if (!pair.length) setPair(pick()) }, [list])
-  const r = id => elo[id]?.r ?? 1500
-
-  function choose(win, lose) {
-    const ea = 1 / (1 + 10 ** ((r(lose.id) - r(win.id)) / 400)), k = 32
-    setElo({
-      ...elo,
-      [win.id]: { r: r(win.id) + k * (1 - ea), n: (elo[win.id]?.n ?? 0) + 1 },
-      [lose.id]: { r: r(lose.id) - k * (1 - ea), n: (elo[lose.id]?.n ?? 0) + 1 },
-    })
-    setPair(pick())
-  }
-  const board = pool.filter(m => elo[m.id]).sort((a, b) => r(b.id) - r(a.id)).slice(0, 20)
-  const votes = Object.values(elo).reduce((a, b) => a + b.n, 0) / 2
-
-  return (
-    <div className="rank">
-      <section>
-        <h3>Which is better?</h3>
-        {pair.length === 2 && <div className="vs arena">
-          {pair.map((m, i) => (
-            <button key={m.id} className={`choice side-${i ? 'b' : 'a'}`} onClick={() => choose(m, pair[1 - i])}>
-              <div className="fighter">
-                <div className="cover big" style={{ backgroundImage: `url(${m.coverImage.large})` }} />
-                <div className="frating">{Math.round(r(m.id))}<small>ELO</small></div>
-              </div>
-              <span>{title(m)}</span>
-              <em>Pick {i ? 'right' : 'left'}</em>
-            </button>
-          ))}
-          <div className="vsbadge">VS</div>
-        </div>}
-        <div className="center"><button className="pill ghost" onClick={() => setPair(pick())}>Skip round</button></div>
-      </section>
-      <aside>
-        <h3>True Ranking <small className="muted">· {votes} picks</small></h3>
-        <div className="card pad">
-          {board.map((m, i) => <div key={m.id} className={`mini lb ${i < 3 ? 'top' : ''}`}><b className={`r r${i + 1}`}>#{i + 1}</b><img src={m.coverImage.medium} alt="" />
-            <span className="grow">{title(m)}</span><span className="elo">{Math.round(r(m.id))}</span></div>)}
-          {!board.length && <span className="muted">Pick a few matchups to build it.</span>}
-        </div>
-      </aside>
-    </div>
-  )
 }
 
 const BCHIPS = [['trend', 'Trending'], ['Action', 'Action'], ['Romance', 'Romance'], ['Comedy', 'Comedy'], ['Fantasy', 'Fantasy'], ['Sports', 'Sports'], ['Drama', 'Drama']]

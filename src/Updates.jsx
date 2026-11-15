@@ -6,6 +6,15 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-24', headline: 'BLIND TASTE TEST, RANKED RADIO AND MANGA ALERTS',
+    items: [
+      ['🎭 Blind Taste Test', 'A mystery anime with the title hidden. Guess what it is and its AniList score for up to 100 points. Keep your streak going.', 'Play → Blind Test'],
+      ['📻 Ranked Radio', 'The Times now plays as a radio show: the week in slides, with an optional voice reading it out.', 'The Times'],
+      ['📡 Coming from your list', 'Alerts on Home when a show you watched gets a new season, a sequel starts airing, or its manga carries on.', 'Home'],
+      ['⚔️ Head-to-head', 'Smarter matchups, arrow keys to pick, a confidence meter, and "gut vs score": where your picks disagree with your own ratings.', 'Head-to-Head → Anime vs Anime'],
+    ],
+  },
+  {
     id: '2026-11-23', headline: 'LEAGUE: EARN YOUR CHIPS, STOCKPILE, AND REAL RISK',
     items: [
       ['🎴 Earned chips', 'Everyone starts with 1 chip. Finish in the top half of a week 3 times and you earn another. Chips played this week show on the table.', 'League → My team'],
