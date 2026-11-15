@@ -8,9 +8,9 @@ export const UPDATES = [
   {
     id: '2026-11-25', headline: 'THE LEAGUE GETS A MANGA MAKEOVER',
     items: [
-      ['📋 Everyone on one screen', 'Standings is now one board: every manager's full team, their points and form, without scrolling.', 'League → Standings'],
+      ['📋 Everyone on one screen', 'Standings is now one board: every manager’s full team, their points and form, without scrolling.', 'League → Standings'],
       ['💥 Manga panels', 'Inked panels, speed lines on the leader, a TARGET stamp on whoever is above you, and BAM! pop-ups when points land.', 'League'],
-      ['🔥 MVP and form', 'The week's top scorer gets an MVP tag, and each team shows W/L boxes for its last 4 weeks.', 'League → Standings'],
+      ['🔥 MVP and form', 'The week’s top scorer gets an MVP tag, and each team shows W/L boxes for its last 4 weeks.', 'League → Standings'],
     ],
   },
   {
