@@ -258,12 +258,48 @@ function Picker({ chars, info, takenBy, name, onLock }) {
   </div>
 }
 
+function Scoresheet({ events, feed, byId, who, me, week }) {
+  const [tab, setTab] = useState('team')
+  const [span, setSpan] = useState('week')
+  const [only, setOnly] = useState('')
+  const [open, setOpen] = useState(me)
+  const users = [...new Set(events.map(e => e.team_user).filter(Boolean))]
+  const sheet = {}
+  for (const e of events) if (e.team_user && (span === 'season' || e.week === week)) {
+    const t = (sheet[e.team_user] ||= { tot: 0, c: {} }); t.tot += e.points
+    const k = e.char_id || 'bonus', c = (t.c[k] ||= { pts: 0, n: 0, kinds: {} }); c.pts += e.points; c.n++; c.kinds[e.kind] = (c.kinds[e.kind] || 0) + e.points }
+  const order = Object.entries(sheet).sort((a, b) => b[1].tot - a[1].tot)
+  const shown = only ? feed.filter(e => e.team_user === only) : feed
+  return <div className="lg-panel ss">
+    <div className="lg-ph"><i className="lg-dot" /> Who scored what</div>
+    <div className="ss-tabs"><button className={tab === 'team' ? 'on' : ''} onClick={() => setTab('team')}>By team</button><button className={tab === 'feed' ? 'on' : ''} onClick={() => setTab('feed')}>Latest</button></div>
+    {tab === 'team' ? <>
+      <div className="ss-tabs sm"><button className={span === 'week' ? 'on' : ''} onClick={() => setSpan('week')}>Week {week}</button><button className={span === 'season' ? 'on' : ''} onClick={() => setSpan('season')}>Season</button></div>
+      {order.map(([u, t]) => <div key={u} className={`ss-team ${u === me ? 'me' : ''}`}>
+        <button className="ss-th" onClick={() => setOpen(open === u ? '' : u)}><span>{open === u ? '▾' : '▸'} {who(u)?.username}</span><b className={t.tot < 0 ? 'dn' : 'up'}>{pts(t.tot)}</b></button>
+        {open === u && Object.entries(t.c).sort((a, b) => b[1].pts - a[1].pts).map(([id, c]) => { const ch = byId[id]
+          return <div key={id} className="ss-c">{ch ? <img src={ch.image} alt="" referrerPolicy="origin" /> : <span className="ss-b">★</span>}
+            <div><b>{ch?.name || 'Team bonuses'}</b><small>{Object.entries(c.kinds).map(([k, v]) => `${KINDS[k]?.[0] || ''} ${KINDS[k]?.[1] || k} ${pts(v)}`).join(' · ')}</small></div>
+            <em className={c.pts < 0 ? 'dn' : 'up'}>{pts(c.pts)}</em></div> })}
+      </div>)}
+      {!order.length && <div className="pad muted small">No points yet this {span === 'week' ? 'week' : 'season'}.</div>}
+    </> : <>
+      <select className="ss-sel" value={only} onChange={e => setOnly(e.target.value)}><option value="">Everyone</option>{users.map(u => <option key={u} value={u}>{who(u)?.username}</option>)}</select>
+      <div className="lg-feed ss-feed">{shown.map((e, i) => { const c = byId[e.char_id]
+        return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''} ${i === 0 ? 'new' : ''}`} title={e.note || ''}>
+          <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
+          <div><b>{c?.name || 'Team'} · {KINDS[e.kind]?.[1].toLowerCase()}</b><small>{who(e.team_user)?.username} · wk {e.week}{e.note ? ` · ${e.note}` : ''}</small></div>
+          <em className={e.points < 0 ? 'dn' : 'up'}>{pts(e.points)}</em></div> })}{!shown.length && <div className="pad muted small">Points land as episodes and chapters drop.</div>}</div>
+    </>}
+  </div>
+}
+
 function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, benchOf, teams, byId, who, me, charPts, dead, vault, openProfile, events, S }) {
   // hall of fame: winner of each finished season
   const past = {}
   for (const e of events) if (e.season !== S.key) ((past[e.season] ||= {})[e.team_user] = (past[e.season][e.team_user] || 0) + e.points)
   const champs = Object.entries(past).map(([s, t]) => { const [u, p] = Object.entries(t).sort((a, b) => b[1] - a[1])[0]; return { s, u, p } }).sort((a, b) => b.s.localeCompare(a.s))
-  const feed = events.filter(e => e.season === S.key).slice(0, 25)
+  const feed = events.filter(e => e.season === S.key).slice(0, 80)
   return <div className="rank lg-rank">
     <section>
       <div className="mb-h">Everyone's teams</div>
@@ -272,11 +308,7 @@ function Standings({ weekPts, lastRank, topWeek, chipNow, form, week, capOf, ben
     </section>
     <aside>
       <div className="lg-panel"><div className="lg-ph">Week {S.week} ends in</div><WeekClock S={S} /></div>
-      <div className="lg-panel lg-feed mb-feed"><div className="lg-ph"><i className="lg-dot" /> Latest points</div>{feed.map((e, i) => { const c = byId[e.char_id]
-        return <div key={e.id} className={`lg-fi ${e.points < 0 ? 'neg' : ''} ${i === 0 ? 'new' : ''}`} title={e.note || ''}>
-          <div className="lg-ic">{c ? <img src={c.image} alt="" referrerPolicy="origin" /> : <span />}<i>{KINDS[e.kind]?.[0]}</i></div>
-          <div><b>{c?.name || who(e.team_user)?.username} · {KINDS[e.kind]?.[1].toLowerCase()}</b><small>{who(e.team_user)?.username}{e.note ? ` · ${e.note}` : ''}</small></div>
-          <em className={e.points < 0 ? 'dn' : 'up'}>{pts(e.points)}</em></div> })}{!feed.length && <div className="pad muted small">Points land as episodes and chapters drop.</div>}</div>
+      <Scoresheet events={events.filter(e => e.season === S.key)} feed={feed} byId={byId} who={who} me={me} week={S.week} />
       <h3>Hall of fame</h3>
       <div className="card">{champs.map(c => <div key={c.s} className="lrow"><span>🏆</span><div className="grow">{who(c.u)?.username}<div className="muted small">{seasonLabel(c.s)}</div></div><b>{c.p}</b></div>)}
         {!champs.length && <div className="pad muted small">The first champion is crowned when {S.label} ends.</div>}</div>

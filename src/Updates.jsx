@@ -6,6 +6,14 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-26', headline: 'WHO SCORED WHAT: THE FULL LEAGUE SCORESHEET',
+    items: [
+      ['📋 By team', 'Tap any manager to see every character’s points, split by type (episodes, hype, moments). Your team opens first.', 'League → Who scored what'],
+      ['🗓️ Week or season', 'Flip between this week’s haul and the whole season.', 'League → Who scored what'],
+      ['📰 Full feed', 'The Latest tab now scrolls back 80 events and filters by manager.', 'League → Who scored what → Latest'],
+    ],
+  },
+  {
     id: '2026-11-25', headline: 'THE LEAGUE GETS A MANGA MAKEOVER',
     items: [
       ['📋 Everyone on one screen', 'Standings is now one board: every manager’s full team, their points and form, without scrolling.', 'League → Standings'],
