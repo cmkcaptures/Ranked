@@ -6,6 +6,12 @@ import './times.css'
 // ADD A NEW EDITION AT THE TOP every time features ship. id must be unique and increase (date-based).
 export const UPDATES = [
   {
+    id: '2026-11-27', headline: 'SWAPS ARE BACK IN SIGHT',
+    items: [
+      ['🔄 Swap bar', 'My team now has a Swap a character panel at the top: tap who to drop, then pick their replacement. No more flipping cards to find it.', 'League → My team'],
+    ],
+  },
+  {
     id: '2026-11-26', headline: 'WHO SCORED WHAT: THE FULL LEAGUE SCORESHEET',
     items: [
       ['📋 By team', 'Tap any manager to see every character’s points, split by type (episodes, hype, moments). Your team opens first.', 'League → Who scored what'],

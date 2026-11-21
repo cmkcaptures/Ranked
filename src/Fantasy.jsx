@@ -338,6 +338,12 @@ function MyTeam({ mercy, streak = {}, vault = {}, chips, chipWeek, onChip, earn 
         <span>{captain ? <>{byId[captain]?.name} scores <b>{chips.some(c => c.chip === 'triple' && c.week === chipWeek) ? 'triple' : 'double'}</b> this week</> : 'Pick a captain: their points count double'}</span>
         <em>{capLocked ? 'Locked for this week' : 'One pick per week, then it locks'}</em>
       </div>
+      <div className="lg-panel swb"><div className="lg-ph">🔄 Swap a character</div>
+        {(!swapped || wildcard) ? <><p className="muted small">Pick who to drop, then choose their replacement below.</p>
+          <div className="swb-row">{team.chars.map(id => byId[id] && <button key={id} className={out === id ? 'on' : ''} onClick={() => setOut(out === id ? null : id)}>
+            <img src={byId[id].image} alt="" referrerPolicy="origin" /><b>{byId[id].name}</b></button>)}</div></>
+          : <p className="muted small">You've used this week's swap{mercy ? 's' : ''}. A new one unlocks next week.</p>}
+      </div>
       <div className="lg-panel"><div className="lg-ph">Your squad <span className={`lg-phr ${wkTot < 0 ? 'dn' : 'up'}`}>{wkTot > 0 ? '+' : ''}{wkTot} this week</span></div>
       <div className={`sq-grid n${team.chars.length}`}>
         {[...team.chars].sort((a, b) => (b === captain) - (a === captain) || (charPts[b] || 0) - (charPts[a] || 0)).map((id, i) =>
